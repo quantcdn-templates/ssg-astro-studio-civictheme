@@ -1,0 +1,39 @@
+//
+// CivicTheme Basic Content component styles.
+//
+
+.ct-basic-content {
+  $root: &;
+
+  &#{$root}--with-background {
+    @include ct-breakpoint(m) {
+      padding-left: var(--ct-basic-content-space-horizontal);
+      padding-right: var(--ct-basic-content-space-horizontal);
+    }
+  }
+
+  @include ct-content();
+
+  .ct-content-link {
+    .ct-icon {
+      vertical-align: middle;
+    }
+  }
+
+  .ct-table,
+  .ct-video-player {
+    margin-bottom: var(--ct-basic-content-vertical-spacing);
+
+    &:last-child {
+      margin-bottom: 0;
+    }
+  }
+
+  @include ct-component-theme($root) using($root, $theme) {
+    @include ct-content-theme($theme);
+
+    &.ct-basic-content--with-background {
+      @include ct-component-property($root, $theme, background-color);
+    }
+  }
+}

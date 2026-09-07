@@ -1,0 +1,5 @@
+// Single stylesheet entry. Imported once from BaseLayout.
+$ct-assets-directory: '/civictheme/';
+@import '../civictheme/scss/index';
+
+// Site overrides go below this line.
