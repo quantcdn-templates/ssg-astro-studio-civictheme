@@ -4,3 +4,4 @@ src/civictheme/scss
 src/civictheme/js/behaviours
 src/civictheme/components/00-base/icons.ts
 .upstream
+docs/
