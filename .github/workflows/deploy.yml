@@ -1,4 +1,4 @@
-name: "Deploy to QuantCDN"
+name: 'Deploy to QuantCDN'
 
 on:
   push:
@@ -20,7 +20,6 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: '22'
-          cache: 'npm'
 
       - name: Install dependencies
         run: npm install
@@ -61,4 +60,4 @@ jobs:
           customer: ${{ vars.QUANT_CUSTOMER }}
           project: ${{ vars.QUANT_PROJECT }}
           token: ${{ secrets.QUANT_TOKEN }}
-          url_pattern: "/*"
+          url_pattern: '/*'
