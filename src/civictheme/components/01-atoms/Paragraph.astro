@@ -1,0 +1,35 @@
+---
+/**
+ * CivicTheme Paragraph component.
+ *
+ * Props:
+ * - theme: Theme variation (light or dark).
+ * - content: Paragraph content.
+ * - size: Paragraph size (extra-large, large, regular, small).
+ * - noMargin: Disable default margin.
+ * - class: Additional CSS classes.
+ * - ...rest: Additional HTML attributes, spread onto the root element.
+ */
+interface Props {
+  theme?: 'light' | 'dark';
+  content?: string | null;
+  size?: 'extra-large' | 'large' | 'regular' | 'small';
+  noMargin?: boolean | null;
+  class?: string;
+  [key: string]: unknown;
+}
+
+const { theme = 'light', content, size = 'regular', noMargin = false, class: className = '', ...rest } = Astro.props;
+
+const classes = [
+  'ct-paragraph',
+  `ct-theme-${theme}`,
+  `ct-paragraph--${size}`,
+  noMargin && 'ct-paragraph--no-margin',
+  className,
+]
+  .filter(Boolean)
+  .join(' ');
+---
+
+{content && <div class={classes} {...rest} set:html={content} />}
