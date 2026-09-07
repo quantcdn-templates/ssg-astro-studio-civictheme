@@ -1,0 +1,38 @@
+{
+  "name": "ssg-astro-studio-civictheme",
+  "description": "CivicTheme design system on Astro with Quant Studio integration",
+  "type": "module",
+  "version": "0.1.0",
+  "license": "GPL-2.0-or-later",
+  "scripts": {
+    "dev": "astro dev",
+    "start": "astro dev",
+    "build": "astro build",
+    "preview": "astro preview",
+    "check": "astro check && prettier --check .",
+    "fix": "prettier --write .",
+    "test": "vitest run",
+    "test:parity": "vitest run tests/parity",
+    "test:e2e": "playwright test",
+    "vendor": "node scripts/vendor-civictheme.mjs"
+  },
+  "dependencies": {
+    "astro": "^7.3.1",
+    "@astrojs/mdx": "^8.0.0",
+    "@astrojs/sitemap": "^3.7.4",
+    "@resvg/resvg-js": "^2.6.2",
+    "astro-robots-txt": "^1.0.0",
+    "satori": "^0.26.0"
+  },
+  "devDependencies": {
+    "@axe-core/playwright": "^4.10.0",
+    "@playwright/test": "^1.50.0",
+    "linkedom": "^0.18.0",
+    "prettier": "^3.0.0",
+    "prettier-plugin-astro": "^0.14.0",
+    "sass": "^1.104.0",
+    "typescript": "^5.0.0",
+    "vitest": "^3.0.0"
+  },
+  "engines": { "node": ">=22.12.0" }
+}

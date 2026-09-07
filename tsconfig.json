@@ -1,0 +1,13 @@
+{
+  "extends": "astro/tsconfigs/strict",
+  "compilerOptions": {
+    "baseUrl": ".",
+    "paths": {
+      "@/*": ["src/*"],
+      "@civictheme/base/*": ["src/civictheme/components/00-base/*"],
+      "@civictheme/atoms/*": ["src/civictheme/components/01-atoms/*"],
+      "@civictheme/molecules/*": ["src/civictheme/components/02-molecules/*"],
+      "@civictheme/organisms/*": ["src/civictheme/components/03-organisms/*"]
+    }
+  }
+}

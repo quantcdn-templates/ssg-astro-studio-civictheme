@@ -1,0 +1,64 @@
+name: "Deploy to QuantCDN"
+
+on:
+  push:
+    branches:
+      - main
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    if: "!contains(github.event.head_commit.message, '[skip deploy]')"
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm install
+
+      - name: Restore Astro build cache
+        uses: actions/cache@v5
+        with:
+          path: node_modules/.astro
+          key: astro-build-${{ hashFiles('src/content/**', 'public/**') }}
+          restore-keys: |
+            astro-build-
+
+      - name: Restore revision log
+        uses: actions/cache@v5
+        with:
+          path: .quant-revision
+          key: quant-revision-${{ github.ref }}-${{ github.run_id }}
+          restore-keys: |
+            quant-revision-${{ github.ref }}-
+
+      - name: Build
+        run: npm run build
+        env:
+          NODE_OPTIONS: '--max-old-space-size=8192'
+
+      - name: Deploy to QuantCDN
+        uses: quantcdn/deploy-action@v6
+        with:
+          customer: ${{ vars.QUANT_CUSTOMER }}
+          project: ${{ vars.QUANT_PROJECT }}
+          token: ${{ secrets.QUANT_TOKEN }}
+          dir: dist
+          revision-log: .quant-revision
+
+      - name: Purge cache
+        uses: quantcdn/purge-action@v6
+        with:
+          customer: ${{ vars.QUANT_CUSTOMER }}
+          project: ${{ vars.QUANT_PROJECT }}
+          token: ${{ secrets.QUANT_TOKEN }}
+          url_pattern: "/*"
