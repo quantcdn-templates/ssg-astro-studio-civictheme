@@ -1,0 +1,13 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`Widget renders div wrapper 1`] = `
+<div>
+  <span class="k">v</span>
+</div>
+`;
+
+exports[`Widget renders backtick and interpolation 1`] = `
+<div>
+  <code>\`escaped\` and \${interpolated}</code>
+</div>
+`;
