@@ -1,4 +1,4 @@
-// Single stylesheet entry. Imported once from BaseLayout.
+// Single stylesheet entry. Imported once from the base layout (src/pages/index.astro until BaseLayout lands).
 $ct-assets-directory: '/civictheme/';
 @import '../civictheme/scss/index';
 
