@@ -134,6 +134,16 @@ export function fixNonVoidSelfClosingTags(html: string): string {
 // space back, or `<a\n  href="#"\n>` would dedent to the single malformed
 // tag name `<ahref="#">` instead of `<a href="#">`.
 const BARE_OPEN_TAG_RE = /^<[a-zA-Z][a-zA-Z0-9-]*$/;
+// A line that is a complete tag (name, optional attributes, and its closing
+// `>`/`/>`) all on one line — e.g. `<br>`, `<div>`, `<input type="text">`.
+const COMPLETE_TAG_RE = /^<([a-zA-Z][a-zA-Z0-9-]*)(?:\s[^<>]*)?(\/)?>$/;
+// A closing tag alone on its own line, e.g. `</div>`.
+const CLOSE_TAG_RE = /^<\/([a-zA-Z][a-zA-Z0-9-]*)>$/;
+// The bracket that closes a *multi-line* open tag's attribute list — printed
+// on its own line once pretty-format has finished listing the attributes
+// (`>` for an element with children to follow, `/>` for a self-closed one).
+const PLAIN_CLOSE_BRACKET_RE = /^>$/;
+const SELF_CLOSE_BRACKET_RE = /^\/>$/;
 
 /**
  * Reverses Jest's pretty-format DOM-serializer formatting back into literal
@@ -149,49 +159,120 @@ const BARE_OPEN_TAG_RE = /^<[a-zA-Z][a-zA-Z0-9-]*$/;
  * (that content, split on '\n', is printed one raw line per split, with the
  * current indentation prepended) — pretty-format never emits such a line
  * between two elements/attributes it prints back-to-back with no text node
- * between them at all. So:
- *   - a whitespace-only line (any length, including empty) -> emit a single
- *     space. Any number of these in a row between two non-whitespace lines
- *     still collapses to the ONE whitespace-collapsed text node a browser
- *     would see there (`normaliseHtml`'s own text-node collapse already
- *     reduces a run of adjacent space characters to one), so there is no
- *     need to reproduce the exact original whitespace length.
- *   - any other line: strip its leading indentation (pretty-format's
- *     nesting whitespace — never more than that, since a real text node's
- *     own leading whitespace is always pretty-printed as a *separate*
- *     whitespace-only line, not prepended to a content line) and keep the
- *     rest of the line verbatim, including a trailing space that is itself
- *     real text-node content (e.g. the literal `text_start ~ ' '` some
- *     twig templates produce, which must survive as a real separator to
- *     whatever sibling follows).
+ * between them at all. So a whitespace-only line (any length, including
+ * empty) emits a single space; any number of these in a row between two
+ * non-whitespace lines still collapses to the ONE whitespace-collapsed text
+ * node a browser would see there (`normaliseHtml`'s own text-node collapse
+ * already reduces a run of adjacent space characters to one), so there is
+ * no need to reproduce the exact original whitespace length.
+ *
+ * Every other line needs its leading pretty-format indentation stripped,
+ * keeping the rest verbatim (including a text line's own trailing space,
+ * which is real text-node content — e.g. the literal `text_start ~ ' '`
+ * some twig templates produce, a real separator to whatever sibling
+ * follows). That indentation is `nestingDepth * 2` spaces — tracked here by
+ * walking the tag structure line by line (a `<tagname` line with no
+ * attributes/close yet, an attribute line, the line with the closing
+ * `>`/`/>`, or a whole `<tag ...>` / `<tag ... />` on one line, or a
+ * `</tagname>` closing line) exactly as pretty-format itself nests them: a
+ * non-void, non-self-closed tag's *children* print one level deeper than
+ * the tag itself, starting on the line after the one that closes its
+ * opening tag; a `</tagname>` line prints back at the *parent's* depth.
+ *
+ * The amount actually stripped from a line is `min(expectedIndent,
+ * line's own leading-whitespace length)`, not the full `expectedIndent`
+ * unconditionally — a real text node occasionally prints with LESS leading
+ * whitespace than its structural nesting depth would predict (observed in
+ * `.upstream/uikit/packages/twig/components/02-molecules/field/
+ * __snapshots__/field.test.js.snap`, where a `content: 'Field <em>...'`
+ * string rendered via `set:html`-equivalent raw HTML puts a "Field " text
+ * node at half its expected indent). Clamping to what is actually there
+ * means such a line still has all of its (whatever amount of) leading
+ * whitespace consumed as structural padding, and none of its real text
+ * accidentally eaten — while a line with MORE than the expected indent
+ * (a real text node with its own genuine leading space, e.g. the "one
+ * extra space" pattern already documented in this file) still keeps that
+ * extra character as real content.
+ *
  * Lines are then joined with NO separator — a newline between two
  * non-whitespace lines carries no meaning of its own in pretty-format's
  * output; only an explicit whitespace-only *line* does. The one exception
- * is `BARE_OPEN_TAG_RE` (see above): a single space is appended there
+ * (besides `BARE_OPEN_TAG_RE`, below) is two consecutive *text* lines (real
+ * content, not a tag/attribute/bracket line and not whitespace-only): that
+ * shape only arises from ONE multi-line text node's own content being
+ * split on its embedded `\n` (verified with a live `pretty-format` run —
+ * `document.createTextNode('Hello\nWorld')` prints as `Hello` then `World`
+ * on the next line, the second with NO indentation at all, matching the
+ * `min(expectedIndent, actualIndent)` clamp above), so they are re-joined
+ * with a real `\n` — which `normaliseHtml`'s text-node whitespace collapse
+ * then turns into the single space a browser's rendered text would have
+ * there. `BARE_OPEN_TAG_RE` (see above) gets a single space appended
  * instead, to keep the tag name and its first attribute apart.
- *
- * Deliberately does NOT attempt to tell a real whitespace text node apart
- * from one of pretty-format's own layout lines by comparing indentation
- * depth (e.g. "this line's indent matches what the next tag's indent should
- * be, so it must be filler") — that would require modelling pretty-format's
- * own recursive indentation algorithm, which is not part of this harness's
- * job. Treating every whitespace-only line as one real space, relying on
- * `normaliseHtml`'s existing per-text-node collapse to make repeated
- * "spaces" harmless, and its existing per-element edge trim to make a
- * leading/trailing one (right after an opening tag, or right before a
- * closing tag) invisible, is sufficient for every fixture pinned in this
- * repo — see the ported components' PORTING.md rows for the boundaries this
- * was actually exercised against.
  */
 export function dedentPrettyPrintedHtml(body: string): string {
-  return body
-    .split('\n')
-    .map((line) => {
-      if (line.trim() === '') return ' ';
-      const stripped = line.replace(/^[ \t]+/, '');
-      return BARE_OPEN_TAG_RE.test(stripped) ? `${stripped} ` : stripped;
-    })
-    .join('');
+  let depth = 0;
+  // The tag a bare `<tagname` open-line started, awaiting its closing
+  // `>`/`/>` on a later line (attribute lines sit in between, one level
+  // deeper than the tag's own line — see `lineDepth` below). `null` when
+  // not currently inside such a multi-line opening tag.
+  let pendingTag: { void: boolean } | null = null;
+
+  const closesWithChildren = (tag: string, selfClosed: boolean) => !selfClosed && !VOID_ELEMENTS.has(tag.toLowerCase());
+
+  type Kind = 'space' | 'tag' | 'text';
+  const lines: Array<{ kind: Kind; content: string }> = body.split('\n').map((line) => {
+    if (line.trim() === '') return { kind: 'space', content: ' ' };
+
+    const bare = line.replace(/^[ \t]+/, '');
+    const actualIndent = line.length - bare.length;
+    const isCloseTag = CLOSE_TAG_RE.test(bare);
+    const isCloseBracket = PLAIN_CLOSE_BRACKET_RE.test(bare) || SELF_CLOSE_BRACKET_RE.test(bare);
+    // A `</tagname>` line prints at the *parent's* depth — one shallower
+    // than the depth its own now-closing tag's children were at — so the
+    // decrement must happen before this line's own indent is computed, not
+    // after. An attribute line (still awaiting its tag's closing bracket)
+    // prints one level DEEPER than its own tag's `<tagname` line — the
+    // tag-open line, the closing bracket line, and a `</tagname>` line all
+    // share one depth; only their (pending) attribute lines sit at
+    // depth + 1.
+    if (isCloseTag) depth = Math.max(0, depth - 1);
+    const lineDepth = pendingTag && !isCloseBracket ? depth + 1 : depth;
+    const expectedIndent = lineDepth * 2;
+    const content = line.slice(Math.min(expectedIndent, actualIndent));
+
+    if (isCloseTag) {
+      pendingTag = null;
+      return { kind: 'tag', content };
+    }
+    if (BARE_OPEN_TAG_RE.test(bare)) {
+      pendingTag = { void: VOID_ELEMENTS.has(bare.slice(1).toLowerCase()) };
+      return { kind: 'tag', content: `${content} ` };
+    }
+    if (PLAIN_CLOSE_BRACKET_RE.test(bare)) {
+      if (pendingTag && !pendingTag.void) depth += 1;
+      pendingTag = null;
+      return { kind: 'tag', content };
+    }
+    if (SELF_CLOSE_BRACKET_RE.test(bare)) {
+      pendingTag = null;
+      return { kind: 'tag', content };
+    }
+    const completeMatch = bare.match(COMPLETE_TAG_RE);
+    if (completeMatch) {
+      const [, tag, selfClose] = completeMatch;
+      if (closesWithChildren(tag, Boolean(selfClose))) depth += 1;
+      pendingTag = null;
+      return { kind: 'tag', content };
+    }
+    if (pendingTag) return { kind: 'tag', content }; // an attribute line
+    return { kind: 'text', content };
+  });
+
+  return lines.reduce((out, line, i) => {
+    const prev = lines[i - 1];
+    const separator = prev && prev.kind === 'text' && line.kind === 'text' ? '\n' : '';
+    return out + separator + line.content;
+  }, '');
 }
 
 export function upstreamSnapshot(layer: string, name: string, key: string, root: string = UIKIT): string {

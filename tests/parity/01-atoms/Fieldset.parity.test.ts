@@ -82,6 +82,7 @@ describe('Fieldset', () => {
     expect(html).toContain('ct-field-message--error');
     expect(html).not.toContain('ct-field-message--information');
     expect(closeOutlineIconPath).toBeTruthy();
+    expect(informationIconPath).toBeTruthy();
     expect(html).toContain(closeOutlineIconPath);
     expect(html).not.toContain(informationIconPath);
   });

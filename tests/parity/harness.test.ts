@@ -187,6 +187,33 @@ describe('dedentPrettyPrintedHtml', () => {
     expect(normaliseHtml(out)).toBe(normaliseHtml('<a class="x" href="y">z</a>'));
   });
 
+  it('strips only the whitespace actually present when a text line has LESS than its structural indent', () => {
+    // Regression guard for a real fixture
+    // (.upstream/uikit/packages/twig/components/02-molecules/field/
+    // __snapshots__/field.test.js.snap:608): a `content: 'Field <em>...'`
+    // string rendered as raw HTML puts a "Field " text node at HALF its
+    // structurally-expected indent. An earlier draft stripped a fixed
+    // `depth * 2` unconditionally, which ate into "Field" itself. Depth
+    // here: div(depth0, indent0) > div.a(depth1, indent2) > [svg(depth2,
+    // indent4) ... "Field "(expected indent4, actually only indent2) ...
+    // em(depth2, indent4) ... " has an error"(indent5 = 4 + 1 real space)].
+    const out = dedentPrettyPrintedHtml(
+      '<div\n  class="a"\n>\n  <svg\n    class="b"\n  >\n    <path\n      d="M1"\n    />\n  </svg>\nField \n  <em>\n    Test input\n  </em>\n   has an error\n</div>'
+    );
+    expect(out).toBe('<div class="a"><svg class="b"><path d="M1"/></svg>Field <em>Test input</em> has an error</div>');
+  });
+
+  it("joins two consecutive text lines (one multi-line text node's own embedded newline) with a real newline", () => {
+    // Verified live: `document.createTextNode('Hello\\nWorld')` prints via
+    // jest's pretty-format as `Hello` then `World` on the very next line
+    // with NO indentation on that second line at all — not a case any
+    // pinned `.upstream` snapshot happens to hit, but the general rule
+    // ("two real text lines back to back with no tag/blank line between
+    // them are one split text node") must still hold.
+    const out = dedentPrettyPrintedHtml('<span\n  class="a"\n>\nHello\nWorld\n</span>');
+    expect(normaliseHtml(out)).toBe(normaliseHtml('<span class="a">Hello World</span>'));
+  });
+
   describe('against real pretty-format-shaped fixtures', () => {
     const meta = { layer: 'fixture-atoms', name: 'spacing' };
 
@@ -213,6 +240,38 @@ describe('dedentPrettyPrintedHtml', () => {
         FIXTURE_ROOT
       );
       expect(normaliseHtml(html)).toBe(normaliseHtml('<a class="x" href="y">z</a>'));
+    });
+
+    it('a text node printed with less than its structural indent (field.snap-shaped) keeps its real content intact', () => {
+      const html = upstreamSnapshot(
+        meta.layer,
+        meta.name,
+        'Spacing text node with less indentation than its structural depth 1',
+        FIXTURE_ROOT
+      );
+      expect(html).toContain('</em> has an error');
+      expect(normaliseHtml(html)).toBe(
+        normaliseHtml('<div class="a"><svg class="b"><path d="M1"/></svg>Field <em>Test input</em> has an error</div>')
+      );
+    });
+
+    it('a multi-line text node (embedded newline, no pinned snapshot exercises this) normalises to one space', () => {
+      const html = upstreamSnapshot(
+        meta.layer,
+        meta.name,
+        'Spacing multi-line text node (embedded newline) 1',
+        FIXTURE_ROOT
+      );
+      expect(normaliseHtml(html)).toBe(normaliseHtml('<span class="a">Hello World</span>'));
+    });
+  });
+
+  describe('against the real field.test.js.snap fixture that surfaced this defect', () => {
+    it('keeps the real leading space on the text node after </em> intact', () => {
+      // No explicit root: uses the default UIKIT path (the real
+      // `.upstream/uikit` checkout), not the hand-authored fixtures above.
+      const html = upstreamSnapshot('02-molecules', 'field', 'Field Component textarea with all attributes 1');
+      expect(html).toContain('</em> has an error');
     });
   });
 });

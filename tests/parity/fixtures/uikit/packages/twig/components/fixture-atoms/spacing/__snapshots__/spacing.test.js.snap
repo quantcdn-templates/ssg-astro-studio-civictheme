@@ -45,3 +45,35 @@ exports[`Spacing multi-attribute tag split across lines 1`] = `
   </a>
 </div>
 `;
+
+exports[`Spacing text node with less indentation than its structural depth 1`] = `
+<div>
+  <div
+    class="a"
+  >
+    <svg
+      class="b"
+    >
+      <path
+        d="M1"
+      />
+    </svg>
+  Field 
+    <em>
+      Test input
+    </em>
+     has an error
+  </div>
+</div>
+`;
+
+exports[`Spacing multi-line text node (embedded newline) 1`] = `
+<div>
+  <span
+    class="a"
+  >
+    Hello
+World
+  </span>
+</div>
+`;
