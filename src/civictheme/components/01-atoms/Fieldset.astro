@@ -1,0 +1,125 @@
+---
+/**
+ * CivicTheme Fieldset component.
+ *
+ * Props:
+ * - theme: Theme variation (light or dark).
+ * - legend: Legend for the fieldset.
+ * - description: Description for the fieldset (HTML-bearing).
+ * - descriptionDisplay: Description position (before, after, invisible).
+ * - message: Message content (HTML-bearing).
+ * - messageType: Message type (error, information, warning, success).
+ * - isRequired: Whether the fieldset is required.
+ * - requiredText: Text to display within the legend when required.
+ * - prefix: Content to add before the fields (HTML-bearing).
+ * - suffix: Content to add after the fields (HTML-bearing).
+ * - fields: Fields content (HTML-bearing). Documented as a Slot upstream,
+ *   but the twig body treats it as a plain variable (passed as a string
+ *   prop in every upstream test) — ported as a `string` prop rendered with
+ *   `set:html`, matching Paragraph's precedent. See PORTING.md.
+ * - class: Additional CSS classes.
+ * - ...rest: Additional HTML attributes, spread onto the root <fieldset>.
+ *
+ * Note: upstream's `@atoms/label/label.twig` include for the legend (tag:
+ * 'legend', size: 'large', with `isRequired`/`requiredText` wired through)
+ * is inlined here rather than imported, since `Label` (01-atoms) is out of
+ * this task's scope — see PORTING.md, matching the precedent set by Menu
+ * inlining Link and Checkbox inlining Label's plain case. Unlike Checkbox,
+ * Fieldset's call site does pass `is_required`/`required_text` through, so
+ * the inline here reproduces that branch too (not exercised by any upstream
+ * snapshot, but read directly off label.twig for fidelity).
+ */
+import Paragraph from '@civictheme/atoms/Paragraph.astro';
+import FieldMessage from '@civictheme/atoms/FieldMessage.astro';
+
+interface Props {
+  theme?: 'light' | 'dark';
+  legend?: string;
+  description?: string;
+  descriptionDisplay?: 'before' | 'after' | 'invisible';
+  message?: string;
+  messageType?: 'error' | 'information' | 'warning' | 'success';
+  isRequired?: boolean;
+  requiredText?: string;
+  prefix?: string;
+  suffix?: string;
+  fields?: string;
+  class?: string;
+  [key: string]: unknown;
+}
+
+const {
+  theme = 'light',
+  legend,
+  description,
+  descriptionDisplay: descriptionDisplayProp,
+  message,
+  messageType,
+  isRequired,
+  requiredText = '(required)',
+  prefix,
+  suffix,
+  fields,
+  class: className = '',
+  ...rest
+} = Astro.props;
+
+const descriptionDisplay = (['before', 'after', 'invisible'] as const).includes(descriptionDisplayProp as any)
+  ? descriptionDisplayProp!
+  : 'before';
+
+const themeClass = `ct-theme-${theme}`;
+const classes = ['ct-fieldset', themeClass, isRequired && 'ct-fieldset--required', className].filter(Boolean).join(' ');
+const legendClasses = [
+  'ct-label',
+  themeClass,
+  'ct-label--large',
+  isRequired && 'ct-label--required',
+  'ct-fieldset__legend',
+]
+  .filter(Boolean)
+  .join(' ');
+---
+
+<fieldset class={classes} {...rest}>
+  {
+    legend && (
+      <Fragment>
+        <legend class={legendClasses}>
+          {legend}
+          {isRequired && <span class="ct-label__required">{requiredText}</span>}
+        </legend>{' '}
+      </Fragment>
+    )
+  }
+  <div class="ct-fieldset__wrapper">
+    {
+      description && (descriptionDisplay === 'before' || descriptionDisplay === 'invisible') && (
+        <Paragraph
+          theme={theme}
+          content={description}
+          class={`ct-fieldset__description ${descriptionDisplay === 'invisible' ? 'ct-fieldset__description--invisible ct-visually-hidden' : 'ct-fieldset__description--before'}`}
+        />
+      )
+    }
+    {message && <FieldMessage theme={theme} type={messageType} content={message} class="ct-fieldset__message" />}
+    {
+      prefix && (
+        <Fragment>
+          <div class="ct-fieldset__prefix" set:html={prefix} />{' '}
+        </Fragment>
+      )
+    }
+    {fields && <div class="ct-fieldset__fields" set:html={fields} />}
+    {suffix && <div class="ct-fieldset__suffix" set:html={suffix} />}
+    {
+      description && descriptionDisplay === 'after' && (
+        <Paragraph
+          theme={theme}
+          content={description}
+          class="ct-fieldset__description ct-fieldset__description--after"
+        />
+      )
+    }
+  </div>
+</fieldset>

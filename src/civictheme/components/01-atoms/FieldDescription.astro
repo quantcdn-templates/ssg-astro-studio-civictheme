@@ -1,0 +1,28 @@
+---
+/**
+ * CivicTheme Field Description component.
+ *
+ * Props:
+ * - theme: Theme variation (light or dark).
+ * - content: The description's content (HTML-bearing).
+ * - size: Description size (large, regular).
+ * - class: Additional CSS classes.
+ * - ...rest: Additional HTML attributes, spread onto the root element.
+ */
+interface Props {
+  theme?: 'light' | 'dark';
+  content?: string;
+  size?: 'large' | 'regular';
+  class?: string;
+  [key: string]: unknown;
+}
+
+const { theme = 'light', content, size: sizeProp, class: className = '', ...rest } = Astro.props;
+
+const size = (['large', 'regular'] as const).includes(sizeProp as any) ? sizeProp! : 'regular';
+const classes = ['ct-field-description', `ct-theme-${theme}`, `ct-field-description--${size}`, className]
+  .filter(Boolean)
+  .join(' ');
+---
+
+{content && <div class={classes} {...rest} set:html={content} />}

@@ -1,0 +1,32 @@
+---
+/**
+ * CivicTheme Heading component.
+ *
+ * Props:
+ * - theme: Theme variation (light or dark).
+ * - content: Heading content.
+ * - level: Heading level (1-6). Defaults to 2.
+ * - class: Additional CSS classes.
+ * - ...rest: Additional HTML attributes, spread onto the root element.
+ */
+interface Props {
+  theme?: 'light' | 'dark';
+  content?: string;
+  level?: string | number;
+  class?: string;
+  [key: string]: unknown;
+}
+
+const { theme = 'light', content, level = 2, class: className = '', ...rest } = Astro.props;
+
+const classes = ['ct-heading', `ct-theme-${theme}`, className].filter(Boolean).join(' ');
+const Tag = `h${level}` as 'h1' | 'h2' | 'h3' | 'h4' | 'h5' | 'h6';
+---
+
+{
+  content && (
+    <Tag class={classes} {...rest}>
+      {content}
+    </Tag>
+  )
+}

@@ -1,0 +1,46 @@
+---
+/**
+ * CivicTheme Field Message component.
+ *
+ * Props:
+ * - theme: Theme variation (light or dark).
+ * - content: The message content (HTML-bearing).
+ * - type: Message type (error, information, warning, success).
+ * - class: Additional CSS classes.
+ * - ...rest: Additional HTML attributes, spread onto the root element.
+ */
+import Icon from '@civictheme/base/Icon.astro';
+
+interface Props {
+  theme?: 'light' | 'dark';
+  content?: string;
+  type?: 'error' | 'information' | 'warning' | 'success';
+  class?: string;
+  [key: string]: unknown;
+}
+
+const { theme = 'light', content, type: typeProp, class: className = '', ...rest } = Astro.props;
+
+const type = (['error', 'information', 'warning', 'success'] as const).includes(typeProp as any)
+  ? typeProp!
+  : 'information';
+const classes = ['ct-field-message', `ct-theme-${theme}`, `ct-field-message--${type}`, className]
+  .filter(Boolean)
+  .join(' ');
+
+const ICONS: Record<string, string> = {
+  information: 'information-mark',
+  warning: 'exclamation-mark-3',
+  error: 'close-outline',
+  success: 'approve',
+};
+---
+
+{
+  content && (
+    <div class={classes} {...rest}>
+      {ICONS[type] && <Icon symbol={ICONS[type]} size="regular" class="ct-field-message__icon" />}{' '}
+      <Fragment set:html={content} />
+    </div>
+  )
+}
