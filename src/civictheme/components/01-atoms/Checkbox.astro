@@ -15,12 +15,13 @@
  * - class: Additional CSS classes.
  * - ...rest: Additional HTML attributes, spread onto the root <input>.
  *
- * Note: upstream's `@atoms/label/label.twig` include for the checkbox's
- * label (fixed to the plain `tag: 'label'`, non-required case — Checkbox
- * never passes `is_required`/`required_text` to it) is inlined here rather
- * than imported, since `Label` (01-atoms) is out of this task's scope — see
- * PORTING.md, matching the precedent set by Menu inlining Link.
+ * Note: the checkbox's label uses the ported `Label` atom, passing the same
+ * props upstream's `checkbox.twig` passes to `@atoms/label/label.twig`
+ * (`theme`, `content` = `label`, `for` = `id`, `size: 'small'`,
+ * `modifier_class: 'ct-checkbox__label'`).
  */
+import Label from '@civictheme/atoms/Label.astro';
+
 interface Props {
   theme?: 'light' | 'dark';
   name?: string;
@@ -53,7 +54,6 @@ const themeClass = `ct-theme-${theme}`;
 const classes = ['ct-checkbox', themeClass, isInvalid && 'ct-checkbox--is-invalid', className]
   .filter(Boolean)
   .join(' ');
-const labelClasses = ['ct-label', themeClass, 'ct-label--small', 'ct-checkbox__label'].filter(Boolean).join(' ');
 ---
 
 {
@@ -74,9 +74,7 @@ const labelClasses = ['ct-label', themeClass, 'ct-label--small', 'ct-checkbox__l
       {label && (
         <Fragment>
           {' '}
-          <label class={labelClasses} for={id}>
-            {label}
-          </label>
+          <Label theme={theme} content={label} for={id} size="small" class="ct-checkbox__label" />
         </Fragment>
       )}
     </Fragment>

@@ -1,0 +1,54 @@
+---
+interface Props {
+  theme?: 'light' | 'dark';
+  title?: string;
+  hasControls?: boolean;
+  sources?: Array<{ url?: string; type?: string }>;
+  poster?: string;
+  width?: string;
+  height?: string;
+  fallbackText?: string;
+  class?: string;
+  [key: string]: unknown;
+}
+const { theme = 'light', title, hasControls, sources, poster, width, height, fallbackText, class: className = '', ...rest } = Astro.props;
+---
+<!-- TWIG:
+{% set theme_class = 'ct-theme-%s'|format(theme|default('light')) %}
+{% set modifier_class = '%s %s'|format(theme_class, modifier_class|default('')) %}
+
+{% if sources is not empty %}
+  {% if fallback_text is empty %}
+    {% set fallback_text = "Your browser doesn't support HTML5 video." %}
+  {% endif %}
+
+  {% set attributes = attributes is defined and attributes is not null ? attributes : create_attribute({}) %}
+
+  {% if title is not empty %}
+    {% set attributes = attributes.setAttribute('title', title) %}
+  {% endif %}
+
+  {% if has_controls %}
+    {% set attributes = attributes.setAttribute('controls', '') %}
+  {% endif %}
+
+  {% if poster is not empty %}
+    {% set attributes = attributes.setAttribute('poster', poster) %}
+  {% endif %}
+
+  {% if width is not empty %}
+    {% set attributes = attributes.setAttribute('width', width) %}
+  {% endif %}
+
+  {% if height is not empty %}
+    {% set attributes = attributes.setAttribute('height', height) %}
+  {% endif %}
+
+  <video class="ct-video {{ modifier_class -}}" {% if attributes is defined and attributes is not null %}{{- attributes -}}{% endif %}>
+    {% for source in sources %}
+      <source src="{{ source.url }}" type="{{ source.type }}"/>
+    {% endfor %}
+    {{ fallback_text }}
+  </video>
+{% endif %}
+-->

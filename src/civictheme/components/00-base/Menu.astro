@@ -22,13 +22,14 @@
  * `below`-item property) — reproduced here by passing `parentItem` down
  * explicitly instead of relying on any such implicit scoping. See PORTING.md.
  *
- * Note: upstream's `@atoms/link/link.twig` include for each item's link
- * (and that include's own delegation to `@base/text-icon/text-icon.twig`)
- * is inlined here rather than imported, since `Link` (01-atoms) is out of
- * this task's scope — see PORTING.md.
+ * Note: each item's link uses the ported `Link` atom, passing the same
+ * props upstream's `menu.twig` passes to `@atoms/link/link.twig` (`theme`,
+ * `text`/`title` = `item.title`, `url` = `item.url`, `modifier_class` =
+ * `'ct-menu__item__link'`, `is_new_window`/`is_external` defaulting to
+ * `false`, and `attributes` = the item's link attributes).
  */
 import Menu from './Menu.astro';
-import TextIcon from './TextIcon.astro';
+import Link from '@civictheme/atoms/Link.astro';
 
 interface MenuItem {
   title?: string;
@@ -109,9 +110,7 @@ function itemState(item: MenuItem) {
     linkAttrs['aria-current'] = 'page';
   }
 
-  const isExternalClass = item.isExternal ? 'ct-link--external' : '';
-
-  return { itemHasChildren, itemClasses, isActiveExpanded, itemAttrs, linkAttrs, isExternalClass };
+  return { itemHasChildren, itemClasses, isActiveExpanded, itemAttrs, linkAttrs };
 }
 ---
 
@@ -119,21 +118,21 @@ function itemState(item: MenuItem) {
   items.length > 0 &&
     (() => {
       const itemsMarkup = items.map((item, i) => {
-        const { itemHasChildren, itemClasses, isActiveExpanded, itemAttrs, linkAttrs, isExternalClass } =
-          itemState(item);
+        const { itemHasChildren, itemClasses, isActiveExpanded, itemAttrs, linkAttrs } = itemState(item);
         return (
           <Fragment>
             {i > 0 && ' '}
             <li class={itemClasses} {...itemAttrs}>
-              <a
-                class={`ct-link ${themeClass} ${isExternalClass} ct-menu__item__link`}
-                href={item.url}
+              <Link
+                theme={theme}
+                text={item.title}
                 title={item.title}
-                target={item.isNewWindow ? '_blank' : undefined}
+                url={item.url}
+                class="ct-menu__item__link"
+                isNewWindow={item.isNewWindow ?? false}
+                isExternal={item.isExternal ?? false}
                 {...linkAttrs}
-              >
-                <TextIcon text={item.title} isExternal={item.isExternal} isNewWindow={item.isNewWindow} />
-              </a>
+              />
               {itemHasChildren && isCollapsible && ' '}
               {itemHasChildren && isCollapsible && (
                 <a

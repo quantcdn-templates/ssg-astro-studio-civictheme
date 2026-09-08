@@ -20,17 +20,14 @@
  * - class: Additional CSS classes.
  * - ...rest: Additional HTML attributes, spread onto the root <fieldset>.
  *
- * Note: upstream's `@atoms/label/label.twig` include for the legend (tag:
- * 'legend', size: 'large', with `isRequired`/`requiredText` wired through)
- * is inlined here rather than imported, since `Label` (01-atoms) is out of
- * this task's scope — see PORTING.md, matching the precedent set by Menu
- * inlining Link and Checkbox inlining Label's plain case. Unlike Checkbox,
- * Fieldset's call site does pass `is_required`/`required_text` through, so
- * the inline here reproduces that branch too (not exercised by any upstream
- * snapshot, but read directly off label.twig for fidelity).
+ * Note: the legend uses the ported `Label` atom, passing the same props
+ * upstream's `fieldset.twig` passes to `@atoms/label/label.twig` (`theme`,
+ * `tag: 'legend'`, `size: 'large'`, `content` = `legend`, `isRequired`,
+ * `requiredText`, `modifier_class: 'ct-fieldset__legend'`).
  */
 import Paragraph from '@civictheme/atoms/Paragraph.astro';
 import FieldMessage from '@civictheme/atoms/FieldMessage.astro';
+import Label from '@civictheme/atoms/Label.astro';
 
 interface Props {
   theme?: 'light' | 'dark';
@@ -77,25 +74,21 @@ const messageType = (['error', 'information', 'warning', 'success'] as const).in
 
 const themeClass = `ct-theme-${theme}`;
 const classes = ['ct-fieldset', themeClass, isRequired && 'ct-fieldset--required', className].filter(Boolean).join(' ');
-const legendClasses = [
-  'ct-label',
-  themeClass,
-  'ct-label--large',
-  isRequired && 'ct-label--required',
-  'ct-fieldset__legend',
-]
-  .filter(Boolean)
-  .join(' ');
 ---
 
 <fieldset class={classes} {...rest}>
   {
     legend && (
       <Fragment>
-        <legend class={legendClasses}>
-          {legend}
-          {isRequired && <span class="ct-label__required">{requiredText}</span>}
-        </legend>{' '}
+        <Label
+          theme={theme}
+          tag="legend"
+          size="large"
+          content={legend}
+          isRequired={isRequired}
+          requiredText={requiredText}
+          class="ct-fieldset__legend"
+        />{' '}
       </Fragment>
     )
   }

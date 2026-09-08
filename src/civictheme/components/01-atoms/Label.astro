@@ -1,0 +1,65 @@
+---
+/**
+ * CivicTheme Label component.
+ *
+ * Props:
+ * - theme: Theme variation (light or dark).
+ * - tag: HTML tag to use (label, legend).
+ * - content: The label's content.
+ * - size: Label size (extra-large, large, regular, small, extra-small).
+ * - isRequired: Whether the label is required.
+ * - requiredText: Text to display within label element when required.
+ * - for: Form element ID this label belongs to.
+ * - class: Additional CSS classes.
+ * - ...rest: Additional HTML attributes, spread onto the root element.
+ */
+interface Props {
+  theme?: 'light' | 'dark';
+  tag?: 'label' | 'legend';
+  content?: string;
+  size?: 'extra-large' | 'large' | 'regular' | 'small' | 'extra-small';
+  isRequired?: boolean;
+  requiredText?: string | null;
+  for?: string | null;
+  class?: string;
+  [key: string]: unknown;
+}
+
+const {
+  theme = 'light',
+  tag: tagProp,
+  content,
+  size: sizeProp,
+  isRequired,
+  requiredText = '(required)',
+  for: forId,
+  class: className = '',
+  ...rest
+} = Astro.props;
+
+const tag = tagProp === 'label' || tagProp === 'legend' ? tagProp : 'label';
+const size = (['extra-large', 'large', 'regular', 'small', 'extra-small'] as const).includes(sizeProp as any)
+  ? sizeProp!
+  : 'regular';
+
+const themeClass = `ct-theme-${theme}`;
+const classes = ['ct-label', themeClass, `ct-label--${size}`, isRequired && 'ct-label--required', className]
+  .filter(Boolean)
+  .join(' ');
+
+const Tag = tag;
+---
+
+{
+  content && (
+    <Tag class={classes} for={forId || undefined} {...rest}>
+      {content}
+      {isRequired && (
+        <Fragment>
+          {' '}
+          <span class="ct-label__required">{requiredText}</span>
+        </Fragment>
+      )}
+    </Tag>
+  )
+}

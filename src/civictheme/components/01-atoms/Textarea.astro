@@ -1,0 +1,35 @@
+---
+interface Props {
+  theme?: 'light' | 'dark';
+  name?: string;
+  id?: string;
+  value?: string;
+  placeholder?: string;
+  rows?: number;
+  isInvalid?: boolean;
+  isDisabled?: boolean;
+  isRequired?: boolean;
+  class?: string;
+  [key: string]: unknown;
+}
+const { theme = 'light', name, id, value, placeholder, rows, isInvalid, isDisabled, isRequired, class: className = '', ...rest } = Astro.props;
+---
+<!-- TWIG:
+{% set theme_class = 'ct-theme-%s'|format(theme|default('light')) %}
+{% set is_invalid_class = is_invalid ? 'ct-textarea--is-invalid' : '' %}
+{% set modifier_class = '%s %s %s'|format(theme_class, is_invalid_class, modifier_class|default(''))|trim %}
+
+{% if name is not empty %}
+  <textarea
+    class="ct-textarea {{ modifier_class -}}"
+    name="{{ name }}"
+    {% if rows %}rows="{{ rows }}"{% endif %}
+    {% if id %}id="{{ id }}"{% endif %}
+    {% if is_disabled %}disabled{% endif %}
+    {% if is_required %}required{% endif %}
+    {% if is_invalid %}aria-invalid="true"{% endif %}
+    {% if placeholder %}placeholder="{{ placeholder }}"{% endif %}
+    {% if attributes is defined and attributes is not null %}{{- attributes -}}{% endif %}
+  />{{ value|default('') }}</textarea>
+{% endif %}
+-->

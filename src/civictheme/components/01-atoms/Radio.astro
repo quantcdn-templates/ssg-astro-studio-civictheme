@@ -1,0 +1,47 @@
+---
+import Label from '@civictheme/atoms/Label.astro';
+
+interface Props {
+  theme?: 'light' | 'dark';
+  name?: string;
+  id?: string;
+  value?: string;
+  label?: string;
+  isChecked?: boolean;
+  isRequired?: boolean;
+  isInvalid?: boolean;
+  isDisabled?: boolean;
+  class?: string;
+  [key: string]: unknown;
+}
+const { theme = 'light', name, id, value, label, isChecked, isRequired, isInvalid, isDisabled, class: className = '', ...rest } = Astro.props;
+---
+<!-- TWIG:
+{% set theme_class = 'ct-theme-%s'|format(theme|default('light')) %}
+{% set is_invalid_class = is_invalid ? 'ct-radio--is-invalid' : '' %}
+{% set modifier_class = '%s %s %s'|format(theme_class, is_invalid_class, modifier_class|default(''))|trim %}
+
+{% if name is not empty and id is not empty %}
+  <input
+    type="radio"
+    class="ct-radio {{ modifier_class -}}"
+    name="{{ name }}"
+    value="{{ value }}"
+    id="{{ id }}"
+    {% if is_checked %}checked{% endif %}
+    {% if is_required %}required{% endif %}
+    {% if is_disabled %}disabled{% endif %}
+    {% if is_invalid %}aria-invalid="true"{% endif %}
+    {% if attributes is defined and attributes is not null %}{{- attributes -}}{% endif %}
+  />
+  {% if label is not empty %}
+    {% include '@atoms/label/label.twig' with {
+      theme: theme,
+      content: label,
+      for: id,
+      size: 'small',
+      modifier_class: 'ct-radio__label',
+    } only %}
+  {% endif %}
+{% endif %}
+-->

@@ -1,0 +1,95 @@
+---
+/**
+ * CivicTheme Link component.
+ *
+ * Props:
+ * - theme: Theme variation (light or dark).
+ * - text: Link text.
+ * - url: Link URL.
+ * - title: Title attribute for the link.
+ * - isNewWindow: Open link in a new window.
+ * - isExternal: Indicates if the link is external.
+ * - isActive: Indicates if the link is active.
+ * - isDisabled: Indicates if the link is disabled.
+ * - icon: Icon name.
+ * - iconPlacement: Icon position (before or after).
+ * - iconGroupDisabled: Disable icon and last word grouping.
+ * - iconSingleOnly: Only show 1 icon (external takes preference over icon).
+ * - class: Additional CSS classes.
+ * - ...rest: Additional HTML attributes, spread onto the root <a>.
+ */
+import TextIcon from '@civictheme/base/TextIcon.astro';
+
+interface Props {
+  theme?: 'light' | 'dark';
+  text?: string | null;
+  url?: string | null;
+  title?: string | null;
+  isNewWindow?: boolean | null;
+  isExternal?: boolean | null;
+  isActive?: boolean | null;
+  isDisabled?: boolean | null;
+  icon?: string | null;
+  iconPlacement?: 'before' | 'after' | null;
+  iconGroupDisabled?: boolean | null;
+  iconSingleOnly?: boolean | null;
+  class?: string;
+  [key: string]: unknown;
+}
+
+const {
+  theme = 'light',
+  text: textProp,
+  url,
+  title,
+  isNewWindow,
+  isExternal,
+  isActive,
+  isDisabled,
+  icon,
+  iconPlacement,
+  iconGroupDisabled,
+  iconSingleOnly,
+  class: className = '',
+  ...rest
+} = Astro.props;
+
+const text = textProp ?? '';
+const onlyIconClass = icon && !text ? 'ct-link--only-icon' : '';
+const themeClass = `ct-theme-${theme}`;
+const classes = [
+  'ct-link',
+  themeClass,
+  isExternal && 'ct-link--external',
+  isActive && 'ct-link--active',
+  isDisabled && 'ct-link--disabled',
+  onlyIconClass,
+  className,
+]
+  .filter(Boolean)
+  .join(' ');
+---
+
+{
+  (text || icon) && (
+    <a
+      class={classes}
+      href={url || undefined}
+      title={title || undefined}
+      target={isNewWindow ? '_blank' : undefined}
+      {...({ disabled: isDisabled ? 'disabled' : undefined } as Record<string, unknown>)}
+      {...rest}
+    >
+      <TextIcon
+        text={text}
+        isNewWindow={isNewWindow}
+        isExternal={isExternal}
+        icon={icon}
+        iconPlacement={iconPlacement}
+        iconClass="ct-link__icon"
+        iconGroupDisabled={iconGroupDisabled ?? false}
+        iconSingleOnly={iconSingleOnly ?? false}
+      />
+    </a>
+  )
+}
