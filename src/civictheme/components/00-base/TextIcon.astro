@@ -34,7 +34,7 @@ interface Props {
 const {
   text,
   isNewWindow = false,
-  isExternal = false,
+  isExternal: isExternalProp,
   icon,
   iconPlacement: iconPlacementProp,
   iconClass = '',
@@ -42,6 +42,7 @@ const {
   iconSingleOnly = false,
 } = Astro.props;
 
+const isExternal = Boolean(isExternalProp);
 const resolvedIcon = isExternal && iconSingleOnly ? 'upper-right-arrow' : (icon ?? '');
 const iconPlacement = iconPlacementProp === 'before' ? 'before' : 'after';
 const hasIconOrExternal = Boolean(resolvedIcon) || Boolean(isExternal);
@@ -56,7 +57,22 @@ if (text) {
     .split(' ');
   textStart = words.slice(0, -1).join(' ');
   textEnd = words.at(-1) ?? '';
-  showFullText = iconGroupDisabled || (iconPlacement === 'before' && !isExternal);
+  // text-icon.twig: `show_full_text = icon_group_disabled or (icon_placement
+  // == 'before' and is_external == false)` — verified empirically (a
+  // throwaway probe template run against upstream's real Twig.js engine)
+  // that `undefined == false` evaluates to FALSE in Twig.js (unlike PHP
+  // Twig's loose-comparison rules), so this condition is only true when
+  // `is_external` is the LITERAL boolean `false`, never when it is simply
+  // omitted/undefined. `link.twig` passes `is_external` straight through
+  // with no default (unlike `icon_group_disabled`/`icon_single_only`, which
+  // it does default), so an omitted `isExternal` here must NOT count as
+  // "not external" for this specific check — it must resolve `showFullText`
+  // to `false` (grouped/last-word rendering), matching Breadcrumb's mobile
+  // "parent" link snapshot (icon placement 'before', `isExternal` never
+  // passed). `isExternalProp === false` (strict), not the Boolean-coerced
+  // `isExternal` used everywhere else in this component, is what
+  // reproduces that quirk.
+  showFullText = iconGroupDisabled || (iconPlacement === 'before' && isExternalProp === false);
 }
 const displayText = showFullText ? text : `${textStart} `;
 // text-icon.twig: `{%- if show_full_text %} {% endif -%}` emits a literal

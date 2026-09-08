@@ -1,84 +1,95 @@
 ---
-import Icon from '@civictheme/base/Icon.astro';
-import ItemList from '@civictheme/base/ItemList.astro';
+/**
+ * CivicTheme Breadcrumb component.
+ *
+ * Props:
+ * - theme: Theme variation (light or dark).
+ * - activeIsLink: Whether to show the active element as a link.
+ * - links: Breadcrumb links: { text, url }.
+ * - class: Additional CSS classes.
+ * - ...rest: Additional HTML attributes, spread onto the root <nav>.
+ *
+ * Note: `breadcrumb.twig` builds each rendered link/separator via an
+ * untrimmed-but-inner-trimmed `{% set link_item %}` capture (a `@atoms/link`
+ * include, plus a `@base/icon` separator when not the last link) and feeds
+ * the array of captured strings, plus a second single-item "parent" link
+ * array, to two separate `@base/item-list/item-list.twig` includes (mobile
+ * "back" link, desktop full trail). Same "single string items target"
+ * limitation as Attachment/Grid/Chip in PORTING.md — both `<ul>` wrappers
+ * ItemList would produce are inlined directly here (their class lists are
+ * deterministic) with real `Link`/`Icon` components as children.
+ */
 import Link from '@civictheme/atoms/Link.astro';
+import Icon from '@civictheme/base/Icon.astro';
 
 interface Props {
   theme?: 'light' | 'dark';
   activeIsLink?: boolean;
-  class?: string;
   links?: Array<{ text?: string; url?: string }>;
+  class?: string;
   [key: string]: unknown;
 }
-const { theme = 'light', activeIsLink, class: className = '', links, ...rest } = Astro.props;
+
+const { theme = 'light', activeIsLink, links, class: className = '', ...rest } = Astro.props;
+
+const classes = ['ct-breadcrumb', `ct-theme-${theme}`, className].filter(Boolean).join(' ');
+
+const linkList = links ?? [];
+const count = linkList.length;
+const parent = count >= 2 ? linkList[count - 2] : null;
 ---
-<!-- TWIG:
-{% set theme_class = 'ct-theme-%s'|format(theme|default('light')) %}
-{% set modifier_class = '%s %s'|format(theme_class, modifier_class|default('')) %}
 
-{% if links %}
-  {% set links_count = links|length %}
-  {% set parent = false %}
-
-  <nav class="ct-breadcrumb {{ modifier_class -}}" aria-label="breadcrumb" {% if attributes is defined and attributes is not null %}{{- attributes -}}{% endif %}>
-    {% set link_items = [] %}
-
-    {% for link in links %}
-      {% set link_item -%}
-        {% set link_data = {
-          text: link.text,
-          url: link.url,
-          theme: theme,
-          is_active: (loop.index == links_count),
-          attributes: (loop.index == links_count) ? create_attribute({'aria-current': 'location'}) : null,
-          modifier_class: (loop.index == links_count) ? 'ct-breadcrumb__links__link ct-breadcrumb__links__link--active' : 'ct-breadcrumb__links__link',
-        } %}
-
-        {%- if (not active_is_link or link_data.url is empty) and (loop.index == links_count) -%}
-          <span class="ct-breadcrumb__links__link ct-breadcrumb__links__link--active" aria-current="location">{{ link_data.text }}</span>
-        {%- else -%}
-          {%- include '@atoms/link/link.twig' with link_data only -%}
-          {%- if loop.index < links_count -%}
-            {%- include '@base/icon/icon.twig' with {
-              symbol: 'right-arrow-1',
-              modifier_class: 'ct-breadcrumb__links__separator',
-            } only -%}
-          {% endif -%}
-        {% endif %}
-      {%- endset %}
-
-      {% set link_items = link_items|merge([link_item]) %}
-
-      {% if loop.index == links_count - 1 %}
-        {% set parent = {
-          text: link.text,
-          url: link.url,
-          theme: theme,
-          icon: 'left-arrow',
-          icon_placement: 'before',
-          modifier_class: 'ct-breadcrumb__links__link',
-        } %}
-      {% endif %}
-    {% endfor %}
-
-    {% if parent %}
-      {% set parent_link_item %}
-        {% include '@atoms/link/link.twig' with parent only %}
-      {% endset %}
-
-      {% include '@base/item-list/item-list.twig' with {
-        direction: 'horizontal',
-        items: [parent_link_item],
-        modifier_class: 'ct-breadcrumb__links show-xxs-flex hide-m',
-      } only %}
-    {% endif %}
-
-    {% include '@base/item-list/item-list.twig' with {
-      direction: 'horizontal',
-      items: link_items,
-      no_gap: true,
-      modifier_class: 'ct-breadcrumb__links hide-xxs show-m-flex',
-    } only %}
-  </nav>
-{% endif %}
--->
+{
+  count > 0 && (
+    <nav class={classes} aria-label="breadcrumb" {...rest}>
+      {parent && (
+        <Fragment>
+          <ul class="ct-item-list ct-item-list--horizontal ct-item-list--regular ct-breadcrumb__links show-xxs-flex hide-m">
+            <li class="ct-item-list__item">
+              <Link
+                theme={theme}
+                text={parent.text}
+                url={parent.url}
+                icon="left-arrow"
+                iconPlacement="before"
+                class="ct-breadcrumb__links__link"
+              />
+            </li>
+          </ul>{' '}
+        </Fragment>
+      )}
+      <ul class="ct-item-list ct-item-list--horizontal ct-item-list--regular ct-item-list--no-gap ct-breadcrumb__links hide-xxs show-m-flex">
+        {linkList.map((link, i) => {
+          const isLast = i === count - 1;
+          const asSpan = isLast && (!activeIsLink || !link.url);
+          return (
+            <Fragment>
+              {i > 0 && ' '}
+              <li class="ct-item-list__item">
+                {asSpan ? (
+                  <span class="ct-breadcrumb__links__link ct-breadcrumb__links__link--active" aria-current="location">
+                    {link.text}
+                  </span>
+                ) : (
+                  <Fragment>
+                    <Link
+                      theme={theme}
+                      text={link.text}
+                      url={link.url}
+                      isActive={isLast}
+                      aria-current={isLast ? 'location' : undefined}
+                      class={isLast ? 'ct-breadcrumb__links__link ct-breadcrumb__links__link--active' : 'ct-breadcrumb__links__link'}
+                    />
+                    {!isLast && (
+                      <Icon symbol="right-arrow-1" class="ct-breadcrumb__links__separator" />
+                    )}
+                  </Fragment>
+                )}
+              </li>
+            </Fragment>
+          );
+        })}
+      </ul>
+    </nav>
+  )
+}

@@ -1,37 +1,69 @@
 ---
+/**
+ * CivicTheme Basic Content component.
+ *
+ * Props:
+ * - theme: Theme variation (light or dark).
+ * - isContained: Whether to wrap the content in a container. Defaults to
+ *   true (`is_contained is not same as(false)` — anything but the literal
+ *   boolean `false` counts as contained).
+ * - verticalSpacing: Vertical spacing position (top, bottom, both).
+ * - withBackground: Whether to display with a background.
+ * - content: HTML content. Documented as a Slot upstream, but every
+ *   upstream test passes it as a plain string prop — ported as a `string`
+ *   prop rendered with `set:html`, matching Fieldset's `fields` precedent.
+ * - class: Additional CSS classes.
+ * - ...rest: Additional HTML attributes, spread onto the root element.
+ */
 interface Props {
   theme?: 'light' | 'dark';
   isContained?: boolean;
-  verticalSpacing?: string;
+  verticalSpacing?: 'top' | 'bottom' | 'both';
   withBackground?: boolean;
+  content?: string;
   class?: string;
   [key: string]: unknown;
 }
-const { theme = 'light', isContained, verticalSpacing, withBackground, class: className = '', ...rest } = Astro.props;
+
+const {
+  theme: themeProp,
+  isContained,
+  verticalSpacing,
+  withBackground,
+  content,
+  class: className = '',
+  ...rest
+} = Astro.props;
+
+const theme = themeProp === 'dark' ? 'dark' : 'light';
+const verticalSpacingClass = (['top', 'bottom', 'both'] as const).includes(verticalSpacing as any)
+  ? `ct-vertical-spacing-inset--${verticalSpacing}`
+  : '';
+const isContainedResolved = isContained !== false;
+
+const classes = [
+  'ct-basic-content',
+  `ct-theme-${theme}`,
+  verticalSpacingClass,
+  withBackground && 'ct-basic-content--with-background',
+  className,
+]
+  .filter(Boolean)
+  .join(' ');
 ---
-<!-- TWIG:
-{% set with_background_class = with_background ? 'ct-basic-content--with-background' : '' %}
-{% set vertical_spacing_class = vertical_spacing in ['top', 'bottom', 'both'] ? 'ct-vertical-spacing-inset--%s'|format(vertical_spacing) : '' %}
-{% set theme = theme|default('light') %}
-{% set theme = theme in ['light', 'dark'] ? theme : 'light' %}
-{% set theme_class = 'ct-theme-%s'|format(theme) %}
-{% set modifier_class = '%s %s %s %s'|format(theme_class, vertical_spacing_class, with_background_class, modifier_class|default('')) %}
 
-{% set is_contained = is_contained is not same as(false) %}
-
-{% if content is not empty %}
-  <div class="ct-basic-content {{ modifier_class -}}" {% if attributes is defined and attributes is not null %}{{- attributes -}}{% endif %}>
-    {% if is_contained %}
-    <div class="container">
-      <div class="row">
-        <div class="col-xxs-12">
-          {% endif %}
-          {{- content -}}
-          {% if is_contained %}
+{
+  content && (
+    <div class={classes} {...rest}>
+      {isContainedResolved ? (
+        <div class="container">
+          <div class="row">
+            <div class="col-xxs-12" set:html={content} />
+          </div>
         </div>
-      </div>
+      ) : (
+        <Fragment set:html={content} />
+      )}
     </div>
-    {% endif %}
-  </div>
-{% endif %}
--->
+  )
+}
