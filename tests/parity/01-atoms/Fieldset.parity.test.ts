@@ -1,6 +1,7 @@
-import { describe } from 'vitest';
+import { describe, it, expect } from 'vitest';
 import Fieldset from '@civictheme/atoms/Fieldset.astro';
-import { parityCase, expectAllKeysCovered } from '../harness';
+import Icon from '@civictheme/base/Icon.astro';
+import { parityCase, expectAllKeysCovered, renderNormalised } from '../harness';
 
 const meta = { layer: '01-atoms', name: 'fieldset' };
 
@@ -66,4 +67,22 @@ describe('Fieldset', () => {
     PREFIX_SUFFIX_KEY,
     ATTRS_KEY,
   ]);
+
+  // fieldset.twig: `{% set _message_type = message_type|default('error') %}`
+  // — no upstream snapshot passes `message` without `message_type`, so this
+  // asserts the resolved default directly rather than via parityCase.
+  it('defaults messageType to "error" (not FieldMessage\'s own "information" default) when message is given without one', async () => {
+    const closeOutlineIconPath = (await renderNormalised(Icon, { symbol: 'close-outline' })).match(
+      /<path d="([^"]+)"/
+    )?.[1];
+    const informationIconPath = (await renderNormalised(Icon, { symbol: 'information-mark' })).match(
+      /<path d="([^"]+)"/
+    )?.[1];
+    const html = await renderNormalised(Fieldset, { message: 'Oops' });
+    expect(html).toContain('ct-field-message--error');
+    expect(html).not.toContain('ct-field-message--information');
+    expect(closeOutlineIconPath).toBeTruthy();
+    expect(html).toContain(closeOutlineIconPath);
+    expect(html).not.toContain(informationIconPath);
+  });
 });

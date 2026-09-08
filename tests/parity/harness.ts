@@ -122,11 +122,84 @@ export function fixNonVoidSelfClosingTags(html: string): string {
   );
 }
 
+// A line that, once its leading indentation is stripped, is *nothing but* a
+// bare `<tagname` opening (no attributes, no `>` yet on this line) — Jest's
+// pretty-format prints an element's tag name alone on its own line whenever
+// it has at least one attribute to print on the lines that follow. Real
+// HTML syntax requires at least one whitespace character between a tag name
+// and its first attribute (unlike between two subsequent attributes, which
+// an HTML5 tokenizer accepts with *no* separating whitespace at all, since
+// the previous attribute's closing quote already ends its value) — so this
+// specific join point is the one place `dedentPrettyPrintedHtml` must add a
+// space back, or `<a\n  href="#"\n>` would dedent to the single malformed
+// tag name `<ahref="#">` instead of `<a href="#">`.
+const BARE_OPEN_TAG_RE = /^<[a-zA-Z][a-zA-Z0-9-]*$/;
+
+/**
+ * Reverses Jest's pretty-format DOM-serializer formatting back into literal
+ * HTML text, so `upstreamSnapshot`'s parse sees the same text a browser
+ * would parse from the real (un-formatted) rendered output, not the
+ * indentation pretty-format adds purely for human readability.
+ *
+ * Every attribute and every child node in a Jest DOM snapshot is printed on
+ * its own line, indented by nesting depth, regardless of whether a real
+ * whitespace TEXT NODE separates two sibling nodes in the live DOM. A line
+ * that is *whitespace-only* (once its trailing newline is dropped)
+ * corresponds to one line of a real whitespace text node's own content
+ * (that content, split on '\n', is printed one raw line per split, with the
+ * current indentation prepended) — pretty-format never emits such a line
+ * between two elements/attributes it prints back-to-back with no text node
+ * between them at all. So:
+ *   - a whitespace-only line (any length, including empty) -> emit a single
+ *     space. Any number of these in a row between two non-whitespace lines
+ *     still collapses to the ONE whitespace-collapsed text node a browser
+ *     would see there (`normaliseHtml`'s own text-node collapse already
+ *     reduces a run of adjacent space characters to one), so there is no
+ *     need to reproduce the exact original whitespace length.
+ *   - any other line: strip its leading indentation (pretty-format's
+ *     nesting whitespace — never more than that, since a real text node's
+ *     own leading whitespace is always pretty-printed as a *separate*
+ *     whitespace-only line, not prepended to a content line) and keep the
+ *     rest of the line verbatim, including a trailing space that is itself
+ *     real text-node content (e.g. the literal `text_start ~ ' '` some
+ *     twig templates produce, which must survive as a real separator to
+ *     whatever sibling follows).
+ * Lines are then joined with NO separator — a newline between two
+ * non-whitespace lines carries no meaning of its own in pretty-format's
+ * output; only an explicit whitespace-only *line* does. The one exception
+ * is `BARE_OPEN_TAG_RE` (see above): a single space is appended there
+ * instead, to keep the tag name and its first attribute apart.
+ *
+ * Deliberately does NOT attempt to tell a real whitespace text node apart
+ * from one of pretty-format's own layout lines by comparing indentation
+ * depth (e.g. "this line's indent matches what the next tag's indent should
+ * be, so it must be filler") — that would require modelling pretty-format's
+ * own recursive indentation algorithm, which is not part of this harness's
+ * job. Treating every whitespace-only line as one real space, relying on
+ * `normaliseHtml`'s existing per-text-node collapse to make repeated
+ * "spaces" harmless, and its existing per-element edge trim to make a
+ * leading/trailing one (right after an opening tag, or right before a
+ * closing tag) invisible, is sufficient for every fixture pinned in this
+ * repo — see the ported components' PORTING.md rows for the boundaries this
+ * was actually exercised against.
+ */
+export function dedentPrettyPrintedHtml(body: string): string {
+  return body
+    .split('\n')
+    .map((line) => {
+      if (line.trim() === '') return ' ';
+      const stripped = line.replace(/^[ \t]+/, '');
+      return BARE_OPEN_TAG_RE.test(stripped) ? `${stripped} ` : stripped;
+    })
+    .join('');
+}
+
 export function upstreamSnapshot(layer: string, name: string, key: string, root: string = UIKIT): string {
   const file = snapshotFile(root, layer, name);
   const src = readFileSync(file, 'utf8');
   const raw = extractSnapshotBody(src, key, file);
-  const html = fixNonVoidSelfClosingTags(unescapeSnapshotBody(raw));
+  const dedented = dedentPrettyPrintedHtml(unescapeSnapshotBody(raw));
+  const html = fixNonVoidSelfClosingTags(dedented);
   return unwrapSnapshotHtml(html);
 }
 

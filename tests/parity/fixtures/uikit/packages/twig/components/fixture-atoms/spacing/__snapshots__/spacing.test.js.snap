@@ -1,0 +1,47 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+// Fixtures for the `dedentPrettyPrintedHtml` self-tests in harness.test.ts —
+// hand-authored to mimic Jest's real pretty-format DOM serializer output
+// (verified against real `.upstream` .snap fixtures and against a live
+// jest `pretty-format` + jsdom run), not copied from any real component.
+
+exports[`Spacing adjacent siblings with no gap 1`] = `
+<div>
+  <span
+    class="a"
+  >
+    Foo
+  </span>
+  <span
+    class="b"
+  >
+    Bar
+  </span>
+</div>
+`;
+
+exports[`Spacing adjacent siblings with a whitespace gap 1`] = `
+<div>
+  <span
+    class="a"
+  >
+    Foo
+  </span>
+
+  <span
+    class="b"
+  >
+    Bar
+  </span>
+</div>
+`;
+
+exports[`Spacing multi-attribute tag split across lines 1`] = `
+<div>
+  <a
+    class="x"
+    href="y"
+  >
+    z
+  </a>
+</div>
+`;

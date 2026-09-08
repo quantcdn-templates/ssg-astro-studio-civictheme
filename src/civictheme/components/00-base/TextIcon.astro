@@ -59,6 +59,16 @@ if (text) {
   showFullText = iconGroupDisabled || (iconPlacement === 'before' && !isExternal);
 }
 const displayText = showFullText ? text : `${textStart} `;
+// text-icon.twig: `{%- if show_full_text %} {% endif -%}` emits a literal
+// single space at the end of `after_text` only when `show_full_text` is
+// true (regardless of whether any icon follows it) — that space is what
+// ends up directly before `is_new_window_content` in the real markup, via
+// `{{- content_markup -}}{{- is_new_window_content -}}` (both tightly
+// trimmed, so the ONLY separator between them is this one, conditional,
+// literal space). Every other content_markup branch (grouped/not-full-text,
+// icon-only, plain-span-no-icon) is wrapped in tags that trim tightly on
+// both sides, so none of them leave any space before is_new_window_content.
+const spaceBeforeNewWindow = Boolean(hasIconOrExternal && text && showFullText);
 ---
 
 {
@@ -78,14 +88,11 @@ const displayText = showFullText ? text : `${textStart} `;
             {isExternal && !iconSingleOnly && <Icon symbol="upper-right-arrow" />}
           </Fragment>
         ) : (
-          <Fragment>
-            {' '}
-            <span class="ct-text-icon__group">
-              <span class="ct-text-icon__text">{textEnd}</span>{' '}
-              {iconPlacement === 'after' && resolvedIcon && <Icon symbol={resolvedIcon} class={iconClass} />}
-              {isExternal && !iconSingleOnly && <Icon symbol="upper-right-arrow" />}
-            </span>
-          </Fragment>
+          <span class="ct-text-icon__group">
+            <span class="ct-text-icon__text">{textEnd}</span>{' '}
+            {iconPlacement === 'after' && resolvedIcon && <Icon symbol={resolvedIcon} class={iconClass} />}
+            {isExternal && !iconSingleOnly && <Icon symbol="upper-right-arrow" />}
+          </span>
         )}
       </Fragment>
     ) : (
@@ -98,7 +105,7 @@ const displayText = showFullText ? text : `${textStart} `;
 {
   isNewWindow && (
     <Fragment>
-      {' '}
+      {spaceBeforeNewWindow && ' '}
       <span class="ct-visually-hidden">(Opens in a new tab/window)</span>
     </Fragment>
   )

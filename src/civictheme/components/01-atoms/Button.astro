@@ -126,7 +126,7 @@ const classes = [
       type={kind}
       class={classes}
       data-component-name="button"
-      value={text}
+      value={(text ?? '').trim()}
       disabled={isDisabled ? 'disabled' : undefined}
       aria-disabled={isDisabled ? 'true' : undefined}
       {...rest}

@@ -7,6 +7,7 @@ import {
   listSnapshotKeys,
   missingSnapshotKeys,
   fixNonVoidSelfClosingTags,
+  dedentPrettyPrintedHtml,
 } from './harness';
 
 const FIXTURE_ROOT = join(__dirname, 'fixtures/uikit');
@@ -153,5 +154,85 @@ describe('missingSnapshotKeys / expectAllKeysCovered', () => {
     expect(() => {
       expect(missingSnapshotKeys(meta, ['Widget renders div wrapper 1'], FIXTURE_ROOT)).toEqual([]);
     }).toThrow();
+  });
+});
+
+describe('dedentPrettyPrintedHtml', () => {
+  it('adds no space between two elements pretty-format prints with no gap line between them', () => {
+    expect(dedentPrettyPrintedHtml('<span\n  class="a"\n>\nFoo\n</span>\n<span\n  class="b"\n>\nBar\n</span>')).toBe(
+      '<span class="a">Foo</span><span class="b">Bar</span>'
+    );
+  });
+
+  it('adds a single space where a whitespace-only line separates two elements', () => {
+    expect(
+      dedentPrettyPrintedHtml('<span\n  class="a"\n>\nFoo\n</span>\n   \n<span\n  class="b"\n>\nBar\n</span>')
+    ).toBe('<span class="a">Foo</span> <span class="b">Bar</span>');
+  });
+
+  it('keeps a trailing space on a text line verbatim', () => {
+    expect(dedentPrettyPrintedHtml('<span\n  class="a"\n>\nFoo \n</span>')).toBe('<span class="a">Foo </span>');
+  });
+
+  it('keeps a tag name apart from its first attribute when they are split across lines', () => {
+    expect(dedentPrettyPrintedHtml('<a\n  href="x"\n>\nz\n</a>')).toBe('<a href="x">z</a>');
+  });
+
+  it('does not require whitespace between two consecutive attribute lines (HTML5 does not either)', () => {
+    // Regression guard: an earlier draft of this function joined every line
+    // with nothing, which is fine for attribute-to-attribute (a quoted
+    // value's closing quote already ends the previous attribute), but wrong
+    // for tag-name-to-first-attribute (see the previous test).
+    const out = dedentPrettyPrintedHtml('<a\n  class="x"\n  href="y"\n>\nz\n</a>');
+    expect(normaliseHtml(out)).toBe(normaliseHtml('<a class="x" href="y">z</a>'));
+  });
+
+  describe('against real pretty-format-shaped fixtures', () => {
+    const meta = { layer: 'fixture-atoms', name: 'spacing' };
+
+    it('two sibling <span>s on adjacent indented lines normalise WITHOUT a space between them', () => {
+      const html = upstreamSnapshot(meta.layer, meta.name, 'Spacing adjacent siblings with no gap 1', FIXTURE_ROOT);
+      expect(normaliseHtml(html)).toBe(normaliseHtml('<span class="a">Foo</span><span class="b">Bar</span>'));
+    });
+
+    it('the same siblings with a whitespace-only line between them normalise WITH a single space', () => {
+      const html = upstreamSnapshot(
+        meta.layer,
+        meta.name,
+        'Spacing adjacent siblings with a whitespace gap 1',
+        FIXTURE_ROOT
+      );
+      expect(normaliseHtml(html)).toBe(normaliseHtml('<span class="a">Foo</span> <span class="b">Bar</span>'));
+    });
+
+    it('a multi-attribute tag split across lines parses with both attributes intact', () => {
+      const html = upstreamSnapshot(
+        meta.layer,
+        meta.name,
+        'Spacing multi-attribute tag split across lines 1',
+        FIXTURE_ROOT
+      );
+      expect(normaliseHtml(html)).toBe(normaliseHtml('<a class="x" href="y">z</a>'));
+    });
+  });
+});
+
+describe('BOOLEAN_ATTRS normalisation (normaliseHtml)', () => {
+  it('treats checked="checked" as equal to bare checked', () => {
+    expect(normaliseHtml('<input checked="checked" />')).toBe(normaliseHtml('<input checked />'));
+  });
+
+  it('treats disabled="disabled" as equal to bare disabled', () => {
+    expect(normaliseHtml('<button disabled="disabled">x</button>')).toBe(normaliseHtml('<button disabled>x</button>'));
+  });
+
+  it('does NOT normalise aria-disabled — it is an ordinary string-valued attribute, not an HTML boolean one', () => {
+    expect(normaliseHtml('<button aria-disabled="true">x</button>')).not.toBe(
+      normaliseHtml('<button aria-disabled>x</button>')
+    );
+  });
+
+  it('does NOT normalise aria-invalid either', () => {
+    expect(normaliseHtml('<input aria-invalid="true" />')).not.toBe(normaliseHtml('<input aria-invalid />'));
   });
 });

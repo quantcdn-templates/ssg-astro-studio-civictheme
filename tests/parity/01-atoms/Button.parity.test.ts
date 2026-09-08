@@ -1,6 +1,6 @@
-import { describe } from 'vitest';
+import { describe, it, expect } from 'vitest';
 import Button from '@civictheme/atoms/Button.astro';
-import { parityCase, expectAllKeysCovered } from '../harness';
+import { parityCase, expectAllKeysCovered, renderNormalised } from '../harness';
 
 const meta = { layer: '01-atoms', name: 'button' };
 
@@ -58,4 +58,19 @@ describe('Button', () => {
   });
 
   expectAllKeysCovered(meta, [REQUIRED_KEY, LINK_KEY, LINK_EXTERNAL_KEY, SUBMIT_KEY, RESET_KEY, DISABLED_KEY]);
+
+  // button.twig: `value="{{- text -}}"` is unconditional (no `{% if %}`
+  // guard) and trims the printed value — no upstream snapshot exercises a
+  // submit/reset button with no `text` (or with untrimmed whitespace), so
+  // asserted directly here rather than via parityCase.
+  it('emits a trimmed, always-present value attribute on a submit/reset button, even with no text', async () => {
+    const html = await renderNormalised(Button, { kind: 'submit' });
+    // renderNormalised serialises an empty-string attribute value bare (no
+    // `=""`) — see normaliseHtml's own attribute-serialisation step — so an
+    // *always-present, empty* value attribute shows up as bare `value` here.
+    expect(html).toContain(' value>');
+
+    const trimmedHtml = await renderNormalised(Button, { kind: 'reset', text: '  Reset  ' });
+    expect(trimmedHtml).toContain('value="Reset"');
+  });
 });

@@ -54,7 +54,7 @@ const {
   description,
   descriptionDisplay: descriptionDisplayProp,
   message,
-  messageType,
+  messageType: messageTypeProp,
   isRequired,
   requiredText = '(required)',
   prefix,
@@ -67,6 +67,13 @@ const {
 const descriptionDisplay = (['before', 'after', 'invisible'] as const).includes(descriptionDisplayProp as any)
   ? descriptionDisplayProp!
   : 'before';
+// fieldset.twig: `{% set _message_type = message_type|default('error') %}` then
+// coerces an invalid value to 'error' too — note this default ('error') is
+// NOT the same as FieldMessage's own default ('information'), so it must be
+// resolved here rather than left to FieldMessage's fallback.
+const messageType = (['error', 'information', 'warning', 'success'] as const).includes(messageTypeProp as any)
+  ? messageTypeProp!
+  : 'error';
 
 const themeClass = `ct-theme-${theme}`;
 const classes = ['ct-fieldset', themeClass, isRequired && 'ct-fieldset--required', className].filter(Boolean).join(' ');

@@ -17,9 +17,15 @@ interface Props {
   [key: string]: unknown;
 }
 
-const { theme = 'light', content, level = 2, class: className = '', ...rest } = Astro.props;
+const { theme = 'light', content, level: levelProp, class: className = '', ...rest } = Astro.props;
 
 const classes = ['ct-heading', `ct-theme-${theme}`, className].filter(Boolean).join(' ');
+// heading.twig: `{% set level = level|default('2') %}` — Twig's `default`
+// filter (like this) falls back on ANY falsy value, not just an omitted
+// one, so an explicit `''` or `0` must also resolve to level 2, unlike a
+// plain destructuring default (`level = 2`), which only applies when the
+// prop is `undefined`.
+const level = levelProp || 2;
 const Tag = `h${level}` as 'h1' | 'h2' | 'h3' | 'h4' | 'h5' | 'h6';
 ---
 
