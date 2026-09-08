@@ -46,7 +46,15 @@ function snapshotFile(root: string, layer: string, name: string): string {
  * literal one.
  */
 function extractSnapshotBody(src: string, key: string, file: string): string {
-  const escapedKey = key.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+  // `key` is the unescaped title (as a caller would write/read it). In the
+  // .snap file itself, Jest escapes any backtick the key contains as `\``
+  // (backslash + backtick, two literal bytes) — the same treatment the
+  // snapshot *body* gets. So: first escape ordinary regex metacharacters,
+  // then turn each backtick into the regex-source sequence `\\\`` (three
+  // pattern characters: an escaped backslash, then a literal backtick) so
+  // the compiled regex matches that literal two-byte `\`` run in the file,
+  // rather than a single unescaped backtick.
+  const escapedKey = key.replace(/[.*+?^${}()|[\]\\]/g, '\\$&').replace(/`/g, '\\\\`');
   const re = new RegExp('exports\\[`' + escapedKey + '`\\] = `((?:\\\\.|[^`\\\\])*)`;', 'm');
   const m = src.match(re);
   if (!m) throw new Error(`snapshot key not found: ${key} in ${file}`);
@@ -57,11 +65,19 @@ function unescapeSnapshotBody(raw: string): string {
   return raw.replace(/\\(`|\\|\$)/g, '$1');
 }
 
+// Matches a whole `exports[`key`] = `body`;` entry, escape-aware for both key
+// and body (mirrors `extractSnapshotBody`). This is deliberately stricter
+// than a naive `exports\[`([^`]*)`\]` scan: it requires the full
+// `= `…`;` assignment shape immediately after the key, so literal text that
+// merely *looks* like an export header (e.g. `exports[`x`]` appearing inside
+// another entry's snapshot body) cannot be mistaken for a real entry.
+const SNAPSHOT_ENTRY_RE = /exports\[`((?:\\.|[^`\\])*)`\] = `(?:\\.|[^`\\])*`;/g;
+
 /** Lists every `exports[`…`]` key defined in the `.snap` file for `layer`/`name`. */
 export function listSnapshotKeys(layer: string, name: string, root: string = UIKIT): string[] {
   const file = snapshotFile(root, layer, name);
   const src = readFileSync(file, 'utf8');
-  return [...src.matchAll(/exports\[`([^`]*)`\]/g)].map((m) => m[1]);
+  return [...src.matchAll(SNAPSHOT_ENTRY_RE)].map((m) => unescapeSnapshotBody(m[1]));
 }
 
 /** Snapshots wrap output in <div>…</div> (twig-testing-library). Return inner HTML, unwrapped. */
@@ -79,8 +95,13 @@ export function upstreamSnapshot(layer: string, name: string, key: string, root:
   return unwrapSnapshotHtml(html);
 }
 
-function collapse(s: string): string {
-  return s.replace(/\s+/g, ' ').trim();
+// Collapses runs of whitespace in TEXT NODE content to a single space. Must
+// never run over an already-serialised markup string (one containing tags
+// with attributes) — doing so would also rewrite whitespace inside attribute
+// values, which must compare as-is (except the class-token sort/trim
+// already applied separately, below).
+function collapseText(s: string): string {
+  return s.replace(/\s+/g, ' ');
 }
 
 export function normaliseHtml(html: string): string {
@@ -91,7 +112,7 @@ export function normaliseHtml(html: string): string {
       // space (or its absence) at a text node's edge is what distinguishes
       // `Hello <b>world</b>` from `Hello<b>world</b>`. Edges are trimmed once,
       // per element, below.
-      return node.textContent.replace(/\s+/g, ' ');
+      return collapseText(node.textContent);
     }
     if (node.nodeType !== 1) return '';
     const attrs = [...node.attributes]
@@ -106,11 +127,19 @@ export function normaliseHtml(html: string): string {
       .sort(([a], [b]) => a.localeCompare(b))
       .map(([k, v]) => (v === '' ? k : `${k}="${v}"`))
       .join(' ');
-    const children = collapse([...node.childNodes].map(walk).filter(Boolean).join(''));
+    // Trim only — do NOT run a whitespace-collapse regex over this string:
+    // it already contains fully-serialised child markup (tags + attribute
+    // values), and a regex collapse would corrupt whitespace inside those
+    // attribute values. Each text-node descendant was already
+    // whitespace-collapsed on its own above, so only the edges (leading /
+    // trailing whitespace contributed by an edge text-node child) need
+    // trimming here. This is a per-element trim, which is stricter than
+    // rendered-text equivalence would require — by design (see PORTING.md).
+    const children = [...node.childNodes].map(walk).filter(Boolean).join('').trim();
     const tag = node.tagName.toLowerCase();
     return `<${tag}${attrs ? ' ' + attrs : ''}>${children}</${tag}>`;
   };
-  return collapse([...document.body.childNodes].map(walk).filter(Boolean).join(''));
+  return [...document.body.childNodes].map(walk).filter(Boolean).join('').trim();
 }
 
 export async function renderNormalised(
@@ -137,14 +166,29 @@ export function parityCase(
 }
 
 /**
+ * Pure helper: returns every upstream snapshot key for `meta.layer`/`meta.name`
+ * that is NOT present in `coveredKeys`. Empty when every key is covered.
+ */
+export function missingSnapshotKeys(
+  meta: { layer: string; name: string },
+  coveredKeys: string[],
+  root: string = UIKIT
+): string[] {
+  const allKeys = listSnapshotKeys(meta.layer, meta.name, root);
+  return allKeys.filter((k) => !coveredKeys.includes(k));
+}
+
+/**
  * Guards against a new upstream snapshot key going unported: fails, listing
  * the missing keys, if the `.snap` file defines a key not present in
  * `coveredKeys` (the keys already passed to `parityCase` in the same file).
  */
-export function expectAllKeysCovered(meta: { layer: string; name: string }, coveredKeys: string[]) {
+export function expectAllKeysCovered(
+  meta: { layer: string; name: string },
+  coveredKeys: string[],
+  root: string = UIKIT
+) {
   it('covers every upstream snapshot key', () => {
-    const allKeys = listSnapshotKeys(meta.layer, meta.name);
-    const missing = allKeys.filter((k) => !coveredKeys.includes(k));
-    expect(missing).toEqual([]);
+    expect(missingSnapshotKeys(meta, coveredKeys, root)).toEqual([]);
   });
 }

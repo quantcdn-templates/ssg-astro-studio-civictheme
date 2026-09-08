@@ -11,3 +11,15 @@ exports[`Widget renders backtick and interpolation 1`] = `
   <code>\`escaped\` and \${interpolated}</code>
 </div>
 `;
+
+exports[`Widget \`quoted\` name 1`] = `
+<div>
+  <span class="k">quoted-key</span>
+</div>
+`;
+
+exports[`Widget mentions a fake entry 1`] = `
+<div>
+  <code>exports[\`not a real key\`] = \`still just text\`;</code>
+</div>
+`;
