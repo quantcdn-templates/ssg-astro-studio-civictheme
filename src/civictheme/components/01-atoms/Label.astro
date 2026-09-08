@@ -31,12 +31,13 @@ const {
   content,
   size: sizeProp,
   isRequired,
-  requiredText = '(required)',
+  requiredText: requiredTextProp,
   for: forId,
   class: className = '',
   ...rest
 } = Astro.props;
 
+const requiredText = requiredTextProp || '(required)';
 const tag = tagProp === 'label' || tagProp === 'legend' ? tagProp : 'label';
 const size = (['extra-large', 'large', 'regular', 'small', 'extra-small'] as const).includes(sizeProp as any)
   ? sizeProp!

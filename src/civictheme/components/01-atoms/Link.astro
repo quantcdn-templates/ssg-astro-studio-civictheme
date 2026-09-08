@@ -55,6 +55,9 @@ const {
 } = Astro.props;
 
 const text = textProp ?? '';
+// link.twig: `{%- set is_new_window = is_new_window is same as(true) -%}` narrows
+// to a strict boolean (only literal `true` counts) before it reaches text-icon.twig.
+const isNewWindowStrict = isNewWindow === true;
 const onlyIconClass = icon && !text ? 'ct-link--only-icon' : '';
 const themeClass = `ct-theme-${theme}`;
 const classes = [
@@ -76,13 +79,13 @@ const classes = [
       class={classes}
       href={url || undefined}
       title={title || undefined}
-      target={isNewWindow ? '_blank' : undefined}
+      target={isNewWindowStrict ? '_blank' : undefined}
       {...({ disabled: isDisabled ? 'disabled' : undefined } as Record<string, unknown>)}
       {...rest}
     >
       <TextIcon
         text={text}
-        isNewWindow={isNewWindow}
+        isNewWindow={isNewWindowStrict}
         isExternal={isExternal}
         icon={icon}
         iconPlacement={iconPlacement}

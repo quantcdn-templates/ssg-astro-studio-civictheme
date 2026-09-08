@@ -72,7 +72,7 @@ const classes = ['ct-select', themeClass, isInvalid && 'ct-select--is-invalid', 
         <Fragment>
           {i > 0 && ' '}
           {option.type === 'optgroup' ? (
-            <optgroup label={option.label} disabled={option.isDisabled ? 'disabled' : undefined}>
+            <optgroup label={option.label ?? ''} disabled={option.isDisabled ? 'disabled' : undefined}>
               {(option.options ?? []).map((subOption, j) => (
                 <Fragment>
                   {j > 0 && ' '}

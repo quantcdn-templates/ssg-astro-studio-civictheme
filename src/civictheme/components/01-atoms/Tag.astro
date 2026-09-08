@@ -78,7 +78,17 @@ const hasContent = Boolean(content?.trim());
         </Fragment>
       )}
       {content}
-      {icon && iconPlacement === 'after' && <Icon symbol={icon} class="ct-tag__icon" />}
+      {/* icon_markup is captured via an untrimmed `{% set icon_markup %}…{% endset %}`
+          block, so it carries BOTH a leading and a trailing newline from the SVG
+          asset/template source — the 'before' branch above already accounts for the
+          trailing side; this accounts for the leading side on the 'after' (default)
+          placement, between `content` and the icon. */}
+      {icon && iconPlacement === 'after' && (
+        <Fragment>
+          {' '}
+          <Icon symbol={icon} class="ct-tag__icon" />
+        </Fragment>
+      )}
       {/* is_new_window_content/is_external_content are captured via an untrimmed
           Twig `{% set %}...{% endset %}` block whose own leading newline+indent
           becomes part of the printed value — a real leading space, not incidental. */}
