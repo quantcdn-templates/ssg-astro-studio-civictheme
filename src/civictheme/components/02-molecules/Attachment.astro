@@ -100,16 +100,24 @@ const classes = [
 
 const fileList = files ?? [];
 
-// Values are interpolated into a raw HTML string (fed to `Link`'s
-// HTML-bearing `text` prop, per `link_text`'s untrimmed `{% set %}`
-// capture) rather than JSX attribute binding, so `&`/`<`/`>` must be
-// escaped ourselves here (`file.name` is plain text in the twig doc
-// header, autoescaped by Twig's own `{{ file.name }}` print, unlike the
-// literal `<span>` markup around it).
-const escapeText = (v: string) => v.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
-
+// `file.name`/`file.ext`/`file.size` are plain (non-Slot, non-HTML) `Props`
+// array-item fields per the twig doc header — per this project's autoescape
+// convention (see PORTING.md), a plain data field like this is normally
+// rendered as text, not raw HTML. But here the whole `link_text` capture
+// (this function's return value) is fed into `Link`'s HTML-bearing `text`
+// prop as ONE raw string, so `file.name` necessarily rides along raw too.
+// This is NOT "Twig autoescapes `{{ file.name }}` so we must pre-escape it
+// ourselves" (an earlier, incorrect version of this comment claimed that) —
+// the upstream jest harness runs with Twig's `autoescape` globally
+// disabled (`jest.helpers.js:20`), so `{{ file.name }}` is raw, UNESCAPED
+// text in every pinned `.snap` fixture already. Interpolating it here with
+// no escaping matches that real (unescaped) upstream behaviour exactly; no
+// test fixture exercises HTML-significant characters in `file.name`, so
+// this divergence from a real (autoescape-on) Drupal deployment is
+// unverified by parity either way, but escaping here would be LESS
+// faithful to the pinned snapshots, not more.
 function linkText(file: { name?: string; ext?: string; size?: string }): string {
-  const name = escapeText(file.name ?? '');
+  const name = file.name ?? '';
   const hasExt = Boolean(file.ext);
   const hasSize = Boolean(file.size);
   let extension: string | null = null;

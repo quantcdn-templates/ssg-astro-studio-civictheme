@@ -12,9 +12,13 @@
  * - tags: Event tags: string, or { content, url, isNewWindow }.
  * - imageOver / contentTop / title / contentMiddle / location / summary /
  *   contentBottom: Documented as Slots upstream, but every upstream test
- *   passes plain string props — ported as `string` props (most rendered
- *   with `set:html`, matching Fieldset's `fields` precedent; `title` is
- *   plain text per `{{ title }}`'s own usage in `title_content`).
+ *   passes plain string props — ported as `string` props, ALL rendered
+ *   with `set:html` per this project's autoescape convention (see
+ *   PORTING.md): every one of these is documented under "Slots:", not
+ *   "Props:", including `title` (its `{{ title }}` print inside
+ *   `title_content` looks like plain text, but the upstream jest harness
+ *   runs with Twig's `autoescape` globally disabled, so that plain print is
+ *   raw HTML in every pinned `.snap` fixture already).
  * - class: Additional CSS classes.
  * - ...rest: Additional HTML attributes, spread onto the root element.
  *
@@ -141,10 +145,10 @@ function datetimeMarkup(): string {
         <div class="ct-event-card__title">
           {withLink ? (
             <a class="ct-event-card__title-link" href={link?.url} target={link?.isNewWindow ? '_blank' : undefined}>
-              {title}
+              <Fragment set:html={title} />
             </a>
           ) : (
-            title
+            <Fragment set:html={title} />
           )}
         </div>
         {contentMiddle && (

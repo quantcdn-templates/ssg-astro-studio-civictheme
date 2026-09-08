@@ -7,9 +7,13 @@
  * - url: Image URL (required to render anything).
  * - alt: Image alt text.
  * - width / height: Image dimensions.
- * - caption: Image caption. Documented as a Slot upstream, but the twig
- *   body treats it as a plain variable (`{{ caption }}`) and every upstream
- *   test passes it as a plain string prop — ported as a `string` prop.
+ * - caption: Image caption (HTML-bearing — rendered with `set:html`).
+ *   Documented as a Slot upstream (not under "Props:"), so per this
+ *   project's autoescape convention (see PORTING.md) it is treated as
+ *   HTML-bearing even though the twig body prints it with a plain
+ *   `{{ caption }}` (no `|raw`) — the upstream jest harness runs with
+ *   Twig's `autoescape` globally disabled, so that plain print is raw HTML
+ *   in every pinned `.snap` fixture already.
  * - class: Additional CSS classes.
  * - ...rest: Additional HTML attributes, spread onto the root <figure>.
  */
@@ -40,7 +44,7 @@ const classes = ['ct-figure', `ct-theme-${theme}`, className].filter(Boolean).jo
         <Fragment>
           {' '}
           <figcaption class="ct-figure__caption">
-            <Icon symbol="image" /> {caption}
+            <Icon symbol="image" /> <Fragment set:html={caption} />
           </figcaption>
         </Fragment>
       )}
