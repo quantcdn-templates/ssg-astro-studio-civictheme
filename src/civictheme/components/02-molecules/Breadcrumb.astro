@@ -78,11 +78,13 @@ const parent = count >= 2 ? linkList[count - 2] : null;
                       url={link.url}
                       isActive={isLast}
                       aria-current={isLast ? 'location' : undefined}
-                      class={isLast ? 'ct-breadcrumb__links__link ct-breadcrumb__links__link--active' : 'ct-breadcrumb__links__link'}
+                      class={
+                        isLast
+                          ? 'ct-breadcrumb__links__link ct-breadcrumb__links__link--active'
+                          : 'ct-breadcrumb__links__link'
+                      }
                     />
-                    {!isLast && (
-                      <Icon symbol="right-arrow-1" class="ct-breadcrumb__links__separator" />
-                    )}
+                    {!isLast && <Icon symbol="right-arrow-1" class="ct-breadcrumb__links__separator" />}
                   </Fragment>
                 )}
               </li>

@@ -14,8 +14,10 @@ const keys = {
   defaultInput: 'Field Component default input 1',
   defaultValues: 'Field Component default values 1',
   customMessage: 'Field Component field messages custom message renders correctly when message object is passed 1',
-  defaultMessageInvalid: 'Field Component field messages default message renders when field is invalid without message object and no field title 1',
-  defaultMessageTitle: 'Field Component field messages default message renders when message object has no content and title is present 1',
+  defaultMessageInvalid:
+    'Field Component field messages default message renders when field is invalid without message object and no field title 1',
+  defaultMessageTitle:
+    'Field Component field messages default message renders when message object has no content and title is present 1',
   multiControlCheckbox: 'Field Component multiple control as array propagation - checkbox 1',
   multiControlTextfield: 'Field Component multiple control as array propagation - textfield 1',
   multiControlMixedCheckbox: 'Field Component multiple control as array propagation with mixed levels - checkbox 1',
@@ -168,7 +170,14 @@ describe('Field', () => {
     type: 'radio',
     title: 'Test Title',
     control: [
-      { name: 'testname', value: 'testvalue', id: 'testid', isChecked: false, class: 'custom-modifier', 'data-test': 'true' },
+      {
+        name: 'testname',
+        value: 'testvalue',
+        id: 'testid',
+        isChecked: false,
+        class: 'custom-modifier',
+        'data-test': 'true',
+      },
       {
         name: 'testname',
         value: 'testvalue2',

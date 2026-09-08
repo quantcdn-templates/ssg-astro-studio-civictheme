@@ -43,25 +43,29 @@ const classes = [
 ---
 
 <div class={classes} {...rest}>
-  {image?.url && (
-    <Fragment>
-      <div class="ct-fast-fact-card__image">
-        <Image theme={theme} url={image.url} alt={image.alt ?? ''} />
-      </div>{' '}
-    </Fragment>
-  )}
-  {title && (
-    <Fragment>
-      <div class="ct-fast-fact-card__title">
-        {withLink ? (
-          <a class="ct-fast-fact-card__title-link" href={link?.url} target={link?.isNewWindow ? '_blank' : undefined}>
-            {title}
-          </a>
-        ) : (
-          title
-        )}
-      </div>{' '}
-    </Fragment>
-  )}
+  {
+    image?.url && (
+      <Fragment>
+        <div class="ct-fast-fact-card__image">
+          <Image theme={theme} url={image.url} alt={image.alt ?? ''} />
+        </div>{' '}
+      </Fragment>
+    )
+  }
+  {
+    title && (
+      <Fragment>
+        <div class="ct-fast-fact-card__title">
+          {withLink ? (
+            <a class="ct-fast-fact-card__title-link" href={link?.url} target={link?.isNewWindow ? '_blank' : undefined}>
+              {title}
+            </a>
+          ) : (
+            title
+          )}
+        </div>{' '}
+      </Fragment>
+    )
+  }
   {summary && <Paragraph theme={theme} content={summary} size="large" class="ct-fast-fact-card__summary" />}
 </div>

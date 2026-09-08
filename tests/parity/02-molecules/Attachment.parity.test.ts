@@ -10,8 +10,24 @@ const EMPTY_KEY = 'Attachment Component does not render when files are empty 1';
 const MULTI_KEY = 'Attachment Component renders with multiple files and attributes 1';
 
 const files2 = [
-  { name: 'File 1', ext: 'pdf', url: 'https://example.com/file1.pdf', size: '1MB', created: '2023-01-01', changed: '2023-01-02', icon: 'pdf-file' },
-  { name: 'File 2', ext: 'docx', url: 'https://example.com/file2.docx', size: '2MB', created: '2023-01-03', changed: '2023-01-04', icon: 'word-file' },
+  {
+    name: 'File 1',
+    ext: 'pdf',
+    url: 'https://example.com/file1.pdf',
+    size: '1MB',
+    created: '2023-01-01',
+    changed: '2023-01-02',
+    icon: 'pdf-file',
+  },
+  {
+    name: 'File 2',
+    ext: 'docx',
+    url: 'https://example.com/file2.docx',
+    size: '2MB',
+    created: '2023-01-03',
+    changed: '2023-01-04',
+    icon: 'word-file',
+  },
 ];
 
 describe('Attachment', () => {
@@ -24,7 +40,15 @@ describe('Attachment', () => {
     title: 'Attachment Title',
     content: 'Attachment content',
     files: [
-      { name: 'File 1', ext: 'pdf', url: 'https://example.com/file1.pdf', size: '1MB', created: '2023-01-01', changed: '2023-01-02', icon: 'pdf-file' },
+      {
+        name: 'File 1',
+        ext: 'pdf',
+        url: 'https://example.com/file1.pdf',
+        size: '1MB',
+        created: '2023-01-01',
+        changed: '2023-01-02',
+        icon: 'pdf-file',
+      },
     ],
     contentBottom: 'Bottom content',
     theme: 'dark',

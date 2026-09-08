@@ -62,46 +62,54 @@ const linkList = links ?? [];
     <div class="row">
       <div class="col-xxs-12">
         <div class="ct-callout__wrapper">
-          {contentTop && (
-            <Fragment>
-              <div class="ct-callout__content-top" set:html={contentTop} />{' '}
-            </Fragment>
-          )}
-          {(title || content) && (
-            <Fragment>
-              <div class="ct-callout__inner">
-                {title && <Heading content={title} level={4} theme={theme} class="ct-callout__title" />}
-                {title && content && ' '}
-                {content && <Paragraph theme={theme} content={content} noMargin class="ct-callout__content" />}
-              </div>{' '}
-            </Fragment>
-          )}
-          {linkList.length > 0 && (
-            <ul class="ct-item-list ct-item-list--horizontal ct-item-list--small ct-callout__links">
-              {linkList.map((link, i) => (
-                <Fragment>
-                  {i > 0 && ' '}
-                  <li class="ct-item-list__item">
-                    <Button
-                      theme={theme}
-                      kind="link"
-                      type={i > 0 ? 'secondary' : 'primary'}
-                      text={link.text}
-                      url={link.url}
-                      isExternal={link.isExternal}
-                      isNewWindow={link.isNewWindow}
-                    />
-                  </li>
-                </Fragment>
-              ))}
-            </ul>
-          )}
-          {contentBottom && (
-            <Fragment>
-              {' '}
-              <div class="ct-callout__content-bottom" set:html={contentBottom} />
-            </Fragment>
-          )}
+          {
+            contentTop && (
+              <Fragment>
+                <div class="ct-callout__content-top" set:html={contentTop} />{' '}
+              </Fragment>
+            )
+          }
+          {
+            (title || content) && (
+              <Fragment>
+                <div class="ct-callout__inner">
+                  {title && <Heading content={title} level={4} theme={theme} class="ct-callout__title" />}
+                  {title && content && ' '}
+                  {content && <Paragraph theme={theme} content={content} noMargin class="ct-callout__content" />}
+                </div>{' '}
+              </Fragment>
+            )
+          }
+          {
+            linkList.length > 0 && (
+              <ul class="ct-item-list ct-item-list--horizontal ct-item-list--small ct-callout__links">
+                {linkList.map((link, i) => (
+                  <Fragment>
+                    {i > 0 && ' '}
+                    <li class="ct-item-list__item">
+                      <Button
+                        theme={theme}
+                        kind="link"
+                        type={i > 0 ? 'secondary' : 'primary'}
+                        text={link.text}
+                        url={link.url}
+                        isExternal={link.isExternal}
+                        isNewWindow={link.isNewWindow}
+                      />
+                    </li>
+                  </Fragment>
+                ))}
+              </ul>
+            )
+          }
+          {
+            contentBottom && (
+              <Fragment>
+                {' '}
+                <div class="ct-callout__content-bottom" set:html={contentBottom} />
+              </Fragment>
+            )
+          }
         </div>
       </div>
     </div>

@@ -1,41 +1,49 @@
 ---
-import Icon from '@civictheme/base/Icon.astro';
+/**
+ * CivicTheme Figure component.
+ *
+ * Props:
+ * - theme: Theme variation (light or dark).
+ * - url: Image URL (required to render anything).
+ * - alt: Image alt text.
+ * - width / height: Image dimensions.
+ * - caption: Image caption. Documented as a Slot upstream, but the twig
+ *   body treats it as a plain variable (`{{ caption }}`) and every upstream
+ *   test passes it as a plain string prop — ported as a `string` prop.
+ * - class: Additional CSS classes.
+ * - ...rest: Additional HTML attributes, spread onto the root <figure>.
+ */
 import Image from '@civictheme/atoms/Image.astro';
+import Icon from '@civictheme/base/Icon.astro';
 
 interface Props {
   theme?: 'light' | 'dark';
-  class?: string;
   url?: string;
   alt?: string;
   width?: number | null;
   height?: number | null;
+  caption?: string;
+  class?: string;
   [key: string]: unknown;
 }
-const { theme = 'light', class: className = '', url, alt, width, height, ...rest } = Astro.props;
+
+const { theme = 'light', url, alt, width, height, caption, class: className = '', ...rest } = Astro.props;
+
+const classes = ['ct-figure', `ct-theme-${theme}`, className].filter(Boolean).join(' ');
 ---
-<!-- TWIG:
-{% set theme_class = 'ct-theme-%s'|format(theme|default('light')) %}
-{% set modifier_class = '%s %s'|format(theme_class, modifier_class|default('')) %}
 
-{% if url is not empty %}
-  <figure class="ct-figure {{ modifier_class -}}" {% if attributes is defined and attributes is not null %}{{- attributes -}}{% endif %}>
-    {% include '@atoms/image/image.twig' with {
-      theme: theme,
-      url: url,
-      alt: alt,
-      width: width,
-      height: height,
-      modifier_class: 'ct-figure__image',
-    } only %}
-
-    {% if caption is not empty %}
-      <figcaption class="ct-figure__caption">
-        {% include '@base/icon/icon.twig' with {
-          symbol: 'image',
-        } only %}
-        {{ caption }}
-      </figcaption>
-    {% endif %}
-  </figure>
-{% endif %}
--->
+{
+  url && (
+    <figure class={classes} {...rest}>
+      <Image theme={theme} url={url} alt={alt} width={width} height={height} class="ct-figure__image" />
+      {caption && (
+        <Fragment>
+          {' '}
+          <figcaption class="ct-figure__caption">
+            <Icon symbol="image" /> {caption}
+          </figcaption>
+        </Fragment>
+      )}
+    </figure>
+  )
+}

@@ -124,15 +124,15 @@ const type = typeProp ?? 'hidden';
 const titleDisplay = (['visible', 'invisible', 'hidden'] as const).includes(titleDisplayProp as any)
   ? titleDisplayProp!
   : 'visible';
-const titleSize = (['extra-small', 'small', 'regular', 'large', 'extra-large'] as const).includes(
-  titleSizeProp as any
-)
+const titleSize = (['extra-small', 'small', 'regular', 'large', 'extra-large'] as const).includes(titleSizeProp as any)
   ? titleSizeProp!
   : '';
 const isInvalid = isInvalidProp ?? false;
 const isDisabled = isDisabledProp ?? false;
 const isRequired = isRequiredProp ?? false;
-const orientation = (['vertical', 'horizontal'] as const).includes(orientationProp as any) ? orientationProp! : 'vertical';
+const orientation = (['vertical', 'horizontal'] as const).includes(orientationProp as any)
+  ? orientationProp!
+  : 'vertical';
 
 const classes = [
   'ct-field',
@@ -211,14 +211,18 @@ const FieldWrapperTag = fieldWrapper as 'div' | 'fieldset';
 const outerLabelFor = control0.id && type !== 'radio' && type !== 'checkbox' ? control0.id : undefined;
 const titleClass = `ct-field__title${titleDisplay === 'invisible' ? ' ct-visually-hidden' : ''}`;
 
-const descriptionErrorMessage = label ? `Field <em>${label}</em> has an error` : 'Field has an error';
+// field.twig's `description_content` "default error message" fallback
+// (`{% if not description and is_invalid %}`) is nested inside a block
+// already gated on `description` being truthy — unreachable dead code, so
+// `description` is used as-is here, never replaced by a computed error
+// message (unlike `message`'s equivalent branch below, which IS reachable).
 const descriptionContent = description;
 
 const showMessage = Boolean(message || isInvalid) && type !== 'hidden';
 const messageErrorText = title ? `Field <em>${title}</em> has an error` : 'Field has an error';
-let messageContent: string | null = null;
+let messageContent: string | undefined;
 if (isInvalid) messageContent = messageErrorText;
-if (message && message.content !== undefined) messageContent = message.content ?? null;
+if (message && message.content !== undefined) messageContent = message.content;
 const messageRest = message ? Object.fromEntries(Object.entries(message).filter(([k]) => k !== 'content')) : {};
 ---
 

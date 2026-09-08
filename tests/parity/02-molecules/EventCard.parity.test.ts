@@ -37,10 +37,7 @@ describe('EventCard', () => {
 
   parityCase(meta, OBJECT_TAGS_KEY, EventCard, {
     title: 'Event Title',
-    tags: [
-      { content: 'Tag 1', url: 'https://example.com/tag-1' },
-      { content: 'Tag 2' },
-    ],
+    tags: [{ content: 'Tag 1', url: 'https://example.com/tag-1' }, { content: 'Tag 2' }],
   });
 
   expectAllKeysCovered(meta, [REQUIRED_KEY, OPTIONAL_KEY, OBJECT_TAGS_KEY]);

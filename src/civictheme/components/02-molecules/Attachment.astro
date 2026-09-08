@@ -115,9 +115,7 @@ function linkText(file: { name?: string; ext?: string; size?: string }): string 
   let extension: string | null = null;
   if (hasExt && hasSize) extension = `(${file.ext}, ${file.size})`;
   else if (hasExt || hasSize) extension = `(${file.ext || file.size})`;
-  return extension
-    ? `${name} <span class="ct-attachment__links__link__extension">${extension}</span>`
-    : name;
+  return extension ? `${name} <span class="ct-attachment__links__link__extension">${extension}</span>` : name;
 }
 ---
 
@@ -138,7 +136,9 @@ function linkText(file: { name?: string; ext?: string; size?: string }): string 
                   <div class="ct-attachment__inner">
                     {title && <Heading theme={theme} content={title} level={4} class="ct-attachment__title" />}
                     {title && content && ' '}
-                    {content && <Paragraph theme={theme} content={content} size="small" class="ct-attachment__content" />}
+                    {content && (
+                      <Paragraph theme={theme} content={content} size="small" class="ct-attachment__content" />
+                    )}
                   </div>{' '}
                 </Fragment>
               )}

@@ -77,28 +77,32 @@ const visiblePanels = (panels ?? []).filter((panel) => panel.title && panel.cont
                     <Fragment>
                       {i > 0 && ' '}
                       <li
-                      class="ct-accordion__panels__panel"
-                      data-collapsible
-                      data-collapsible-collapsed={!isExpanded ? '' : undefined}
-                      data-collapsible-duration="250"
-                      data-collapsible-trigger-wide
-                    >
-                      <div class="ct-accordion__panels__panel__header">
-                        <button
-                          class="ct-accordion__panels__panel__header__button"
-                          data-collapsible-trigger
-                          aria-expanded={isExpanded ? 'true' : 'false'}
-                        >
-                          {panel.title}
-                        </button>
-                      </div>{' '}
-                      <div
-                        class="ct-accordion__panels__panel__content"
-                        data-collapsible-panel
-                        aria-hidden={isExpanded ? 'false' : 'true'}
+                        class="ct-accordion__panels__panel"
+                        data-collapsible
+                        data-collapsible-collapsed={!isExpanded ? '' : undefined}
+                        data-collapsible-duration="250"
+                        data-collapsible-trigger-wide
                       >
-                        <Paragraph theme={theme} content={panel.content} class="ct-accordion__panels__panel__content__inner" />
-                      </div>
+                        <div class="ct-accordion__panels__panel__header">
+                          <button
+                            class="ct-accordion__panels__panel__header__button"
+                            data-collapsible-trigger
+                            aria-expanded={isExpanded ? 'true' : 'false'}
+                          >
+                            {panel.title}
+                          </button>
+                        </div>{' '}
+                        <div
+                          class="ct-accordion__panels__panel__content"
+                          data-collapsible-panel
+                          aria-hidden={isExpanded ? 'false' : 'true'}
+                        >
+                          <Paragraph
+                            theme={theme}
+                            content={panel.content}
+                            class="ct-accordion__panels__panel__content__inner"
+                          />
+                        </div>
                       </li>
                     </Fragment>
                   );

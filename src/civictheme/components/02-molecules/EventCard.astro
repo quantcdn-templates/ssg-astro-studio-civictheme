@@ -28,7 +28,6 @@
 import Image from '@civictheme/atoms/Image.astro';
 import Tag from '@civictheme/atoms/Tag.astro';
 import Paragraph from '@civictheme/atoms/Paragraph.astro';
-import Datetime from '@civictheme/base/Datetime.astro';
 import Icon from '@civictheme/base/Icon.astro';
 
 interface Props {
@@ -135,13 +134,7 @@ function datetimeMarkup(): string {
         {date && (
           <Fragment>
             <div class="ct-event-card__date">
-              <Tag
-                theme={theme}
-                type="secondary"
-                content={datetimeMarkup()}
-                icon="calendar-2"
-                iconPlacement="before"
-              />
+              <Tag theme={theme} type="secondary" content={datetimeMarkup()} icon="calendar-2" iconPlacement="before" />
             </div>{' '}
           </Fragment>
         )}
@@ -186,7 +179,12 @@ function datetimeMarkup(): string {
                           <Fragment>
                             {i > 0 && ' '}
                             <li class="ct-item-list__item">
-                              <Tag theme={theme} content={tagObj.content} url={tagObj.url} isNewWindow={tagObj.isNewWindow} />
+                              <Tag
+                                theme={theme}
+                                content={tagObj.content}
+                                url={tagObj.url}
+                                isNewWindow={tagObj.isNewWindow}
+                              />
                             </li>
                           </Fragment>
                         );
