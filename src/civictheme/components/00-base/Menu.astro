@@ -21,6 +21,11 @@
  * point of the recursive macro call (a `_self`-import scoping quirk, not a
  * `below`-item property) — reproduced here by passing `parentItem` down
  * explicitly instead of relying on any such implicit scoping. See PORTING.md.
+ *
+ * Note: upstream's `@atoms/link/link.twig` include for each item's link
+ * (and that include's own delegation to `@base/text-icon/text-icon.twig`)
+ * is inlined here rather than imported, since `Link` (01-atoms) is out of
+ * this task's scope — see PORTING.md.
  */
 import Menu from './Menu.astro';
 import TextIcon from './TextIcon.astro';
@@ -68,18 +73,27 @@ const ariaHiddenAttrs: Record<string, string> =
   menuLevel > 0 && isCollapsible ? { 'aria-hidden': parentItem?.inActiveTrail ? 'false' : 'true' } : {};
 const levelModifierClass = menuLevel > 0 ? (menuLevelModifierClass[menuLevel] ?? '') : '';
 
+// An empty `below: []` array is still "no children" (Twig's `item.below` is
+// falsy for an empty array too) — never gate on `item.below` truthiness
+// directly.
+function hasChildren(item: MenuItem): boolean {
+  return (item.below?.length ?? 0) > 0;
+}
+
 function itemState(item: MenuItem) {
+  const itemHasChildren = hasChildren(item);
+
   const itemClasses = [
     'ct-menu__item',
     `ct-menu__item--level-${menuLevel}`,
-    item.below ? 'ct-menu__item--has-children' : '',
+    itemHasChildren ? 'ct-menu__item--has-children' : '',
     item.inActiveTrail ? 'ct-menu__item--active-trail' : '',
     item.class ?? '',
   ].join(' ');
 
   let isActiveExpanded: 'true' | 'false' = 'false';
   const itemAttrs: Record<string, unknown> = { ...(item.attributes ?? {}) };
-  if (item.below && isCollapsible) {
+  if (itemHasChildren && isCollapsible) {
     isActiveExpanded = item.inActiveTrail && item.isExpanded ? 'true' : 'false';
     if (!(item.inActiveTrail && item.isExpanded)) {
       itemAttrs['data-collapsible-collapsed'] = '';
@@ -95,100 +109,69 @@ function itemState(item: MenuItem) {
     linkAttrs['aria-current'] = 'page';
   }
 
-  return { itemClasses, isActiveExpanded, itemAttrs, linkAttrs };
+  const isExternalClass = item.isExternal ? 'ct-link--external' : '';
+
+  return { itemHasChildren, itemClasses, isActiveExpanded, itemAttrs, linkAttrs, isExternalClass };
 }
 ---
 
 {
   items.length > 0 &&
-    (menuLevel === 0 ? (
-      <ul class={`ct-menu ct-menu--level-0 ${themeClass} ${modifierClass}`} data-component-name="ct-menu" {...rest}>
-        {items.map((item, i) => {
-          const { itemClasses, isActiveExpanded, itemAttrs, linkAttrs } = itemState(item);
-          return (
-            <Fragment>
-              {i > 0 && ' '}
-              <li class={itemClasses} {...itemAttrs}>
+    (() => {
+      const itemsMarkup = items.map((item, i) => {
+        const { itemHasChildren, itemClasses, isActiveExpanded, itemAttrs, linkAttrs, isExternalClass } =
+          itemState(item);
+        return (
+          <Fragment>
+            {i > 0 && ' '}
+            <li class={itemClasses} {...itemAttrs}>
+              <a
+                class={`ct-link ${themeClass} ${isExternalClass} ct-menu__item__link`}
+                href={item.url}
+                title={item.title}
+                target={item.isNewWindow ? '_blank' : undefined}
+                {...linkAttrs}
+              >
+                <TextIcon text={item.title} isExternal={item.isExternal} isNewWindow={item.isNewWindow} />
+              </a>
+              {itemHasChildren && isCollapsible && ' '}
+              {itemHasChildren && isCollapsible && (
                 <a
-                  class={`ct-link ${themeClass} ct-menu__item__link`}
-                  href={item.url}
-                  title={item.title}
-                  {...linkAttrs}
-                >
-                  <TextIcon text={item.title} />
-                </a>
-                {item.below && isCollapsible && ' '}
-                {item.below && isCollapsible && (
-                  <a
-                    href="#"
-                    class="ct-menu__item__link-trigger"
-                    data-collapsible-trigger=""
-                    aria-expanded={isActiveExpanded}
-                    title={`Expand ${item.title} menu`}
-                  />
-                )}
-                {item.below && ' '}
-                {item.below && (
-                  <Menu
-                    items={item.below}
-                    menuLevel={menuLevel + 1}
-                    theme={theme}
-                    isCollapsible={isCollapsible}
-                    menuLevelModifierClass={menuLevelModifierClass}
-                    parentItem={item}
-                  />
-                )}
-              </li>
-            </Fragment>
-          );
-        })}
-      </ul>
-    ) : (
-      <div
-        class={`ct-menu__sub-menu__wrapper ct-menu__sub-menu__wrapper--level-${menuLevel}`}
-        {...collapsiblePanelAttrs}
-        {...ariaHiddenAttrs}
-      >
-        <ul class={`ct-menu ct-menu__sub-menu ct-menu--level-${menuLevel} ${levelModifierClass}`}>
-          {items.map((item, i) => {
-            const { itemClasses, isActiveExpanded, itemAttrs, linkAttrs } = itemState(item);
-            return (
-              <Fragment>
-                {i > 0 && ' '}
-                <li class={itemClasses} {...itemAttrs}>
-                  <a
-                    class={`ct-link ${themeClass} ct-menu__item__link`}
-                    href={item.url}
-                    title={item.title}
-                    {...linkAttrs}
-                  >
-                    <TextIcon text={item.title} />
-                  </a>
-                  {item.below && isCollapsible && (
-                    <a
-                      href="#"
-                      class="ct-menu__item__link-trigger"
-                      data-collapsible-trigger=""
-                      aria-expanded={isActiveExpanded}
-                      title={`Expand ${item.title} menu`}
-                    />
-                  )}
-                  {item.below && ' '}
-                  {item.below && (
-                    <Menu
-                      items={item.below}
-                      menuLevel={menuLevel + 1}
-                      theme={theme}
-                      isCollapsible={isCollapsible}
-                      menuLevelModifierClass={menuLevelModifierClass}
-                      parentItem={item}
-                    />
-                  )}
-                </li>
-              </Fragment>
-            );
-          })}
+                  href="#"
+                  class="ct-menu__item__link-trigger"
+                  data-collapsible-trigger=""
+                  aria-expanded={isActiveExpanded}
+                  title={`Expand ${item.title} menu`}
+                />
+              )}
+              {itemHasChildren && ' '}
+              {itemHasChildren && (
+                <Menu
+                  items={item.below}
+                  menuLevel={menuLevel + 1}
+                  theme={theme}
+                  isCollapsible={isCollapsible}
+                  menuLevelModifierClass={menuLevelModifierClass}
+                  parentItem={item}
+                />
+              )}
+            </li>
+          </Fragment>
+        );
+      });
+
+      return menuLevel === 0 ? (
+        <ul class={`ct-menu ct-menu--level-0 ${themeClass} ${modifierClass}`} data-component-name="ct-menu" {...rest}>
+          {itemsMarkup}
         </ul>
-      </div>
-    ))
+      ) : (
+        <div
+          class={`ct-menu__sub-menu__wrapper ct-menu__sub-menu__wrapper--level-${menuLevel}`}
+          {...collapsiblePanelAttrs}
+          {...ariaHiddenAttrs}
+        >
+          <ul class={`ct-menu ct-menu__sub-menu ct-menu--level-${menuLevel} ${levelModifierClass}`}>{itemsMarkup}</ul>
+        </div>
+      );
+    })()
 }

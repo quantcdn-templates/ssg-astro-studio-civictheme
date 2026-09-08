@@ -1,6 +1,7 @@
-import { describe } from 'vitest';
+import { describe, it, expect } from 'vitest';
+import { parseHTML } from 'linkedom';
 import Icon from '@civictheme/base/Icon.astro';
-import { parityCase, expectAllKeysCovered } from '../harness';
+import { parityCase, expectAllKeysCovered, renderComponent } from '../harness';
 
 const meta = { layer: '00-base', name: 'icon' };
 
@@ -30,4 +31,15 @@ describe('Icon', () => {
   });
 
   expectAllKeysCovered(meta, [EMPTY_KEY, ADDITIONAL_KEY, SIZE_KEY, DEFAULT_KEY]);
+
+  // No upstream snapshot exercises a rest-attribute value containing `"` or
+  // `&` (Icon builds its `<svg ...>` tag as a raw string, so an unescaped
+  // value would truncate the attribute or corrupt the tag). Verified by
+  // round-tripping through the same parser the harness uses elsewhere.
+  it('escapes " and & in injected attribute values so they cannot break the surrounding markup', async () => {
+    const html = await renderComponent(Icon, { symbol: 'close', 'data-test': 'a"b&c' });
+    const { document } = parseHTML(`<!DOCTYPE html><html><body>${html}</body></html>`);
+    const svg = document.querySelector('svg');
+    expect(svg?.getAttribute('data-test')).toBe('a"b&c');
+  });
 });

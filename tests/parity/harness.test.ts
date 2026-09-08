@@ -48,6 +48,10 @@ describe('normaliseHtml', () => {
     expect(normaliseHtml('<a href="a  b">x</a>')).not.toBe(normaliseHtml('<a href="a b">x</a>'));
   });
 
+  it('compares a non-class attribute value as-is, not edge-trimmed', () => {
+    expect(normaliseHtml('<a href=" x ">t</a>')).not.toBe(normaliseHtml('<a href="x">t</a>'));
+  });
+
   it('does not collapse attribute value whitespace on a nested element either', () => {
     expect(normaliseHtml('<div><a href="a  b">x</a></div>')).not.toBe(normaliseHtml('<div><a href="a b">x</a></div>'));
   });

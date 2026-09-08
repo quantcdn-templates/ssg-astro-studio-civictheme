@@ -154,7 +154,7 @@ export function normaliseHtml(html: string): string {
       .filter((a: any) => !a.name.startsWith('data-astro-cid-'))
       .map(
         (a: any) =>
-          [a.name, a.name === 'class' ? a.value.split(/\s+/).filter(Boolean).sort().join(' ') : a.value.trim()] as [
+          [a.name, a.name === 'class' ? a.value.split(/\s+/).filter(Boolean).sort().join(' ') : a.value] as [
             string,
             string,
           ]

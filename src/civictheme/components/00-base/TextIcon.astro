@@ -69,6 +69,7 @@ const displayText = showFullText ? text : `${textStart} `;
         <span class="ct-text-icon__text" set:html={displayText} />
         {showFullText ? (
           <Fragment>
+            {' '}
             {iconPlacement === 'after' && resolvedIcon && <Icon symbol={resolvedIcon} class={iconClass} />}
             {isExternal && !iconSingleOnly && <Icon symbol="upper-right-arrow" />}
           </Fragment>

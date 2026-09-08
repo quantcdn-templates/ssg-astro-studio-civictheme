@@ -20,8 +20,12 @@ interface Props {
 const { symbol, size, class: className = '', ...rest } = Astro.props;
 const svg = symbol ? (icons as Record<string, string>)[symbol] : undefined;
 const classes = ['ct-icon', size && `ct-icon--size-${size}`, ...className.split(' ')].filter(Boolean).join(' ');
+// Values are interpolated into a raw HTML string below (not JSX attribute
+// binding), so `&` and `"` must be escaped ourselves to avoid breaking the
+// surrounding `"..."` attribute-value quoting or double-escaping entities.
+const escapeAttr = (v: string) => v.replace(/&/g, '&amp;').replace(/"/g, '&quot;');
 const attrs = Object.entries({ class: classes, 'aria-hidden': 'true', role: 'img', ...rest })
-  .map(([k, v]) => `${k}="${String(v)}"`)
+  .map(([k, v]) => `${k}="${escapeAttr(String(v))}"`)
   .join(' ');
 const html = svg ? svg.replace('<svg ', `<svg ${attrs} `) : '';
 ---
