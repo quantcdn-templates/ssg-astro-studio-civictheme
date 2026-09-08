@@ -1,0 +1,48 @@
+---
+/**
+ * CivicTheme Search component.
+ *
+ * Props:
+ * - theme: Theme variation (light or dark).
+ * - class: Additional CSS classes.
+ * - ...rest: Additional HTML attributes, spread onto the root element.
+ *
+ * Slots (documented upstream, but every upstream test passes plain string
+ * props — ported as `string` props per this project's autoescape
+ * convention, see PORTING.md):
+ * - text: Text for the search link.
+ * - url: Search page URL.
+ */
+import Link from '@civictheme/atoms/Link.astro';
+
+interface Props {
+  theme?: 'light' | 'dark';
+  text?: string;
+  url?: string;
+  class?: string;
+  [key: string]: unknown;
+}
+
+const { theme = 'light', text, url, class: className = '', ...rest } = Astro.props;
+
+const classes = ['ct-search', `ct-theme-${theme}`, className].filter(Boolean).join(' ');
+
+// search.twig's `search_text` capture wraps `text` in a `<span
+// class="ct-search__link-text">` before feeding it to `link.twig`'s `text`
+// prop — `Link`'s `text` prop is a plain string fed through `TextIcon`'s
+// `set:html`-free text span, so the wrapper is built as an HTML string here
+// rather than as a live JSX child.
+const searchText = `<span class="ct-search__link-text">${text ?? ''}</span>`;
+---
+
+<div class={classes} {...rest}>
+  <Link
+    theme={theme}
+    text={searchText}
+    url={url}
+    icon="magnifier"
+    iconPlacement="after"
+    iconGroupDisabled
+    class="ct-search__link"
+  />
+</div>

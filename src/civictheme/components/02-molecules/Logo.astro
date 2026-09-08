@@ -1,0 +1,101 @@
+---
+/**
+ * CivicTheme Logo component.
+ *
+ * Props:
+ * - theme: Theme variation (light or dark).
+ * - type: Logo display type (default, stacked, inline, inline-stacked).
+ * - logos: { primary?: { mobile?: {url,alt}, desktop?: {url,alt} },
+ *   secondary?: { mobile?: {url,alt}, desktop?: {url,alt} } }.
+ * - url: Optional URL that wraps the logo.
+ * - title: Optional logo title attribute.
+ * - class: Additional CSS classes.
+ * - ...rest: Additional HTML attributes, spread onto the root element.
+ */
+import Image from '@civictheme/atoms/Image.astro';
+
+interface LogoImage {
+  url?: string;
+  alt?: string;
+}
+
+interface LogoBreakpoints {
+  mobile?: LogoImage;
+  desktop?: LogoImage;
+}
+
+interface Props {
+  theme?: 'light' | 'dark';
+  type?: 'default' | 'inline' | 'stacked' | 'inline-stacked';
+  logos?: { primary?: LogoBreakpoints; secondary?: LogoBreakpoints };
+  url?: string;
+  title?: string;
+  class?: string;
+  [key: string]: unknown;
+}
+
+const { theme = 'light', type: typeProp, logos, url, title, class: className = '', ...rest } = Astro.props;
+
+const type = (['default', 'inline', 'stacked', 'inline-stacked'] as const).includes(typeProp as any)
+  ? typeProp!
+  : 'default';
+const classes = ['ct-logo', `ct-theme-${theme}`, `ct-logo--${type}`, className].filter(Boolean).join(' ');
+
+const hasLogos = Boolean(logos && (logos.primary || logos.secondary));
+
+// logo.twig's `{% if url is not empty %}` picks the root tag; the rest of
+// the markup is identical either way, so the root tag is chosen dynamically
+// rather than duplicating the loop body for each branch.
+const RootTag = (url ? 'a' : 'div') as 'a' | 'div';
+
+// logo.twig's `{% for logo_type, logo in logos %}` iterates object keys in
+// insertion order — `primary` is always defined first in every upstream
+// prop object, so a fixed [primary, secondary] order matches. When
+// `type == 'default'`, only `primary` is rendered.
+const logoEntries: Array<['primary' | 'secondary', LogoBreakpoints]> = (
+  [
+    ['primary', logos?.primary],
+    ['secondary', logos?.secondary],
+  ] as Array<['primary' | 'secondary', LogoBreakpoints | undefined]>
+).filter(([logoType, logo]) => logo && (type !== 'default' || logoType === 'primary')) as Array<
+  ['primary' | 'secondary', LogoBreakpoints]
+>;
+
+function breakpointClass(breakpoint: 'mobile' | 'desktop', logoType: 'primary' | 'secondary'): string {
+  if (breakpoint === 'mobile') {
+    return type === 'inline' && logoType === 'secondary' ? 'hide-xxs' : 'hide-l';
+  }
+  return 'hide-xxs show-l';
+}
+---
+
+{
+  hasLogos && (
+    <RootTag class={classes} href={url} title={url ? title || 'Click to go to the homepage' : undefined} {...rest}>
+      {logoEntries.map(([logoType, logo], entryIndex) => (
+        <Fragment>
+          {entryIndex > 0 && ' '}
+          {logoType === 'secondary' && (
+            <Fragment>
+              <span class={`ct-logo__stripe${type === 'inline' ? ' hide-xxs show-l' : ''}`} />{' '}
+            </Fragment>
+          )}
+          {(['mobile', 'desktop'] as const).map(
+            (breakpoint, i) =>
+              logo[breakpoint] && (
+                <Fragment>
+                  {i > 0 && ' '}
+                  <Image
+                    theme={theme}
+                    url={logo[breakpoint]?.url}
+                    alt={logo[breakpoint]?.alt}
+                    class={`ct-logo__image ct-logo__image--${breakpoint} ${breakpointClass(breakpoint, logoType)}`}
+                  />
+                </Fragment>
+              )
+          )}
+        </Fragment>
+      ))}
+    </RootTag>
+  )
+}

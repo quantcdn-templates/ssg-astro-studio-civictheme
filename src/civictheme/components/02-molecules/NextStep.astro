@@ -1,0 +1,118 @@
+---
+/**
+ * CivicTheme Next Step component.
+ *
+ * Props:
+ * - theme: Theme variation (light or dark).
+ * - verticalSpacing: Vertical spacing position (top, bottom, both).
+ * - link: Next step link: { url, isNewWindow, isExternal }.
+ * - class: Additional CSS classes.
+ * - ...rest: Additional HTML attributes, spread onto the root element.
+ *
+ * Slots (documented upstream, but every upstream test passes plain string
+ * props — ported as `string` props per this project's autoescape
+ * convention, see PORTING.md):
+ * - title / content / contentTop / contentBottom.
+ *
+ * Note: the task brief's Interfaces line lists a `withBackground` prop for
+ * NextStep, but `next-step.twig` has no such prop (grepped the whole file
+ * for "background" — no match) — not declared here, per the fidelity rule
+ * to declare only props the Twig reads.
+ *
+ * Note: `title_content`'s "with link" branch routes `title` through a live
+ * `@atoms/link/link.twig` before feeding the result to `@atoms/heading/
+ * heading.twig`'s string-only `content` prop — since `Heading.astro`'s
+ * `content` has no live-JSX-child path (matches `Paragraph`/`FieldMessage`
+ * precedent), the `<h4 class="ct-heading ct-theme-{theme}
+ * ct-next-step__title">` wrapper Heading would produce is inlined directly
+ * here instead, so the real `Link` component can be nested as a live child
+ * rather than replicated as a markup string — same reasoning as the
+ * ItemList-inlining precedent (live children needed). The link-less branch
+ * still uses the real `Heading` component, since it only needs a string.
+ */
+import Link from '@civictheme/atoms/Link.astro';
+import Heading from '@civictheme/atoms/Heading.astro';
+import Paragraph from '@civictheme/atoms/Paragraph.astro';
+
+interface Props {
+  theme?: 'light' | 'dark';
+  verticalSpacing?: 'top' | 'bottom' | 'both';
+  link?: { url?: string; isNewWindow?: boolean; isExternal?: boolean };
+  title?: string;
+  content?: string;
+  contentTop?: string;
+  contentBottom?: string;
+  class?: string;
+  [key: string]: unknown;
+}
+
+const {
+  theme = 'light',
+  verticalSpacing,
+  link,
+  title,
+  content,
+  contentTop,
+  contentBottom,
+  class: className = '',
+  ...rest
+} = Astro.props;
+
+const verticalSpacingClass = (['top', 'bottom', 'both'] as const).includes(verticalSpacing as any)
+  ? `ct-vertical-spacing-inset--${verticalSpacing}`
+  : '';
+const classes = ['ct-next-step', `ct-theme-${theme}`, verticalSpacingClass, className].filter(Boolean).join(' ');
+
+const withLink = Boolean(link?.url);
+---
+
+{
+  title && (
+    <div class={classes} {...rest}>
+      <div class="container">
+        <div class="row">
+          <div class="col-xxs-12">
+            <div class="ct-next-step__wrapper">
+              {contentTop && (
+                <Fragment>
+                  <div class="ct-next-step__content-top" set:html={contentTop} />{' '}
+                </Fragment>
+              )}
+              {(title || content) && (
+                <Fragment>
+                  <div class="ct-next-step__inner">
+                    {title &&
+                      (withLink ? (
+                        <h4 class={`ct-heading ct-theme-${theme} ct-next-step__title`}>
+                          <Link
+                            theme={theme}
+                            text={title}
+                            url={link?.url}
+                            icon="right-arrow-2"
+                            iconGroupDisabled
+                            iconSingleOnly
+                            isNewWindow={link?.isNewWindow}
+                            isExternal={link?.isExternal}
+                            class="ct-next-step__title__link"
+                          />
+                        </h4>
+                      ) : (
+                        <Heading theme={theme} level={4} class="ct-next-step__title" content={title} />
+                      ))}{' '}
+                    {content && <Paragraph theme={theme} content={content} class="ct-next-step__content" />}
+                  </div>{' '}
+                </Fragment>
+              )}
+              {contentBottom && (
+                <Fragment>
+                  {' '}
+                  <div class="ct-next-step__content-bottom" set:html={contentBottom} />
+                </Fragment>
+              )}
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  )
+}

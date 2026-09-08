@@ -1,0 +1,100 @@
+---
+/**
+ * CivicTheme Service Card component.
+ *
+ * Props:
+ * - theme: Theme variation (light or dark).
+ * - links: Card links: Array<{ text, url, isNewWindow, isExternal }>.
+ * - class: Additional CSS classes.
+ * - ...rest: Additional HTML attributes, spread onto the root element.
+ *
+ * Slots (documented upstream, but every upstream test passes plain string
+ * props — ported as `string` props per this project's autoescape
+ * convention, see PORTING.md):
+ * - contentTop / title / contentBottom.
+ */
+import Heading from '@civictheme/atoms/Heading.astro';
+import Link from '@civictheme/atoms/Link.astro';
+
+interface LinkItem {
+  text?: string;
+  url?: string;
+  isNewWindow?: boolean;
+  isExternal?: boolean;
+}
+
+interface Props {
+  theme?: 'light' | 'dark';
+  links?: LinkItem[];
+  contentTop?: string;
+  title?: string;
+  contentBottom?: string;
+  class?: string;
+  [key: string]: unknown;
+}
+
+const {
+  theme = 'light',
+  links,
+  contentTop,
+  title,
+  contentBottom,
+  class: className = '',
+  ...rest
+} = Astro.props;
+
+const classes = ['ct-service-card', `ct-theme-${theme}`, className].filter(Boolean).join(' ');
+
+// service-card.twig only builds a `list_item` for links whose `text` is
+// truthy — an `{% if link.text %}` guard around the whole capture, not just
+// a rendering detail of `link.twig` itself.
+const linkItems = (links ?? []).filter((l) => l.text);
+---
+
+{
+  title && (
+    <div class={classes} {...rest}>
+      <div class="ct-service-card__content">
+        {contentTop && (
+          <Fragment>
+            <div class="ct-service-card__content-top" set:html={contentTop} />{' '}
+          </Fragment>
+        )}
+        <Heading theme={theme} content={title} level={4} class="ct-service-card__title" />{' '}
+        {linkItems.length > 0 && (
+          <Fragment>
+            {/* `@base/item-list/item-list.twig`'s `<ul>` wrapper is inlined
+                directly (deterministic class list: `ct-item-list
+                ct-item-list--vertical ct-item-list--regular
+                ct-service-card__links`) with real `Link` components as
+                children, so they can be live JSX rather than pre-rendered
+                strings — same "single string items target" limitation as
+                Attachment/Breadcrumb/Callout/EventCard/Field. */}
+            <ul class="ct-item-list ct-item-list--vertical ct-item-list--regular ct-service-card__links">
+              {linkItems.map((link, i) => (
+                <Fragment>
+                  {i > 0 && ' '}
+                  <li class="ct-item-list__item">
+                    <Link
+                      theme={theme}
+                      text={link.text}
+                      url={link.url}
+                      isNewWindow={link.isNewWindow ?? false}
+                      isExternal={link.isExternal ?? false}
+                    />
+                  </li>
+                </Fragment>
+              ))}
+            </ul>
+          </Fragment>
+        )}
+        {contentBottom && (
+          <Fragment>
+            {' '}
+            <div class="ct-service-card__content-bottom" set:html={contentBottom} />
+          </Fragment>
+        )}
+      </div>
+    </div>
+  )
+}
