@@ -1,94 +1,109 @@
 ---
-import Button from '@civictheme/atoms/Button.astro';
+/**
+ * CivicTheme Callout component.
+ *
+ * Props:
+ * - theme: Theme variation (light or dark).
+ * - verticalSpacing: Vertical spacing position (top, bottom, both).
+ * - title / content / contentTop / contentBottom: Documented as Slots
+ *   upstream, but every upstream test passes plain string props — ported as
+ *   `string` props (title rendered as plain text via Heading, the rest via
+ *   `set:html`), matching Fieldset's `fields` precedent.
+ * - links: Callout links: { text, url, isNewWindow, isExternal }.
+ * - class: Additional CSS classes.
+ * - ...rest: Additional HTML attributes, spread onto the root element.
+ *
+ * Note: `callout.twig`'s `links_block` builds each link via `@atoms/button`
+ * (kind 'link', type 'primary' for the first, 'secondary' for the rest),
+ * feeding the array to `@base/item-list/item-list.twig` — same
+ * "single string items target" limitation as Attachment/Breadcrumb/Grid.
+ * The `<ul>` wrapper ItemList would produce is inlined directly (its class
+ * list is deterministic) with real `Button` components as children.
+ */
 import Heading from '@civictheme/atoms/Heading.astro';
-import ItemList from '@civictheme/base/ItemList.astro';
 import Paragraph from '@civictheme/atoms/Paragraph.astro';
+import Button from '@civictheme/atoms/Button.astro';
 
 interface Props {
   theme?: 'light' | 'dark';
-  verticalSpacing?: string;
-  class?: string;
+  verticalSpacing?: 'top' | 'bottom' | 'both';
+  title?: string;
+  content?: string;
+  contentTop?: string;
+  contentBottom?: string;
   links?: Array<{ text?: string; url?: string; isNewWindow?: boolean; isExternal?: boolean }>;
+  class?: string;
   [key: string]: unknown;
 }
-const { theme = 'light', verticalSpacing, class: className = '', links, ...rest } = Astro.props;
----
-<!-- TWIG:
-{% set vertical_spacing_class = vertical_spacing in ['top', 'bottom', 'both'] ? 'ct-vertical-spacing-inset--%s'|format(vertical_spacing) : '' %}
-{% set theme_class = 'ct-theme-%s'|format(theme|default('light')) %}
-{% set modifier_class = '%s %s %s'|format(theme_class, vertical_spacing_class, modifier_class|default('')) %}
 
-<div class="ct-callout {{ modifier_class -}}" {% if attributes is defined and attributes is not null %}{{- attributes -}}{% endif %}>
+const {
+  theme = 'light',
+  verticalSpacing,
+  title,
+  content,
+  contentTop,
+  contentBottom,
+  links,
+  class: className = '',
+  ...rest
+} = Astro.props;
+
+const verticalSpacingClass = (['top', 'bottom', 'both'] as const).includes(verticalSpacing as any)
+  ? `ct-vertical-spacing-inset--${verticalSpacing}`
+  : '';
+
+const classes = ['ct-callout', `ct-theme-${theme}`, verticalSpacingClass, className].filter(Boolean).join(' ');
+
+const linkList = links ?? [];
+---
+
+<div class={classes} {...rest}>
   <div class="container">
     <div class="row">
       <div class="col-xxs-12">
         <div class="ct-callout__wrapper">
-          {% block content_top_block %}
-            {% if content_top is not empty %}
-              <div class="ct-callout__content-top">
-                {{- content_top -}}
-              </div>
-            {% endif %}
-          {% endblock %}
-
-          {% block content_block %}
-            {% if title is not empty or content is not empty %}
+          {contentTop && (
+            <Fragment>
+              <div class="ct-callout__content-top" set:html={contentTop} />{' '}
+            </Fragment>
+          )}
+          {(title || content) && (
+            <Fragment>
               <div class="ct-callout__inner">
-                {% if title %}
-                  {% include '@atoms/heading/heading.twig' with {
-                    content: title,
-                    level: 4,
-                    theme: theme,
-                    modifier_class: 'ct-callout__title',
-                  } only %}
-                {% endif %}
-
-                {% if content is not empty %}
-                  {% include '@atoms/paragraph/paragraph.twig' with {
-                    theme: theme,
-                    content: content,
-                    no_margin: true,
-                    modifier_class: 'ct-callout__content',
-                  } only %}
-                {% endif %}
-              </div>
-            {% endif %}
-          {% endblock %}
-
-          {% block links_block %}
-            {% set link_items = [] %}
-            {% for link in links %}
-              {%- set link %}
-                {% include '@atoms/button/button.twig' with {
-                  theme: theme,
-                  kind: 'link',
-                  type: loop.index > 1 ? 'secondary' : 'primary',
-                  text: link.text,
-                  url: link.url,
-                  is_external: link.is_external,
-                  is_new_window: link.is_new_window,
-                } only %}
-              {% endset -%}
-              {% set link_items = link_items|merge([link]) %}
-            {% endfor %}
-
-            {% include '@base/item-list/item-list.twig' with {
-              items: link_items,
-              size: 'small',
-              modifier_class: 'ct-callout__links',
-            } only %}
-          {% endblock %}
-
-          {% block content_bottom_block %}
-            {% if content_bottom is not empty %}
-              <div class="ct-callout__content-bottom">
-                {{- content_bottom -}}
-              </div>
-            {% endif %}
-          {% endblock %}
+                {title && <Heading content={title} level={4} theme={theme} class="ct-callout__title" />}
+                {title && content && ' '}
+                {content && <Paragraph theme={theme} content={content} noMargin class="ct-callout__content" />}
+              </div>{' '}
+            </Fragment>
+          )}
+          {linkList.length > 0 && (
+            <ul class="ct-item-list ct-item-list--horizontal ct-item-list--small ct-callout__links">
+              {linkList.map((link, i) => (
+                <Fragment>
+                  {i > 0 && ' '}
+                  <li class="ct-item-list__item">
+                    <Button
+                      theme={theme}
+                      kind="link"
+                      type={i > 0 ? 'secondary' : 'primary'}
+                      text={link.text}
+                      url={link.url}
+                      isExternal={link.isExternal}
+                      isNewWindow={link.isNewWindow}
+                    />
+                  </li>
+                </Fragment>
+              ))}
+            </ul>
+          )}
+          {contentBottom && (
+            <Fragment>
+              {' '}
+              <div class="ct-callout__content-bottom" set:html={contentBottom} />
+            </Fragment>
+          )}
         </div>
       </div>
     </div>
   </div>
 </div>
--->

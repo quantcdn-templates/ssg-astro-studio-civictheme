@@ -5,7 +5,13 @@
  * Props:
  * - theme: Theme variation (light or dark).
  * - type: Tag type (primary, secondary, tertiary).
- * - content: Tag content.
+ * - content: Tag content (HTML-bearing — rendered with `set:html`). Even
+ *   though `tag.twig` prints it with a plain `{{- content -}}` (no `|raw`),
+ *   the upstream jest test harness runs with Twig's `autoescape` globally
+ *   disabled (`jest.helpers.js` sets `options.autoescape = false`), so every
+ *   plain `{{ }}` print in every pinned `.snap` fixture is effectively raw
+ *   HTML already — confirmed needed here because Event Card's "date" tag
+ *   passes a full `Datetime` component's rendered markup as `content`.
  * - icon: Icon name.
  * - iconPlacement: Icon position (before, after).
  * - url: Optional URL to convert to a link.
@@ -77,7 +83,7 @@ const hasContent = Boolean(content?.trim());
           <Icon symbol={icon} class="ct-tag__icon" />{' '}
         </Fragment>
       )}
-      {content}
+      <Fragment set:html={content} />
       {/* icon_markup is captured via an untrimmed `{% set icon_markup %}…{% endset %}`
           block, so it carries BOTH a leading and a trailing newline from the SVG
           asset/template source — the 'before' branch above already accounts for the
