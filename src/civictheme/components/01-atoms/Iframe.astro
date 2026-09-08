@@ -1,0 +1,56 @@
+---
+/**
+ * CivicTheme Iframe component.
+ *
+ * Props:
+ * - theme: Theme variation (light or dark).
+ * - url: Iframe URL.
+ * - width: Iframe width.
+ * - height: Iframe height.
+ * - verticalSpacing: Vertical spacing position (top, bottom, both).
+ * - withBackground: Whether to include a background.
+ * - class: Additional CSS classes.
+ * - ...rest: Additional HTML attributes, spread onto the root <iframe>.
+ *
+ * Note: unlike the other atoms, upstream's iframe.twig has no `{% if %}`
+ * guard around the root element — it always renders, even with an empty
+ * `url`. This port matches that (no gating on `url`).
+ */
+interface Props {
+  theme?: 'light' | 'dark';
+  url?: string;
+  width?: number | null;
+  height?: number | null;
+  verticalSpacing?: 'top' | 'bottom' | 'both';
+  withBackground?: boolean;
+  class?: string;
+  [key: string]: unknown;
+}
+
+const {
+  theme = 'light',
+  url,
+  width,
+  height,
+  verticalSpacing,
+  withBackground,
+  class: className = '',
+  ...rest
+} = Astro.props;
+
+const verticalSpacingClass = (['top', 'bottom', 'both'] as const).includes(verticalSpacing as any)
+  ? `ct-vertical-spacing-inset--${verticalSpacing}`
+  : '';
+const classes = [
+  'ct-iframe',
+  `ct-theme-${theme}`,
+  verticalSpacingClass,
+  withBackground && 'ct-iframe--with-background',
+  className,
+]
+  .filter(Boolean)
+  .join(' ');
+---
+
+<iframe class={classes} src={url || undefined} width={width || undefined} height={height || undefined} {...rest}
+></iframe>

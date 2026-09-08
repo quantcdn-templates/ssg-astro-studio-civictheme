@@ -1,0 +1,66 @@
+---
+/**
+ * CivicTheme Input component.
+ *
+ * Props:
+ * - theme: Theme variation (light or dark).
+ * - type: Input type (text, password, email, etc.).
+ * - name: DOM name (required).
+ * - id: DOM id.
+ * - value: The input value.
+ * - placeholder: Placeholder text.
+ * - isInvalid: Whether the input is invalid.
+ * - isDisabled: Whether the input is disabled.
+ * - isRequired: Whether the input is required.
+ * - class: Additional CSS classes.
+ * - ...rest: Additional HTML attributes, spread onto the root <input>.
+ */
+interface Props {
+  theme?: 'light' | 'dark';
+  type?: string;
+  name?: string;
+  id?: string;
+  value?: string;
+  placeholder?: string;
+  isInvalid?: boolean;
+  isDisabled?: boolean;
+  isRequired?: boolean;
+  class?: string;
+  [key: string]: unknown;
+}
+
+const {
+  theme = 'light',
+  type,
+  name,
+  id,
+  value,
+  placeholder,
+  isInvalid,
+  isDisabled,
+  isRequired,
+  class: className = '',
+  ...rest
+} = Astro.props;
+
+const classes = ['ct-input', `ct-theme-${theme}`, isInvalid && 'ct-input--is-invalid', className]
+  .filter(Boolean)
+  .join(' ');
+---
+
+{
+  name && (
+    <input
+      type={(type ?? '') as any}
+      class={classes}
+      name={name}
+      value={value || undefined}
+      id={id || undefined}
+      disabled={isDisabled || undefined}
+      required={isRequired || undefined}
+      aria-invalid={isInvalid ? 'true' : undefined}
+      placeholder={placeholder || undefined}
+      {...rest}
+    />
+  )
+}

@@ -1,0 +1,46 @@
+---
+/**
+ * CivicTheme Image component.
+ *
+ * Props:
+ * - theme: Theme variation (light or dark).
+ * - url: Image URL.
+ * - alt: Image alt text.
+ * - width: Image width.
+ * - height: Image height.
+ * - class: Additional CSS classes.
+ * - ...rest: Additional HTML attributes, spread onto the root <img>.
+ *
+ * Note: `alt` is always rendered (even as `alt=""` when not supplied) —
+ * upstream's twig has no `{% if %}` guard around the `alt` attribute itself,
+ * only around the whole `<img>` (gated on `url`). The `alt == '""'` Drupal
+ * edge case (a literal two-character string) also collapses to empty.
+ */
+interface Props {
+  theme?: 'light' | 'dark';
+  url?: string;
+  alt?: string;
+  width?: number | null;
+  height?: number | null;
+  class?: string;
+  [key: string]: unknown;
+}
+
+const { theme = 'light', url, alt, width, height, class: className = '', ...rest } = Astro.props;
+
+const classes = ['ct-image', `ct-theme-${theme}`, className].filter(Boolean).join(' ');
+const resolvedAlt = alt === '""' ? '' : (alt ?? '');
+---
+
+{
+  url && (
+    <img
+      class={classes}
+      src={url}
+      alt={resolvedAlt}
+      width={width || undefined}
+      height={height || undefined}
+      {...rest}
+    />
+  )
+}
