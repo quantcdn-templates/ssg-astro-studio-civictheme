@@ -1,4 +1,18 @@
 ---
+/**
+ * CivicTheme Fast Fact Card component.
+ *
+ * Props:
+ * - theme: Theme variation (light or dark).
+ * - image: Image data: { url, alt }.
+ * - title: Title text for the card.
+ * - summary: Summary text content (HTML-bearing).
+ * - link: Link object for making the title clickable: { url, isNewWindow }.
+ * - isTitleClick: Whether to make only the title clickable instead of the
+ *   whole card.
+ * - class: Additional CSS classes.
+ * - ...rest: Additional HTML attributes, spread onto the root element.
+ */
 import Image from '@civictheme/atoms/Image.astro';
 import Paragraph from '@civictheme/atoms/Paragraph.astro';
 
@@ -12,53 +26,42 @@ interface Props {
   class?: string;
   [key: string]: unknown;
 }
+
 const { theme = 'light', image, title, summary, link, isTitleClick, class: className = '', ...rest } = Astro.props;
+
+const withLink = Boolean(link?.url);
+const isCardClickable = withLink && !isTitleClick;
+
+const classes = [
+  'ct-fast-fact-card',
+  `ct-theme-${theme}`,
+  isCardClickable && 'ct-fast-fact-card--card-clickable',
+  className,
+]
+  .filter(Boolean)
+  .join(' ');
 ---
-<!-- TWIG:
-{% set with_link = link is not empty and link.url is defined and link.url is not empty %}
-{% set is_card_clickable = with_link and is_title_click is empty %}
-{% set card_clickable_class = is_card_clickable ? 'ct-fast-fact-card--card-clickable' : '' %}
-{% set theme_class = 'ct-theme-%s'|format(theme|default('light')) %}
-{% set modifier_class = '%s %s %s'|format(theme_class, card_clickable_class, modifier_class|default('')) %}
 
-<div class="ct-fast-fact-card {{ modifier_class -}}" {% if attributes is defined and attributes is not null %}{{- attributes -}}{% endif %}>
-  {% block image_block %}
-    {% if image and image.url %}
+<div class={classes} {...rest}>
+  {image?.url && (
+    <Fragment>
       <div class="ct-fast-fact-card__image">
-        {% include '@atoms/image/image.twig' with {
-          theme: theme,
-          url: image.url,
-          alt: image.alt|default(''),
-        } only %}
-      </div>
-    {% endif %}
-  {% endblock %}
-
-  {% block title_block %}
-    {% if title is not empty %}
+        <Image theme={theme} url={image.url} alt={image.alt ?? ''} />
+      </div>{' '}
+    </Fragment>
+  )}
+  {title && (
+    <Fragment>
       <div class="ct-fast-fact-card__title">
-        {% if with_link %}
-          <a
-            class="ct-fast-fact-card__title-link"
-            href="{{ link.url }}"
-            {% if link.is_new_window %}target="_blank"{% endif %}
-          >{{ title }}</a>
-        {% else %}
-          {{ title }}
-        {% endif %}
-      </div>
-    {% endif %}
-  {% endblock %}
-
-  {% block summary_block %}
-    {% if summary is not empty %}
-      {% include '@atoms/paragraph/paragraph.twig' with {
-        theme: theme,
-        content: summary,
-        size: 'large',
-        modifier_class: 'ct-fast-fact-card__summary',
-      } only %}
-    {% endif %}
-  {% endblock %}
+        {withLink ? (
+          <a class="ct-fast-fact-card__title-link" href={link?.url} target={link?.isNewWindow ? '_blank' : undefined}>
+            {title}
+          </a>
+        ) : (
+          title
+        )}
+      </div>{' '}
+    </Fragment>
+  )}
+  {summary && <Paragraph theme={theme} content={summary} size="large" class="ct-fast-fact-card__summary" />}
 </div>
--->
