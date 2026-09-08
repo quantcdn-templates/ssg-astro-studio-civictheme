@@ -1,0 +1,48 @@
+---
+/**
+ * CivicTheme Content Link component.
+ *
+ * Props:
+ * - theme: Theme variation (light or dark).
+ * - text: Link text.
+ * - url: Link URL.
+ * - title: Link title.
+ * - isNewWindow: Whether to open in a new window.
+ * - isExternal: Whether the link is external.
+ * - class: Additional CSS classes.
+ * - ...rest: Additional HTML attributes, spread onto the root <a>.
+ */
+import TextIcon from '@civictheme/base/TextIcon.astro';
+
+interface Props {
+  theme?: 'light' | 'dark';
+  text?: string;
+  url?: string;
+  title?: string;
+  isNewWindow?: boolean;
+  isExternal?: boolean;
+  class?: string;
+  [key: string]: unknown;
+}
+
+const { theme = 'light', text, url, title, isNewWindow, isExternal, class: className = '', ...rest } = Astro.props;
+
+const classes = ['ct-content-link', `ct-theme-${theme}`, isExternal && 'ct-content-link--external', className]
+  .filter(Boolean)
+  .join(' ');
+---
+
+{
+  text && (
+    <a
+      class={classes}
+      href={url || undefined}
+      title={title || undefined}
+      target={isNewWindow ? '_blank' : undefined}
+      aria-label={isNewWindow ? 'Opens in a new tab' : undefined}
+      {...rest}
+    >
+      <TextIcon text={text} isNewWindow={isNewWindow} isExternal={isExternal} />
+    </a>
+  )
+}

@@ -139,8 +139,8 @@ describe('Menu (fidelity gaps, no upstream snapshot)', () => {
         '<li class="ct-menu__item ct-menu__item--level-0">' +
         '<a class="ct-link ct-theme-light ct-link--external ct-menu__item__link" ' +
         'href="https://example.com" title="Example Site" target="_blank">' +
-        '<span class="ct-text-icon__text">Example </span>' +
-        `<span class="ct-text-icon__group"><span class="ct-text-icon__text">Site</span> ${iconHtml}</span>` +
+        '<span class="ct-text-icon__text">Example </span> ' +
+        `<span class="ct-text-icon__group"><span class="ct-text-icon__text">Site</span> ${iconHtml}</span> ` +
         '<span class="ct-visually-hidden">(Opens in a new tab/window)</span>' +
         '</a></li></ul>'
     );

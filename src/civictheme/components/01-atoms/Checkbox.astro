@@ -1,0 +1,84 @@
+---
+/**
+ * CivicTheme Checkbox component.
+ *
+ * Props:
+ * - theme: Theme variation (light or dark).
+ * - name: DOM name (required).
+ * - id: DOM id (required).
+ * - value: DOM value.
+ * - label: Label content.
+ * - isChecked: Whether the checkbox is checked.
+ * - isRequired: Whether the checkbox is required.
+ * - isInvalid: Whether the checkbox is invalid.
+ * - isDisabled: Whether the checkbox is disabled.
+ * - class: Additional CSS classes.
+ * - ...rest: Additional HTML attributes, spread onto the root <input>.
+ *
+ * Note: upstream's `@atoms/label/label.twig` include for the checkbox's
+ * label (fixed to the plain `tag: 'label'`, non-required case — Checkbox
+ * never passes `is_required`/`required_text` to it) is inlined here rather
+ * than imported, since `Label` (01-atoms) is out of this task's scope — see
+ * PORTING.md, matching the precedent set by Menu inlining Link.
+ */
+interface Props {
+  theme?: 'light' | 'dark';
+  name?: string;
+  id?: string;
+  value?: string;
+  label?: string;
+  isChecked?: boolean;
+  isRequired?: boolean;
+  isInvalid?: boolean;
+  isDisabled?: boolean;
+  class?: string;
+  [key: string]: unknown;
+}
+
+const {
+  theme = 'light',
+  name,
+  id,
+  value,
+  label,
+  isChecked,
+  isRequired,
+  isInvalid,
+  isDisabled,
+  class: className = '',
+  ...rest
+} = Astro.props;
+
+const themeClass = `ct-theme-${theme}`;
+const classes = ['ct-checkbox', themeClass, isInvalid && 'ct-checkbox--is-invalid', className]
+  .filter(Boolean)
+  .join(' ');
+const labelClasses = ['ct-label', themeClass, 'ct-label--small', 'ct-checkbox__label'].filter(Boolean).join(' ');
+---
+
+{
+  name && id && (
+    <Fragment>
+      <input
+        type="checkbox"
+        class={classes}
+        name={name}
+        value={value ?? ''}
+        id={id}
+        checked={isChecked || undefined}
+        required={isRequired || undefined}
+        disabled={isDisabled || undefined}
+        aria-invalid={isInvalid ? 'true' : undefined}
+        {...rest}
+      />
+      {label && (
+        <Fragment>
+          {' '}
+          <label class={labelClasses} for={id}>
+            {label}
+          </label>
+        </Fragment>
+      )}
+    </Fragment>
+  )
+}

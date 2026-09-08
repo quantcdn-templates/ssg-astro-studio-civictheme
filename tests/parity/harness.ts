@@ -139,6 +139,46 @@ function collapseText(s: string): string {
   return s.replace(/\s+/g, ' ');
 }
 
+// HTML boolean attributes: presence alone conveys their meaning to a
+// browser, so `checked`, `checked=""` and `checked="checked"` are all
+// exactly equivalent. Astro's own renderer (`htmlBooleanAttributes` in
+// astro/dist/runtime/server/render/util.js) always emits these bare when
+// truthy, regardless of what string value a component passes in — so an
+// Astro port can never reproduce a `.snap` fixture's literal
+// `disabled="disabled"` / `checked="checked"` text (only Twig, running
+// outside that renderer, can). Normalising every boolean attribute's value
+// to '' on both sides (so only its presence is compared) matches real HTML
+// semantics and is the only way parity can hold for these attributes.
+const BOOLEAN_ATTRS = new Set([
+  'allowfullscreen',
+  'async',
+  'autofocus',
+  'autoplay',
+  'checked',
+  'controls',
+  'default',
+  'defer',
+  'disabled',
+  'disablepictureinpicture',
+  'disableremoteplayback',
+  'formnovalidate',
+  'inert',
+  'loop',
+  'multiple',
+  'muted',
+  'nomodule',
+  'novalidate',
+  'open',
+  'playsinline',
+  'readonly',
+  'required',
+  'reversed',
+  'scoped',
+  'seamless',
+  'selected',
+  'itemscope',
+]);
+
 export function normaliseHtml(html: string): string {
   const { document } = parseHTML(`<!DOCTYPE html><html><body>${html}</body></html>`);
   const walk = (node: any): string => {
@@ -154,10 +194,14 @@ export function normaliseHtml(html: string): string {
       .filter((a: any) => !a.name.startsWith('data-astro-cid-'))
       .map(
         (a: any) =>
-          [a.name, a.name === 'class' ? a.value.split(/\s+/).filter(Boolean).sort().join(' ') : a.value] as [
-            string,
-            string,
-          ]
+          [
+            a.name,
+            a.name === 'class'
+              ? a.value.split(/\s+/).filter(Boolean).sort().join(' ')
+              : BOOLEAN_ATTRS.has(a.name.toLowerCase())
+                ? ''
+                : a.value,
+          ] as [string, string]
       )
       .sort(([a], [b]) => a.localeCompare(b))
       .map(([k, v]) => (v === '' ? k : `${k}="${v}"`))

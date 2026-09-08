@@ -65,7 +65,11 @@ const displayText = showFullText ? text : `${textStart} `;
   hasIconOrExternal ? (
     text ? (
       <Fragment>
-        {iconPlacement === 'before' && resolvedIcon && <Icon symbol={resolvedIcon} class={iconClass} />}
+        {iconPlacement === 'before' && resolvedIcon && (
+          <Fragment>
+            <Icon symbol={resolvedIcon} class={iconClass} />{' '}
+          </Fragment>
+        )}
         <span class="ct-text-icon__text" set:html={displayText} />
         {showFullText ? (
           <Fragment>
@@ -74,11 +78,14 @@ const displayText = showFullText ? text : `${textStart} `;
             {isExternal && !iconSingleOnly && <Icon symbol="upper-right-arrow" />}
           </Fragment>
         ) : (
-          <span class="ct-text-icon__group">
-            <span class="ct-text-icon__text">{textEnd}</span>{' '}
-            {iconPlacement === 'after' && resolvedIcon && <Icon symbol={resolvedIcon} class={iconClass} />}
-            {isExternal && !iconSingleOnly && <Icon symbol="upper-right-arrow" />}
-          </span>
+          <Fragment>
+            {' '}
+            <span class="ct-text-icon__group">
+              <span class="ct-text-icon__text">{textEnd}</span>{' '}
+              {iconPlacement === 'after' && resolvedIcon && <Icon symbol={resolvedIcon} class={iconClass} />}
+              {isExternal && !iconSingleOnly && <Icon symbol="upper-right-arrow" />}
+            </span>
+          </Fragment>
         )}
       </Fragment>
     ) : (
@@ -88,4 +95,11 @@ const displayText = showFullText ? text : `${textStart} `;
     <span class="ct-text-icon__text" set:html={text} />
   )
 }
-{isNewWindow && <span class="ct-visually-hidden">(Opens in a new tab/window)</span>}
+{
+  isNewWindow && (
+    <Fragment>
+      {' '}
+      <span class="ct-visually-hidden">(Opens in a new tab/window)</span>
+    </Fragment>
+  )
+}

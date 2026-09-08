@@ -1,0 +1,135 @@
+---
+/**
+ * CivicTheme Button component.
+ *
+ * Props:
+ * - theme: Theme variation (light or dark).
+ * - kind: Button kind (button, link, reset, submit).
+ * - type: Button type (primary, secondary, tertiary).
+ * - size: Button size (large, regular, small).
+ * - icon: Icon name.
+ * - iconPlacement: Icon position (before or after).
+ * - iconGroupDisabled: Disable icon and last word grouping.
+ * - iconSingleOnly: Only show 1 icon (external takes preference over icon).
+ * - text: Button text.
+ * - url: URL for the link button (kind = link).
+ * - isNewWindow: Open in a new window.
+ * - isExternal: Indicates if the link is external.
+ * - isDisabled: Indicates if the button is disabled.
+ * - isDismissable: Indicates if the button can be dismissed.
+ * - class: Additional CSS classes.
+ * - ...rest: Additional HTML attributes, spread onto the root element.
+ */
+import TextIcon from '@civictheme/base/TextIcon.astro';
+
+interface Props {
+  theme?: 'light' | 'dark';
+  kind?: 'button' | 'link' | 'reset' | 'submit';
+  type?: 'primary' | 'secondary' | 'tertiary' | null;
+  size?: 'large' | 'regular' | 'small';
+  icon?: string | null;
+  iconPlacement?: 'before' | 'after' | null;
+  iconGroupDisabled?: boolean | null;
+  iconSingleOnly?: boolean | null;
+  text?: string | null;
+  url?: string | null;
+  isNewWindow?: boolean | null;
+  isExternal?: boolean | null;
+  isDisabled?: boolean | null;
+  isDismissable?: boolean | null;
+  class?: string;
+  [key: string]: unknown;
+}
+
+const {
+  theme = 'light',
+  kind: kindProp,
+  type: typeProp,
+  size: sizeProp,
+  icon,
+  iconPlacement,
+  iconGroupDisabled,
+  iconSingleOnly,
+  text,
+  url,
+  isNewWindow,
+  isExternal: isExternalProp,
+  isDisabled,
+  isDismissable,
+  class: className = '',
+  ...rest
+} = Astro.props;
+
+const kind = (['button', 'link', 'reset', 'submit'] as const).includes(kindProp as any) ? kindProp! : 'button';
+const type = (['primary', 'secondary', 'tertiary'] as const).includes(typeProp as any) ? typeProp : null;
+const size = (['large', 'regular', 'small'] as const).includes(sizeProp as any) ? sizeProp! : 'regular';
+const isExternal = isExternalProp ?? false;
+
+const classes = [
+  'ct-button',
+  `ct-theme-${theme}`,
+  type && `ct-button--${type}`,
+  `ct-button--${kind}`,
+  `ct-button--${size}`,
+  isDismissable && 'ct-button--dismiss',
+  isExternal && 'ct-button--external',
+  className,
+]
+  .filter(Boolean)
+  .join(' ');
+---
+
+{
+  kind === 'button' ? (
+    <button
+      class={classes}
+      data-component-name="button"
+      disabled={isDisabled ? 'disabled' : undefined}
+      aria-disabled={isDisabled ? 'true' : undefined}
+      {...rest}
+    >
+      <TextIcon
+        text={text}
+        isNewWindow={isNewWindow}
+        isExternal={isExternal}
+        icon={icon}
+        iconPlacement={iconPlacement}
+        iconGroupDisabled={iconGroupDisabled ?? false}
+        iconSingleOnly={iconSingleOnly ?? false}
+        iconClass="ct-button__icon"
+      />
+    </button>
+  ) : kind === 'link' ? (
+    <a
+      class={classes}
+      role="button"
+      data-component-name="button"
+      href={url || undefined}
+      aria-disabled={isDisabled ? 'true' : undefined}
+      target={isNewWindow ? '_blank' : undefined}
+      {...({ disabled: isDisabled ? 'disabled' : undefined } as Record<string, unknown>)}
+      {...rest}
+    >
+      <TextIcon
+        text={text}
+        isNewWindow={isNewWindow}
+        isExternal={isExternal}
+        icon={icon}
+        iconPlacement={iconPlacement}
+        iconGroupDisabled={iconGroupDisabled ?? false}
+        iconSingleOnly={iconSingleOnly ?? false}
+        iconClass="ct-button__icon"
+      />
+    </a>
+  ) : (
+    <input
+      type={kind}
+      class={classes}
+      data-component-name="button"
+      value={text}
+      disabled={isDisabled ? 'disabled' : undefined}
+      aria-disabled={isDisabled ? 'true' : undefined}
+      {...rest}
+    />
+  )
+}

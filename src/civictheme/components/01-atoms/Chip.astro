@@ -1,0 +1,114 @@
+---
+/**
+ * CivicTheme Chip component.
+ *
+ * Props:
+ * - theme: Theme variation (light or dark).
+ * - kind: Chip kind (default, input, link).
+ * - size: Chip size (large, regular, small).
+ * - content: Chip text.
+ * - url: URL if kind = link.
+ * - label: Aria label if kind = link.
+ * - isSelected: Whether the chip is selected (for filter chips).
+ * - isMultiple: Whether multiple selection is allowed when kind = input.
+ * - isDismissible: Whether a close icon shows when kind is not input.
+ * - groupParent: Additional parent selector for radio group when kind = input.
+ * - class: Additional CSS classes.
+ * - ...rest: Additional HTML attributes. Spread onto the root <input> when
+ *   kind = input, otherwise onto the root <a>/<span> — mirrors upstream's
+ *   `attributes` target, which is the inner input only for the input kind.
+ *
+ * Note: upstream's test passes `is_disabled` but chip.twig never reads it —
+ * no `isDisabled` prop is declared here, per the fidelity rule that a
+ * declared prop must be read and rendered. See PORTING.md.
+ */
+import TextIcon from '@civictheme/base/TextIcon.astro';
+
+interface Props {
+  theme?: 'light' | 'dark';
+  kind?: 'default' | 'input' | 'link';
+  size?: 'large' | 'regular' | 'small';
+  content?: string;
+  url?: string;
+  label?: string;
+  isSelected?: boolean;
+  isMultiple?: boolean;
+  isDismissible?: boolean;
+  groupParent?: string;
+  class?: string;
+  [key: string]: unknown;
+}
+
+const {
+  theme = 'light',
+  kind: kindProp,
+  size: sizeProp,
+  content,
+  url,
+  label,
+  isSelected,
+  isMultiple,
+  isDismissible,
+  groupParent,
+  class: className = '',
+  ...rest
+} = Astro.props;
+
+const kind = (['default', 'input', 'link'] as const).includes(kindProp as any) ? kindProp! : 'default';
+const size = (['large', 'regular', 'small'] as const).includes(sizeProp as any) ? sizeProp! : 'regular';
+
+const classes = [
+  'ct-chip',
+  `ct-theme-${theme}`,
+  `ct-chip--${kind}`,
+  `ct-chip--${size}`,
+  isSelected && 'active',
+  isMultiple && 'ct-chip--multiple',
+  className,
+]
+  .filter(Boolean)
+  .join(' ');
+---
+
+{
+  content &&
+    (kind === 'input' ? (
+      <label
+        class={classes}
+        data-component-name="chip"
+        data-chip-dismiss={isMultiple ? '' : undefined}
+        data-chip-group-parent={groupParent || undefined}
+      >
+        <input
+          class="ct-chip__input"
+          type={isMultiple ? 'checkbox' : 'radio'}
+          checked={isSelected ? 'checked' : undefined}
+          {...rest}
+        />{' '}
+        <TextIcon
+          text={content}
+          icon={isDismissible || isMultiple ? 'cancel' : null}
+          iconPlacement="after"
+          iconClass="ct-chip__dismiss"
+        />
+      </label>
+    ) : kind === 'link' && url ? (
+      <a href={url} class={classes} aria-label={label || undefined} {...rest}>
+        <TextIcon
+          text={content}
+          icon={isDismissible || isMultiple ? 'cancel' : null}
+          iconPlacement="after"
+          iconClass="ct-chip__dismiss"
+        />
+      </a>
+    ) : (
+      <span class={classes} data-component-name="chip" {...rest}>
+        <TextIcon
+          text={content}
+          icon={isDismissible || isMultiple ? 'cancel' : null}
+          iconPlacement="after"
+          iconClass="ct-chip__dismiss"
+        />
+      </span>
+    ))
+}
