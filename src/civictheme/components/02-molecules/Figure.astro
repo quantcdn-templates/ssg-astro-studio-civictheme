@@ -1,0 +1,41 @@
+---
+import Icon from '@civictheme/base/Icon.astro';
+import Image from '@civictheme/atoms/Image.astro';
+
+interface Props {
+  theme?: 'light' | 'dark';
+  class?: string;
+  url?: string;
+  alt?: string;
+  width?: number | null;
+  height?: number | null;
+  [key: string]: unknown;
+}
+const { theme = 'light', class: className = '', url, alt, width, height, ...rest } = Astro.props;
+---
+<!-- TWIG:
+{% set theme_class = 'ct-theme-%s'|format(theme|default('light')) %}
+{% set modifier_class = '%s %s'|format(theme_class, modifier_class|default('')) %}
+
+{% if url is not empty %}
+  <figure class="ct-figure {{ modifier_class -}}" {% if attributes is defined and attributes is not null %}{{- attributes -}}{% endif %}>
+    {% include '@atoms/image/image.twig' with {
+      theme: theme,
+      url: url,
+      alt: alt,
+      width: width,
+      height: height,
+      modifier_class: 'ct-figure__image',
+    } only %}
+
+    {% if caption is not empty %}
+      <figcaption class="ct-figure__caption">
+        {% include '@base/icon/icon.twig' with {
+          symbol: 'image',
+        } only %}
+        {{ caption }}
+      </figcaption>
+    {% endif %}
+  </figure>
+{% endif %}
+-->

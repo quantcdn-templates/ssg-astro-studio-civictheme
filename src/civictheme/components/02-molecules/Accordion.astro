@@ -1,0 +1,119 @@
+---
+/**
+ * CivicTheme Accordion component.
+ *
+ * Props:
+ * - theme: Theme variation (light or dark).
+ * - expandAll: Whether to expand all panels by default.
+ * - withBackground: Whether to display with a background.
+ * - verticalSpacing: Vertical spacing position (top, bottom, both).
+ * - panels: Accordion panels: { title, content, expanded? }.
+ * - contentTop: Top content (HTML-bearing). Documented as a Slot upstream,
+ *   but the twig body treats it as a plain variable — ported as a `string`
+ *   prop rendered with `set:html`, matching Fieldset's `fields` precedent.
+ * - contentBottom: Bottom content (HTML-bearing), same treatment.
+ * - class: Additional CSS classes.
+ * - ...rest: Additional HTML attributes, spread onto the root element.
+ */
+import Paragraph from '@civictheme/atoms/Paragraph.astro';
+
+interface Props {
+  theme?: 'light' | 'dark';
+  expandAll?: boolean;
+  withBackground?: boolean;
+  verticalSpacing?: 'top' | 'bottom' | 'both';
+  panels?: Array<{ title?: string; content?: string; expanded?: boolean }>;
+  contentTop?: string;
+  contentBottom?: string;
+  class?: string;
+  [key: string]: unknown;
+}
+
+const {
+  theme = 'light',
+  expandAll,
+  withBackground,
+  verticalSpacing,
+  panels,
+  contentTop,
+  contentBottom,
+  class: className = '',
+  ...rest
+} = Astro.props;
+
+const verticalSpacingClass = (['top', 'bottom', 'both'] as const).includes(verticalSpacing as any)
+  ? `ct-vertical-spacing-inset--${verticalSpacing}`
+  : '';
+
+const classes = [
+  'ct-accordion',
+  `ct-theme-${theme}`,
+  verticalSpacingClass,
+  withBackground && 'ct-accordion--with-background',
+  className,
+]
+  .filter(Boolean)
+  .join(' ');
+
+const visiblePanels = (panels ?? []).filter((panel) => panel.title && panel.content);
+---
+
+{
+  (panels ?? []).length > 0 && (
+    <div class={classes} {...rest}>
+      <div class="container">
+        <div class="row">
+          <div class="col-xxs-12">
+            {contentTop && (
+              <Fragment>
+                <div class="ct-accordion__content-top" set:html={contentTop} />{' '}
+              </Fragment>
+            )}
+            <div class="ct-accordion__content">
+              <ul class="ct-accordion__panels">
+                {visiblePanels.map((panel, i) => {
+                  const isExpanded = panel.expanded === true || expandAll === true;
+                  return (
+                    <Fragment>
+                      {i > 0 && ' '}
+                      <li
+                      class="ct-accordion__panels__panel"
+                      data-collapsible
+                      data-collapsible-collapsed={!isExpanded ? '' : undefined}
+                      data-collapsible-duration="250"
+                      data-collapsible-trigger-wide
+                    >
+                      <div class="ct-accordion__panels__panel__header">
+                        <button
+                          class="ct-accordion__panels__panel__header__button"
+                          data-collapsible-trigger
+                          aria-expanded={isExpanded ? 'true' : 'false'}
+                        >
+                          {panel.title}
+                        </button>
+                      </div>{' '}
+                      <div
+                        class="ct-accordion__panels__panel__content"
+                        data-collapsible-panel
+                        aria-hidden={isExpanded ? 'false' : 'true'}
+                      >
+                        <Paragraph theme={theme} content={panel.content} class="ct-accordion__panels__panel__content__inner" />
+                      </div>
+                      </li>
+                    </Fragment>
+                  );
+                })}
+              </ul>
+            </div>
+            {contentBottom && (
+              <Fragment>
+                {' '}
+                <div class="ct-accordion__content-bottom" set:html={contentBottom} />
+              </Fragment>
+            )}
+          </div>
+        </div>
+      </div>
+    </div>
+  )
+}

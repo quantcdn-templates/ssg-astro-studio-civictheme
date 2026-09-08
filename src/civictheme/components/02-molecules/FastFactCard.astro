@@ -1,0 +1,64 @@
+---
+import Image from '@civictheme/atoms/Image.astro';
+import Paragraph from '@civictheme/atoms/Paragraph.astro';
+
+interface Props {
+  theme?: 'light' | 'dark';
+  image?: { url?: string; alt?: string };
+  title?: string;
+  summary?: string;
+  link?: { url?: string; isNewWindow?: boolean };
+  isTitleClick?: boolean;
+  class?: string;
+  [key: string]: unknown;
+}
+const { theme = 'light', image, title, summary, link, isTitleClick, class: className = '', ...rest } = Astro.props;
+---
+<!-- TWIG:
+{% set with_link = link is not empty and link.url is defined and link.url is not empty %}
+{% set is_card_clickable = with_link and is_title_click is empty %}
+{% set card_clickable_class = is_card_clickable ? 'ct-fast-fact-card--card-clickable' : '' %}
+{% set theme_class = 'ct-theme-%s'|format(theme|default('light')) %}
+{% set modifier_class = '%s %s %s'|format(theme_class, card_clickable_class, modifier_class|default('')) %}
+
+<div class="ct-fast-fact-card {{ modifier_class -}}" {% if attributes is defined and attributes is not null %}{{- attributes -}}{% endif %}>
+  {% block image_block %}
+    {% if image and image.url %}
+      <div class="ct-fast-fact-card__image">
+        {% include '@atoms/image/image.twig' with {
+          theme: theme,
+          url: image.url,
+          alt: image.alt|default(''),
+        } only %}
+      </div>
+    {% endif %}
+  {% endblock %}
+
+  {% block title_block %}
+    {% if title is not empty %}
+      <div class="ct-fast-fact-card__title">
+        {% if with_link %}
+          <a
+            class="ct-fast-fact-card__title-link"
+            href="{{ link.url }}"
+            {% if link.is_new_window %}target="_blank"{% endif %}
+          >{{ title }}</a>
+        {% else %}
+          {{ title }}
+        {% endif %}
+      </div>
+    {% endif %}
+  {% endblock %}
+
+  {% block summary_block %}
+    {% if summary is not empty %}
+      {% include '@atoms/paragraph/paragraph.twig' with {
+        theme: theme,
+        content: summary,
+        size: 'large',
+        modifier_class: 'ct-fast-fact-card__summary',
+      } only %}
+    {% endif %}
+  {% endblock %}
+</div>
+-->

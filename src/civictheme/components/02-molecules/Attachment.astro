@@ -1,0 +1,189 @@
+---
+/**
+ * CivicTheme Attachment component.
+ *
+ * Props:
+ * - theme: Theme variation (light or dark).
+ * - title: Attachment title.
+ * - content: Attachment content.
+ * - files: File attachments: { name, ext, url, size, created, changed, icon }.
+ * - verticalSpacing: Vertical spacing position (top, bottom, both).
+ * - withBackground: Whether to display with a background.
+ * - contentTop / contentBottom: Documented as Slots upstream, but the twig
+ *   body treats them as plain variables — ported as `string` props
+ *   rendered with `set:html`, matching Fieldset's `fields` precedent.
+ * - class: Additional CSS classes.
+ * - ...rest: Additional HTML attributes, spread onto the root element.
+ *
+ * Note: `attachment.twig`'s `links_block` builds each file link via an
+ * untrimmed `{% set link %}...{% endset %}` capture (icon include, then a
+ * `<div class="ct-attachment__links__link__wrapper">` with a `@atoms/link`
+ * include and an optional "changed" `@atoms/paragraph` include), then feeds
+ * the array of captured strings to `@base/item-list/item-list.twig`.
+ * ItemList's own Astro port (`ItemList.astro`) only accepts an array of
+ * pre-rendered HTML *strings* as `items`, which can't hold live child
+ * components (Icon/Link/Paragraph) — the same "single string target"
+ * limitation already noted for Grid/Chip's multiple-attributes-targets in
+ * PORTING.md. So the `<ul>`/`<li>` wrapper ItemList would produce is
+ * inlined directly here (its class list is deterministic:
+ * `ct-item-list ct-item-list--vertical ct-item-list--regular
+ * ct-attachment__links`), with real Icon/Link/Paragraph components as
+ * children instead of raw HTML strings.
+ *
+ * Note: `attachment.twig`'s icon include uses
+ * `symbol: file.icon ? file.icon : 'download-file'` (a self-referential
+ * ternary: the same expression on both the condition and the "then"
+ * branch). Verified against upstream's actual Twig.js runtime (ran the
+ * pinned jest test directly, plus an isolated probe template) that this
+ * specific `x ? x : y` shape evaluates to an EMPTY string whenever `x` is
+ * undefined — NOT the `y` fallback — unlike the Elvis form `x ?: y` or the
+ * `x|default(y)` filter, both of which fall back correctly. This is a
+ * genuine upstream Twig.js engine quirk, confirmed empirically (not a
+ * misreading of the twig source), and the pinned "renders with multiple
+ * files" snapshot depends on it: files without an explicit `icon` render
+ * with NO icon at all, never the documented 'download-file' fallback. So
+ * this port renders the icon only `{file.icon && <Icon .../>}`, never
+ * defaulting to 'download-file'.
+ */
+import Heading from '@civictheme/atoms/Heading.astro';
+import Paragraph from '@civictheme/atoms/Paragraph.astro';
+import Link from '@civictheme/atoms/Link.astro';
+import Icon from '@civictheme/base/Icon.astro';
+
+interface Props {
+  theme?: 'light' | 'dark';
+  title?: string;
+  content?: string;
+  files?: Array<{
+    name?: string;
+    ext?: string;
+    url?: string;
+    size?: string;
+    created?: string;
+    changed?: string;
+    icon?: string;
+  }>;
+  verticalSpacing?: 'top' | 'bottom' | 'both';
+  withBackground?: boolean;
+  contentTop?: string;
+  contentBottom?: string;
+  class?: string;
+  [key: string]: unknown;
+}
+
+const {
+  theme = 'light',
+  title,
+  content,
+  files,
+  verticalSpacing,
+  withBackground,
+  contentTop,
+  contentBottom,
+  class: className = '',
+  ...rest
+} = Astro.props;
+
+const verticalSpacingClass = (['top', 'bottom', 'both'] as const).includes(verticalSpacing as any)
+  ? `ct-vertical-spacing-inset--${verticalSpacing}`
+  : '';
+
+const classes = [
+  'ct-attachment',
+  `ct-theme-${theme}`,
+  verticalSpacingClass,
+  withBackground && 'ct-attachment--with-background',
+  className,
+]
+  .filter(Boolean)
+  .join(' ');
+
+const fileList = files ?? [];
+
+// Values are interpolated into a raw HTML string (fed to `Link`'s
+// HTML-bearing `text` prop, per `link_text`'s untrimmed `{% set %}`
+// capture) rather than JSX attribute binding, so `&`/`<`/`>` must be
+// escaped ourselves here (`file.name` is plain text in the twig doc
+// header, autoescaped by Twig's own `{{ file.name }}` print, unlike the
+// literal `<span>` markup around it).
+const escapeText = (v: string) => v.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+
+function linkText(file: { name?: string; ext?: string; size?: string }): string {
+  const name = escapeText(file.name ?? '');
+  const hasExt = Boolean(file.ext);
+  const hasSize = Boolean(file.size);
+  let extension: string | null = null;
+  if (hasExt && hasSize) extension = `(${file.ext}, ${file.size})`;
+  else if (hasExt || hasSize) extension = `(${file.ext || file.size})`;
+  return extension
+    ? `${name} <span class="ct-attachment__links__link__extension">${extension}</span>`
+    : name;
+}
+---
+
+{
+  fileList.length > 0 && (
+    <div class={classes} {...rest}>
+      <div class="container">
+        <div class="row">
+          <div class="col-xxs-12">
+            <div class="ct-attachment__wrapper">
+              {contentTop && (
+                <Fragment>
+                  <div class="ct-attachment__content-top" set:html={contentTop} />{' '}
+                </Fragment>
+              )}
+              {(title || content) && (
+                <Fragment>
+                  <div class="ct-attachment__inner">
+                    {title && <Heading theme={theme} content={title} level={4} class="ct-attachment__title" />}
+                    {title && content && ' '}
+                    {content && <Paragraph theme={theme} content={content} size="small" class="ct-attachment__content" />}
+                  </div>{' '}
+                </Fragment>
+              )}
+              <ul class="ct-item-list ct-item-list--vertical ct-item-list--regular ct-attachment__links">
+                {fileList.map((file, i) => (
+                  <Fragment>
+                    {i > 0 && ' '}
+                    <li class="ct-item-list__item">
+                      {file.icon && (
+                        <Fragment>
+                          <Icon symbol={file.icon} size="large" class="ct-attachment__links__link__icon" />{' '}
+                        </Fragment>
+                      )}
+                      <div class="ct-attachment__links__link__wrapper">
+                        <Link
+                          theme={theme}
+                          text={linkText(file)}
+                          title={`Download ${file.name ?? ''}`}
+                          url={file.url}
+                          class="ct-attachment__links__link"
+                        />
+                        {file.changed && ' '}
+                        {file.changed && (
+                          <Paragraph
+                            theme={theme}
+                            content={`LAST UPDATED: ${file.changed}`}
+                            size="small"
+                            class="ct-attachment__links__link__changed"
+                          />
+                        )}
+                      </div>
+                    </li>
+                  </Fragment>
+                ))}
+              </ul>
+              {contentBottom && (
+                <Fragment>
+                  {' '}
+                  <div class="ct-attachment__content-bottom" set:html={contentBottom} />
+                </Fragment>
+              )}
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  )
+}

@@ -1,0 +1,46 @@
+---
+/**
+ * CivicTheme Back to Top component.
+ *
+ * Props:
+ * - class: Additional CSS classes.
+ * - ...rest: Additional HTML attributes, spread onto the root element.
+ *
+ * Note: `back-to-top.twig`'s `text` is an untrimmed `{%- set text -%}...
+ * {%- endset -%}` capture, but the `-` trim markers on the include tag
+ * inside it DO strip the whitespace immediately around that include, so the
+ * captured value is the visually-hidden span immediately followed by the
+ * `up-arrow` icon's raw SVG markup with no separating space. That string
+ * becomes `Button`'s `text` prop, which (since Button passes no `icon` and
+ * `isExternal` is false) reaches `TextIcon`'s plain `set:html={text}`
+ * branch verbatim. Built directly from the `icons` map here (replicating
+ * `Icon.astro`'s own attribute-injection formula) rather than through a
+ * live `<Icon>` JSX child, since `text` must be a real string, not a node.
+ */
+import Button from '@civictheme/atoms/Button.astro';
+import { icons } from '@civictheme/base/icons';
+
+interface Props {
+  class?: string;
+  [key: string]: unknown;
+}
+
+const { class: className = '', ...rest } = Astro.props;
+
+const classes = ['ct-back-to-top', className].filter(Boolean).join(' ');
+
+const iconSvg = (icons as Record<string, string>)['up-arrow'] ?? '';
+const iconMarkup = iconSvg.replace('<svg ', '<svg class="ct-icon" aria-hidden="true" role="img" ');
+const text = `<span class="ct-visually-hidden">Return focus to the top of the page</span>${iconMarkup}`;
+---
+
+<div class={classes} data-component-name="back-to-top" data-scrollspy data-scrollspy-offset="400" {...rest}>
+  <Button
+    theme="light"
+    kind="link"
+    url="#top"
+    text={text}
+    data-skip-to-target=""
+    class="ct-back-to-top__button"
+  />
+</div>
