@@ -274,6 +274,37 @@ describe('dedentPrettyPrintedHtml', () => {
       expect(html).toContain('</em> has an error');
     });
   });
+
+  describe('one-line self-closing non-void tags (COMPLETE_TAG_RE)', () => {
+    // Regression guard: `COMPLETE_TAG_RE`'s attribute run used to be greedy
+    // (`[^<>]*`), so it swallowed the self-closing `/>` on a one-line tag
+    // like `<svg />` — the `(\/)?` capture group never matched, the tag was
+    // treated as an opening tag with children, and `depth` incremented
+    // permanently with no matching decrement (no `</svg>` line ever
+    // follows a genuinely self-closed element). Every text node after it
+    // then had one extra level of structural indent stripped, eating into
+    // its real leading whitespace. Made the lazy run (`[^<>]*?`) capture the
+    // `/` correctly.
+    it('a one-line <svg /> does not inflate depth: a following text line keeps its own real leading space', () => {
+      const out = dedentPrettyPrintedHtml('<div>\n  <svg />\n   real space text\n</div>');
+      expect(out).toBe('<div><svg /> real space text</div>');
+    });
+
+    it('a one-line <svg /> followed by a sibling element then text: depth still returns to the parent correctly', () => {
+      const out = dedentPrettyPrintedHtml('<div>\n  <svg />\n  <em>\n    Test input\n  </em>\n   has an error\n</div>');
+      expect(out).toBe('<div><svg /><em>Test input</em> has an error</div>');
+    });
+
+    it('a one-line <input ... /> behaves the same as <svg />', () => {
+      const out = dedentPrettyPrintedHtml('<div>\n  <input type="x" />\n   real space text\n</div>');
+      expect(out).toBe('<div><input type="x" /> real space text</div>');
+    });
+
+    it('a one-line <br /> (genuinely void) behaves the same as <svg />', () => {
+      const out = dedentPrettyPrintedHtml('<div>\n  <br />\n   real space text\n</div>');
+      expect(out).toBe('<div><br /> real space text</div>');
+    });
+  });
 });
 
 describe('BOOLEAN_ATTRS normalisation (normaliseHtml)', () => {

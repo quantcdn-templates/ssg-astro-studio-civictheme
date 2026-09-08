@@ -136,7 +136,7 @@ export function fixNonVoidSelfClosingTags(html: string): string {
 const BARE_OPEN_TAG_RE = /^<[a-zA-Z][a-zA-Z0-9-]*$/;
 // A line that is a complete tag (name, optional attributes, and its closing
 // `>`/`/>`) all on one line — e.g. `<br>`, `<div>`, `<input type="text">`.
-const COMPLETE_TAG_RE = /^<([a-zA-Z][a-zA-Z0-9-]*)(?:\s[^<>]*)?(\/)?>$/;
+const COMPLETE_TAG_RE = /^<([a-zA-Z][a-zA-Z0-9-]*)(?:\s[^<>]*?)?\s*(\/)?>$/;
 // A closing tag alone on its own line, e.g. `</div>`.
 const CLOSE_TAG_RE = /^<\/([a-zA-Z][a-zA-Z0-9-]*)>$/;
 // The bracket that closes a *multi-line* open tag's attribute list — printed
