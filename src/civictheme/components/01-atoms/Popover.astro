@@ -1,54 +1,77 @@
 ---
+/**
+ * CivicTheme Popover component.
+ *
+ * Props:
+ * - theme: Theme variation (light or dark).
+ * - trigger: Popover trigger link object ({ text, url, isNewWindow }).
+ * - content: Popover panel content (HTML-bearing). Documented as a Slot
+ *   upstream, but the twig body treats it as a plain variable (passed as a
+ *   string prop in every upstream test) — ported as a `string` prop
+ *   rendered with `set:html`, matching Fieldset's `fields` precedent.
+ * - contentTop: Top popover content (HTML-bearing), same treatment as
+ *   `content`. Not exercised by any upstream snapshot.
+ * - contentBottom: Bottom popover content (HTML-bearing), same treatment.
+ *   Not exercised by any upstream snapshot.
+ * - group: Group name for controlling multiple popovers together.
+ * - class: Additional CSS classes.
+ * - ...rest: Additional HTML attributes, spread onto the root <div>.
+ */
 import Link from '@civictheme/atoms/Link.astro';
 
 interface Props {
   theme?: 'light' | 'dark';
   trigger?: { text?: string; url?: string; isNewWindow?: boolean; isExternal?: boolean };
+  content?: string;
+  contentTop?: string;
+  contentBottom?: string;
   group?: string;
   class?: string;
   [key: string]: unknown;
 }
-const { theme = 'light', trigger, group, class: className = '', ...rest } = Astro.props;
+
+const {
+  theme = 'light',
+  trigger = {},
+  content,
+  contentTop,
+  contentBottom,
+  group = '',
+  class: className = '',
+  ...rest
+} = Astro.props;
+
+const themeClass = `ct-theme-${theme}`;
+const classes = ['ct-popover', themeClass, className].filter(Boolean).join(' ');
 ---
-<!-- TWIG:
-{% set theme_class = 'ct-theme-%s'|format(theme|default('light')) %}
-{% set modifier_class = '%s %s'|format(theme_class, modifier_class|default('')) %}
 
-{% if content is not empty %}
-  <div class="ct-popover {{ modifier_class -}}" data-collapsible data-collapsible-collapsed data-collapsible-group="{{ group|default('') }}" data-collapsible-duration="250" {% if attributes is defined and attributes is not null %}{{- attributes -}}{% endif %}>
-    {% include '@atoms/link/link.twig' with {
-      theme: theme,
-      text: trigger.text,
-      url: trigger.url is defined ? trigger.url : null,
-      is_new_window: trigger.is_new_window,
-      modifier_class: 'ct-popover__link',
-      attributes: create_attribute({'data-collapsible-trigger': '', tabindex: '0'}),
-    } only %}
-
-    <div class="ct-popover__content" data-collapsible-panel>
-      <div class="ct-popover__content__inner">
-
-        {% block content_top_block %}
-          {% if content_top is not empty %}
-            <div class="ct-popover__content-top">
-              {{- content_top -}}
-            </div>
-          {% endif %}
-        {% endblock %}
-
-        {% block content_block %}
-          {{- content -}}
-        {% endblock %}
-
-        {% block content_bottom_block %}
-          {% if content_bottom is not empty %}
-            <div class="ct-popover__content-bottom">
-              {{- content_bottom -}}
-            </div>
-          {% endif %}
-        {% endblock %}
+{
+  content && (
+    <div
+      class={classes}
+      data-collapsible=""
+      data-collapsible-collapsed=""
+      data-collapsible-group={group}
+      data-collapsible-duration="250"
+      {...rest}
+    >
+      <Link
+        theme={theme}
+        text={trigger.text}
+        url={trigger.url}
+        isNewWindow={trigger.isNewWindow}
+        class="ct-popover__link"
+        data-collapsible-trigger=""
+        tabindex="0"
+      />
+      {' '}
+      <div class="ct-popover__content" data-collapsible-panel="">
+        <div class="ct-popover__content__inner">
+          {contentTop && <div class="ct-popover__content-top" set:html={contentTop} />}
+          <Fragment set:html={content} />
+          {contentBottom && <div class="ct-popover__content-bottom" set:html={contentBottom} />}
+        </div>
       </div>
     </div>
-  </div>
-{% endif %}
--->
+  )
+}
