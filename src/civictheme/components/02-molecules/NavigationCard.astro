@@ -1,0 +1,150 @@
+---
+/**
+ * CivicTheme Navigation Card component.
+ *
+ * Props:
+ * - theme: Theme variation (light or dark).
+ * - imageAsIcon: Whether to show the image as an icon.
+ * - image: Card image: { url, alt }.
+ * - link: Link object: { text, url, isNewWindow, isExternal }.
+ * - isTitleClick: Whether to make only the title clickable instead of the
+ *   whole card.
+ * - icon / title / summary / contentTop / imageOver / contentMiddle /
+ *   contentBottom: Documented as Slots upstream, but every upstream test
+ *   passes plain string props — ported as `string` props, ALL rendered
+ *   with `set:html` per this project's autoescape convention, except
+ *   `icon`, which is an icon symbol name, not HTML.
+ * - class: Additional CSS classes.
+ * - ...rest: Additional HTML attributes, spread onto the root element.
+ */
+import Image from '@civictheme/atoms/Image.astro';
+import Paragraph from '@civictheme/atoms/Paragraph.astro';
+import Icon from '@civictheme/base/Icon.astro';
+
+interface Props {
+  theme?: 'light' | 'dark';
+  imageAsIcon?: boolean;
+  image?: { url?: string; alt?: string };
+  link?: { text?: string; url?: string; isNewWindow?: boolean; isExternal?: boolean };
+  isTitleClick?: boolean;
+  icon?: string;
+  title?: string;
+  summary?: string;
+  contentTop?: string;
+  imageOver?: string;
+  contentMiddle?: string;
+  contentBottom?: string;
+  class?: string;
+  [key: string]: unknown;
+}
+
+const {
+  theme = 'light',
+  imageAsIcon,
+  image,
+  link,
+  isTitleClick,
+  icon,
+  title,
+  summary,
+  contentTop,
+  imageOver,
+  contentMiddle,
+  contentBottom,
+  class: className = '',
+  ...rest
+} = Astro.props;
+
+const withImage = Boolean(image?.url);
+const withLink = Boolean(link?.url);
+const isCardClickable = withLink && !isTitleClick;
+
+const classes = [
+  'ct-navigation-card',
+  `ct-theme-${theme}`,
+  withImage && 'ct-navigation-card--with-image',
+  withLink && 'ct-navigation-card--with-link',
+  imageAsIcon && 'ct-navigation-card--image-as-icon',
+  isCardClickable && 'ct-navigation-card--card-clickable',
+  className,
+]
+  .filter(Boolean)
+  .join(' ');
+
+const withIconBlock = Boolean(icon) || (withImage && imageAsIcon);
+---
+
+{
+  title && (
+    <div class={classes} {...rest}>
+      {!imageAsIcon && image?.url && (
+        <Fragment>
+          <div class="ct-navigation-card__image">
+            <Image theme={theme} url={image.url} alt={image.alt} />
+            {imageOver && (
+              <Fragment>
+                {' '}
+                <div class="ct-navigation-card__image__over" set:html={imageOver} />
+              </Fragment>
+            )}
+          </div>{' '}
+        </Fragment>
+      )}
+      <div class="ct-navigation-card__content">
+        {contentTop && (
+          <Fragment>
+            <div class="ct-navigation-card__content-top" set:html={contentTop} />{' '}
+          </Fragment>
+        )}
+        {withIconBlock && (
+          <Fragment>
+            <div class="ct-navigation-card__icon">
+              {icon && <Icon symbol={icon} size="extra-large" />}
+              {icon && imageAsIcon && withImage && ' '}
+              {imageAsIcon && withImage && (
+                <div class="ct-icon ct-icon--size-extra-large ct-navigation-card__icon__image">
+                  <Image theme={theme} url={image?.url} alt={image?.alt} />
+                </div>
+              )}
+            </div>{' '}
+          </Fragment>
+        )}
+        <div class="ct-navigation-card__title">
+          {withLink ? (
+            <a class="ct-navigation-card__title-link" href={link?.url} target={link?.isNewWindow ? '_blank' : undefined}>
+              <Fragment set:html={title} />
+            </a>
+          ) : (
+            <Fragment set:html={title} />
+          )}
+        </div>
+        {contentMiddle && (
+          <Fragment>
+            {' '}
+            <div class="ct-navigation-card__content-middle" set:html={contentMiddle} />
+          </Fragment>
+        )}
+        {summary && (
+          <Fragment>
+            {' '}
+            <Paragraph theme={theme} content={summary} noMargin class="ct-navigation-card__summary" />
+          </Fragment>
+        )}
+        {contentBottom && (
+          <Fragment>
+            {' '}
+            <div class="ct-navigation-card__content-bottom" set:html={contentBottom} />
+          </Fragment>
+        )}
+        {isCardClickable && ' '}
+        {isCardClickable && (
+          <div class="ct-navigation-card__tags">
+            <div class="ct-navigation-card__link-graphic">
+              <Icon symbol="right-arrow-2" size="regular" />
+            </div>
+          </div>
+        )}
+      </div>
+    </div>
+  )
+}

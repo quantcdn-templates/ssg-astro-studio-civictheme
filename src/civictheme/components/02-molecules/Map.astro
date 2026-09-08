@@ -1,0 +1,92 @@
+---
+/**
+ * CivicTheme Map component.
+ *
+ * Props:
+ * - theme: Theme variation (light or dark).
+ * - verticalSpacing: Vertical spacing position (top, bottom, both).
+ * - withBackground: Whether to display with a background.
+ * - address: Optional address.
+ * - url: URL for the map iframe.
+ * - viewUrl: URL for the external map.
+ * - viewText: Text for the external map link.
+ * - class: Additional CSS classes.
+ * - ...rest: Additional HTML attributes, spread onto the root element.
+ *
+ * Slots (documented upstream, but every upstream test passes plain string
+ * props — ported as `string` props per this project's autoescape
+ * convention, see PORTING.md):
+ * - contentTop / contentBottom.
+ */
+import Iframe from '@civictheme/atoms/Iframe.astro';
+import Link from '@civictheme/atoms/Link.astro';
+
+interface Props {
+  theme?: 'light' | 'dark';
+  verticalSpacing?: 'top' | 'bottom' | 'both';
+  withBackground?: boolean;
+  address?: string;
+  url?: string;
+  viewUrl?: string;
+  viewText?: string;
+  contentTop?: string;
+  contentBottom?: string;
+  class?: string;
+  [key: string]: unknown;
+}
+
+const {
+  theme = 'light',
+  verticalSpacing,
+  withBackground,
+  address,
+  url,
+  viewUrl,
+  viewText,
+  contentTop,
+  contentBottom,
+  class: className = '',
+  ...rest
+} = Astro.props;
+
+const viewTextResolved = viewText || 'View in Google Maps';
+const verticalSpacingClass = (['top', 'bottom', 'both'] as const).includes(verticalSpacing as any)
+  ? `ct-vertical-spacing-inset--${verticalSpacing}`
+  : '';
+const classes = [
+  'ct-map',
+  `ct-theme-${theme}`,
+  verticalSpacingClass,
+  withBackground && 'ct-map--with-background',
+  className,
+]
+  .filter(Boolean)
+  .join(' ');
+---
+
+{
+  url && (
+    <div class={classes} {...rest}>
+      <div class="container">
+        <div class="row">
+          <div class="col-xxs-12">
+            {contentTop && (
+              <Fragment>
+                <div class="ct-map__content-top" set:html={contentTop} />{' '}
+              </Fragment>
+            )}
+            <div class="ct-map__canvas">
+              <Iframe url={url} class="ct-map__iframe" allowfullscreen data-chromatic="ignore" title={address || undefined} />
+            </div>{' '}
+            {viewUrl && (
+              <Fragment>
+                <Link theme={theme} text={viewTextResolved} url={viewUrl} isNewWindow isExternal class="ct-map__link" />{' '}
+              </Fragment>
+            )}
+            {contentBottom && <div class="ct-map__content-bottom" set:html={contentBottom} />}
+          </div>
+        </div>
+      </div>
+    </div>
+  )
+}

@@ -1,0 +1,155 @@
+---
+/**
+ * CivicTheme Publication Card component.
+ *
+ * Props:
+ * - theme: Theme variation (light or dark).
+ * - image: Card image: { url, alt }.
+ * - file: File object for download: { name, url, ext, size }.
+ * - isTitleClick: Whether to make only the title clickable instead of the
+ *   whole card.
+ * - filenamePrefix: Description of file details for accessibility.
+ * - title: Card title text.
+ * - imageOver / contentTop / contentMiddle / summary / contentBottom:
+ *   Documented as Slots upstream, but every upstream test passes plain
+ *   string props — ported as `string` props, ALL rendered with `set:html`
+ *   per this project's autoescape convention (see PORTING.md).
+ * - class: Additional CSS classes.
+ * - ...rest: Additional HTML attributes, spread onto the root element.
+ */
+import Image from '@civictheme/atoms/Image.astro';
+import Paragraph from '@civictheme/atoms/Paragraph.astro';
+import Link from '@civictheme/atoms/Link.astro';
+import Icon from '@civictheme/base/Icon.astro';
+
+interface FileInfo {
+  name?: string;
+  url?: string;
+  ext?: string;
+  size?: string;
+}
+
+interface Props {
+  theme?: 'light' | 'dark';
+  image?: { url?: string; alt?: string };
+  file?: FileInfo;
+  isTitleClick?: boolean;
+  filenamePrefix?: string;
+  title?: string;
+  imageOver?: string;
+  contentTop?: string;
+  contentMiddle?: string;
+  summary?: string;
+  contentBottom?: string;
+  class?: string;
+  [key: string]: unknown;
+}
+
+const {
+  theme = 'light',
+  image,
+  file,
+  isTitleClick,
+  filenamePrefix: filenamePrefixProp,
+  title,
+  imageOver,
+  contentTop,
+  contentMiddle,
+  summary,
+  contentBottom,
+  class: className = '',
+  ...rest
+} = Astro.props;
+
+const withImage = Boolean(image?.url);
+const withFile = Boolean(file?.url);
+const isCardClickable = withFile && !isTitleClick && Boolean(title);
+
+const classes = [
+  'ct-publication-card',
+  `ct-theme-${theme}`,
+  withImage && 'ct-publication-card--with-image',
+  isCardClickable && 'ct-publication-card--card-clickable',
+  className,
+]
+  .filter(Boolean)
+  .join(' ');
+
+const filenamePrefix = filenamePrefixProp || 'File details:';
+const hasExt = Boolean(file?.ext);
+const hasSize = Boolean(file?.size);
+const extensionTextRaw = hasExt && hasSize ? `${file?.ext}, ${file?.size}` : file?.ext || file?.size || '';
+const extensionText = extensionTextRaw ? `(${extensionTextRaw})` : '';
+const filenameText = file?.name || '';
+const filename = `${filenameText} ${extensionText}`.trim();
+
+const titleLabel = withFile && filename ? `${title}. ${filenamePrefix} ${filename}` : '';
+
+// publication-card.twig gates on `file is not empty` — Twig's `empty` test
+// on an object/array checks its element count, so `file: {}` (no keys) is
+// "empty" and must not render, unlike a plain JS truthiness check on `{}`.
+const hasFile = Boolean(file && Object.keys(file).length > 0);
+---
+
+{
+  hasFile && (
+    <div class={classes} {...rest}>
+      {image?.url && (
+        <Fragment>
+          <div class="ct-publication-card__image">
+            <Image theme={theme} url={image.url} alt={image.alt} />
+            {imageOver && (
+              <Fragment>
+                {' '}
+                <div class="ct-publication-card__image__over" set:html={imageOver} />
+              </Fragment>
+            )}
+          </div>{' '}
+        </Fragment>
+      )}
+      <div class="ct-publication-card__content">
+        {contentTop && (
+          <Fragment>
+            <div class="ct-publication-card__content-top" set:html={contentTop} />{' '}
+          </Fragment>
+        )}
+        {title && (
+          <Fragment>
+            <div class="ct-publication-card__title-bar">
+              <div class="ct-publication-card__title">
+                {withFile ? (
+                  <a class="ct-publication-card__title-link" href={file?.url} aria-label={titleLabel || undefined}>
+                    {title}
+                  </a>
+                ) : (
+                  title
+                )}
+              </div>{' '}
+              <Icon symbol="download" size="regular" class="ct-publication-card__title-icon" />
+            </div>{' '}
+          </Fragment>
+        )}
+        {contentMiddle && (
+          <Fragment>
+            <div class="ct-publication-card__content__middle" set:html={contentMiddle} />{' '}
+          </Fragment>
+        )}
+        {summary && (
+          <Fragment>
+            <Paragraph theme={theme} content={summary} noMargin class="ct-publication-card__summary" />{' '}
+          </Fragment>
+        )}
+        {filename &&
+          (title ? (
+            <div class="ct-publication-card__filename">
+              <span class="ct-visually-hidden">{filenamePrefix}</span>
+              {' '}{filename}
+            </div>
+          ) : (
+            <Link theme={theme} text={filename} url={file?.url} class="ct-publication-card__link" />
+          ))}{' '}
+        {contentBottom && <div class="ct-publication-card__content-bottom" set:html={contentBottom} />}
+      </div>
+    </div>
+  )
+}
