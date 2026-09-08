@@ -1,0 +1,124 @@
+---
+import type { HTMLTag } from 'astro/types';
+
+/**
+ * CivicTheme Grid component.
+ *
+ * Props:
+ * - items: Column items (each rendered as raw HTML content of one column).
+ * - rowElement: Row element tag (default 'div').
+ * - rowClass: Optional row class override.
+ * - rowAttributes: Additional row attributes.
+ * - columnElement: Column element tag (default 'div').
+ * - columnClass: Optional column class override (defaults to 'col' when
+ *   templateColumnCount is 0).
+ * - columnAttributes: Additional column attributes.
+ * - useContainer: Whether to wrap the row in a container (default true).
+ * - isFluid: Whether the container is fluid (only when useContainer is true).
+ * - templateColumnCount: Row column count (0 for auto columns).
+ * - autoBreakpoint: Switch columns (from templateColumnCount) as the screen
+ *   reduces.
+ * - fillWidth: Stretch "hanging" items to the row's full width.
+ * - class: Additional CSS classes (applied to the container, or the row when
+ *   useContainer is false).
+ * - ...rest: Additional HTML attributes. Applied to the container when
+ *   useContainer is true, otherwise merged onto the row.
+ */
+interface Props {
+  items?: Array<string | null>;
+  rowElement?: string;
+  rowClass?: string | null;
+  rowAttributes?: Record<string, unknown>;
+  columnElement?: string;
+  columnClass?: string | null;
+  columnAttributes?: Record<string, unknown>;
+  useContainer?: boolean;
+  isFluid?: boolean;
+  templateColumnCount?: number | null;
+  autoBreakpoint?: boolean;
+  fillWidth?: boolean;
+  class?: string;
+  [key: string]: unknown;
+}
+
+const {
+  items = [],
+  rowElement,
+  rowClass,
+  rowAttributes = {},
+  columnElement,
+  columnClass,
+  columnAttributes = {},
+  useContainer = true,
+  isFluid = false,
+  templateColumnCount,
+  autoBreakpoint = false,
+  fillWidth = false,
+  class: modifierClass = '',
+  ...rest
+} = Astro.props;
+
+const RowTag = (rowElement || 'div') as HTMLTag;
+const ColumnTag = (columnElement || 'div') as HTMLTag;
+const columnCount = templateColumnCount ?? 0;
+
+let resolvedColumnClass: string;
+if (columnCount > 0) {
+  const baseColumnClass = columnClass ?? '';
+  const validCount = [1, 2, 3, 4, 6, 12].includes(columnCount) ? columnCount : 12;
+  if (autoBreakpoint && validCount <= 6) {
+    const breakpoints: Record<number, string> = { 1: 'xxs', 2: 'm', 3: 'xl', 4: 'xxl', 6: 'xxl' };
+    const parts: string[] = [];
+    for (let i = 1; i <= validCount; i++) {
+      if (i !== 5 && !(validCount === 6 && i === 4)) {
+        const bp = breakpoints[i];
+        if (bp) {
+          parts.push(`col-${bp}-${Math.floor(12 / i)}`);
+        }
+      }
+    }
+    resolvedColumnClass = parts.join(' ');
+  } else {
+    resolvedColumnClass = `col-xxs-12 col-m-${Math.floor(12 / validCount)} ${baseColumnClass}`.trim();
+  }
+} else {
+  resolvedColumnClass = `col ${columnClass ?? ''}`.trim();
+}
+
+const rowClasses = ['row', fillWidth && 'row--fill-width', rowClass ?? ''].filter((c) => c !== false);
+const containerClass = useContainer ? `${isFluid ? 'container-fluid' : 'container'} ${modifierClass}`.trim() : '';
+if (!useContainer && modifierClass) {
+  rowClasses.push(modifierClass);
+}
+const rowClassString = rowClasses.join(' ').trim();
+
+const rowExtraAttrs = useContainer ? rowAttributes : { ...rest, ...rowAttributes };
+---
+
+{
+  items.length > 0 && (
+    <>
+      {useContainer ? (
+        <div class={containerClass} {...rest} aria-live="polite">
+          <RowTag class={rowClassString} {...rowExtraAttrs}>
+            {items.map((item, i) => (
+              <Fragment>
+                {i > 0 && ' '}
+                {item && <ColumnTag class={resolvedColumnClass} {...columnAttributes} set:html={item} />}
+              </Fragment>
+            ))}
+          </RowTag>
+        </div>
+      ) : (
+        <RowTag class={rowClassString} {...rowExtraAttrs}>
+          {items.map((item, i) => (
+            <Fragment>
+              {i > 0 && ' '}
+              {item && <ColumnTag class={resolvedColumnClass} {...columnAttributes} set:html={item} />}
+            </Fragment>
+          ))}
+        </RowTag>
+      )}
+    </>
+  )
+}

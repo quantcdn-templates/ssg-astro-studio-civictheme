@@ -1,0 +1,41 @@
+---
+/**
+ * CivicTheme Datetime component.
+ *
+ * Props:
+ * - start: Formatted start time (required to render anything).
+ * - startIso: Start time in ISO format (falls back to `start`).
+ * - end: Formatted end time.
+ * - endIso: End time in ISO format (falls back to `end`).
+ * - class: Additional CSS classes.
+ * - ...rest: Additional HTML attributes, spread onto the root element.
+ */
+interface Props {
+  start?: string | null;
+  startIso?: string | null;
+  end?: string | null;
+  endIso?: string | null;
+  class?: string;
+  [key: string]: unknown;
+}
+
+const { start, startIso, end, endIso, class: className = '', ...rest } = Astro.props;
+
+const stripTags = (s: string) => s.replace(/<[^>]*>/g, '');
+
+const classes = ['ct-datetime', className].filter(Boolean).join(' ');
+---
+
+{
+  start && (
+    <span class={classes} {...rest}>
+      <time class="ct-timestamp__start" datetime={stripTags(startIso ?? start)} set:html={start} />
+      {end && (
+        <Fragment>
+          {' — '}
+          <time class="ct-timestamp__end" datetime={stripTags(endIso ?? end)} set:html={end} />
+        </Fragment>
+      )}
+    </span>
+  )
+}

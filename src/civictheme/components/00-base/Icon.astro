@@ -1,0 +1,29 @@
+---
+/**
+ * CivicTheme Icon component.
+ *
+ * Props:
+ * - symbol: Icon name (required to render anything).
+ * - size: Icon size (extra-small, small, regular, large, extra-large).
+ * - class: Additional CSS classes.
+ * - ...rest: Additional HTML attributes, spread onto the root <svg>.
+ */
+import { icons, type IconSymbol } from './icons';
+
+interface Props {
+  symbol?: IconSymbol | string | null;
+  size?: 'extra-small' | 'small' | 'regular' | 'large' | 'extra-large' | string | null;
+  class?: string;
+  [key: string]: unknown;
+}
+
+const { symbol, size, class: className = '', ...rest } = Astro.props;
+const svg = symbol ? (icons as Record<string, string>)[symbol] : undefined;
+const classes = ['ct-icon', size && `ct-icon--size-${size}`, ...className.split(' ')].filter(Boolean).join(' ');
+const attrs = Object.entries({ class: classes, 'aria-hidden': 'true', role: 'img', ...rest })
+  .map(([k, v]) => `${k}="${String(v)}"`)
+  .join(' ');
+const html = svg ? svg.replace('<svg ', `<svg ${attrs} `) : '';
+---
+
+{html && <Fragment set:html={html} />}

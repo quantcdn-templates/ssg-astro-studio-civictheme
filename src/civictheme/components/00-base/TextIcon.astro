@@ -1,0 +1,90 @@
+---
+/**
+ * CivicTheme Text Icon component.
+ *
+ * Props:
+ * - text: Text content.
+ * - isNewWindow: Whether to open in a new window.
+ * - isExternal: Whether the link is external.
+ * - icon: Icon name.
+ * - iconPlacement: Icon position (before or after; default after).
+ * - iconClass: Class for the icon.
+ * - iconGroupDisabled: Whether to disable icon and last-word grouping.
+ * - iconSingleOnly: Whether to show only one icon (external takes preference
+ *   over `icon` when both are present).
+ *
+ * Note: upstream's `attributes` prop is declared in the Twig doc header but
+ * never applied to any rendered element there — this port matches that
+ * (unused) upstream behaviour rather than inventing a root element to spread
+ * it onto. See PORTING.md.
+ */
+import Icon from './Icon.astro';
+
+interface Props {
+  text?: string | null;
+  isNewWindow?: boolean | null;
+  isExternal?: boolean | null;
+  icon?: string | null;
+  iconPlacement?: 'before' | 'after' | null;
+  iconClass?: string;
+  iconGroupDisabled?: boolean;
+  iconSingleOnly?: boolean;
+}
+
+const {
+  text,
+  isNewWindow = false,
+  isExternal = false,
+  icon,
+  iconPlacement: iconPlacementProp,
+  iconClass = '',
+  iconGroupDisabled = false,
+  iconSingleOnly = false,
+} = Astro.props;
+
+const resolvedIcon = isExternal && iconSingleOnly ? 'upper-right-arrow' : (icon ?? '');
+const iconPlacement = iconPlacementProp === 'before' ? 'before' : 'after';
+const hasIconOrExternal = Boolean(resolvedIcon) || Boolean(isExternal);
+
+let textStart = '';
+let textEnd = '';
+let showFullText = true;
+if (text) {
+  const words = text
+    .replace(/<[^>]*>/g, '')
+    .trim()
+    .split(' ');
+  textStart = words.slice(0, -1).join(' ');
+  textEnd = words.at(-1) ?? '';
+  showFullText = iconGroupDisabled || (iconPlacement === 'before' && !isExternal);
+}
+const displayText = showFullText ? text : `${textStart} `;
+---
+
+{
+  hasIconOrExternal ? (
+    text ? (
+      <Fragment>
+        {iconPlacement === 'before' && resolvedIcon && <Icon symbol={resolvedIcon} class={iconClass} />}
+        <span class="ct-text-icon__text" set:html={displayText} />
+        {showFullText ? (
+          <Fragment>
+            {iconPlacement === 'after' && resolvedIcon && <Icon symbol={resolvedIcon} class={iconClass} />}
+            {isExternal && !iconSingleOnly && <Icon symbol="upper-right-arrow" />}
+          </Fragment>
+        ) : (
+          <span class="ct-text-icon__group">
+            <span class="ct-text-icon__text">{textEnd}</span>{' '}
+            {iconPlacement === 'after' && resolvedIcon && <Icon symbol={resolvedIcon} class={iconClass} />}
+            {isExternal && !iconSingleOnly && <Icon symbol="upper-right-arrow" />}
+          </span>
+        )}
+      </Fragment>
+    ) : (
+      resolvedIcon && <Icon symbol={resolvedIcon} class={iconClass} />
+    )
+  ) : (
+    <span class="ct-text-icon__text" set:html={text} />
+  )
+}
+{isNewWindow && <span class="ct-visually-hidden">(Opens in a new tab/window)</span>}

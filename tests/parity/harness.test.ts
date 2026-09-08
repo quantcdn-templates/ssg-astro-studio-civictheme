@@ -1,6 +1,13 @@
 import { describe, it, expect } from 'vitest';
 import { join } from 'node:path';
-import { normaliseHtml, unwrapSnapshotHtml, upstreamSnapshot, listSnapshotKeys, missingSnapshotKeys } from './harness';
+import {
+  normaliseHtml,
+  unwrapSnapshotHtml,
+  upstreamSnapshot,
+  listSnapshotKeys,
+  missingSnapshotKeys,
+  fixNonVoidSelfClosingTags,
+} from './harness';
 
 const FIXTURE_ROOT = join(__dirname, 'fixtures/uikit');
 
@@ -43,6 +50,23 @@ describe('normaliseHtml', () => {
 
   it('does not collapse attribute value whitespace on a nested element either', () => {
     expect(normaliseHtml('<div><a href="a  b">x</a></div>')).not.toBe(normaliseHtml('<div><a href="a b">x</a></div>'));
+  });
+});
+
+describe('fixNonVoidSelfClosingTags', () => {
+  it('rewrites a self-closed non-void tag into an explicit open/close pair', () => {
+    expect(normaliseHtml(fixNonVoidSelfClosingTags('<a href="#" />'))).toBe(normaliseHtml('<a href="#"></a>'));
+  });
+
+  it('leaves a genuinely void element self-closed', () => {
+    expect(fixNonVoidSelfClosingTags('<br />')).toBe('<br />');
+  });
+
+  it('prevents a following sibling from being mis-nested inside a self-closed non-void tag', () => {
+    const withoutFix = normaliseHtml('<a href="#" /><div>x</div>');
+    const withFix = normaliseHtml(fixNonVoidSelfClosingTags('<a href="#" /><div>x</div>'));
+    expect(withoutFix).not.toBe(withFix);
+    expect(withFix).toBe('<a href="#"></a><div>x</div>');
   });
 });
 

@@ -1,0 +1,145 @@
+---
+/**
+ * CivicTheme Layout component.
+ *
+ * Props:
+ * - hideSidebarLeft: Whether to hide the left sidebar.
+ * - hideSidebarRight: Whether to hide the right sidebar.
+ * - isContained: Whether the page content should be contained.
+ * - verticalSpacing: Controls vertical spacing (top, bottom, or both).
+ * - contentAttributes: HTML attributes for the main content section.
+ * - sidebarTopLeftAttributes: HTML attributes for the top-left sidebar.
+ * - sidebarTopRightAttributes: HTML attributes for the top-right sidebar.
+ * - sidebarBottomLeftAttributes: HTML attributes for the bottom-left sidebar.
+ * - sidebarBottomRightAttributes: HTML attributes for the bottom-right sidebar.
+ * - class: Additional CSS classes.
+ * - ...rest: Additional HTML attributes, spread onto the root element.
+ *
+ * Slots:
+ * - default: Main content.
+ * - contentTop: Main content area top content.
+ * - contentBottom: Main content area bottom content.
+ * - sidebarTopLeft: Top left sidebar content.
+ * - sidebarTopRight: Top right sidebar content.
+ * - sidebarBottomLeft: Bottom left sidebar content.
+ * - sidebarBottomRight: Bottom right sidebar content.
+ */
+interface Props {
+  hideSidebarLeft?: boolean;
+  hideSidebarRight?: boolean;
+  isContained?: boolean;
+  verticalSpacing?: 'top' | 'bottom' | 'both' | string | null;
+  contentAttributes?: Record<string, unknown>;
+  sidebarTopLeftAttributes?: Record<string, unknown>;
+  sidebarTopRightAttributes?: Record<string, unknown>;
+  sidebarBottomLeftAttributes?: Record<string, unknown>;
+  sidebarBottomRightAttributes?: Record<string, unknown>;
+  class?: string;
+  [key: string]: unknown;
+}
+
+const {
+  hideSidebarLeft = false,
+  hideSidebarRight = false,
+  isContained: isContainedProp = false,
+  verticalSpacing: verticalSpacingProp,
+  contentAttributes = {},
+  sidebarTopLeftAttributes = {},
+  sidebarTopRightAttributes = {},
+  sidebarBottomLeftAttributes = {},
+  sidebarBottomRightAttributes = {},
+  class: modifierClass = '',
+  ...rest
+} = Astro.props;
+
+const hasContent = Astro.slots.has('default');
+const hasSidebarTopLeft = Astro.slots.has('sidebarTopLeft');
+const hasSidebarTopRight = Astro.slots.has('sidebarTopRight');
+const hasSidebarBottomLeft = Astro.slots.has('sidebarBottomLeft');
+const hasSidebarBottomRight = Astro.slots.has('sidebarBottomRight');
+
+const hasSidebarLeft = (hasSidebarTopLeft || hasSidebarBottomLeft) && !hideSidebarLeft;
+const hasSidebarRight = (hasSidebarTopRight || hasSidebarBottomRight) && !hideSidebarRight;
+
+const isContained = isContainedProp || hasSidebarLeft || hasSidebarRight;
+const verticalSpacing = hasSidebarLeft || hasSidebarRight ? 'top' : verticalSpacingProp;
+
+const noSidebarLeftClass = hideSidebarLeft ? 'ct-layout--no-sidebar-left' : '';
+const noSidebarRightClass = hideSidebarRight ? 'ct-layout--no-sidebar-right' : '';
+const noTlClass = !hasSidebarTopLeft || hideSidebarLeft ? 'ct-layout--no-top-left' : '';
+const noTrClass = !hasSidebarTopRight || hideSidebarRight ? 'ct-layout--no-top-right' : '';
+const noBlClass = !hasSidebarBottomLeft || hideSidebarLeft ? 'ct-layout--no-bottom-left' : '';
+const noBrClass = !hasSidebarBottomRight || hideSidebarRight ? 'ct-layout--no-bottom-right' : '';
+const isContainedClass = isContained ? 'container' : 'container-fluid';
+const verticalSpacingClass = (['top', 'bottom', 'both'] as const).includes(verticalSpacing as 'top')
+  ? `ct-vertical-spacing--${verticalSpacing}`
+  : '';
+
+const classes = [
+  noSidebarLeftClass,
+  noSidebarRightClass,
+  noTlClass,
+  noTrClass,
+  noBlClass,
+  noBrClass,
+  verticalSpacingClass,
+  modifierClass,
+]
+  .join(' ')
+  .trim();
+---
+
+{
+  hasContent && (
+    <div class={`ct-layout ${classes}`} {...rest}>
+      {Astro.slots.has('contentTop') && (
+        <Fragment>
+          <slot name="contentTop" />{' '}
+        </Fragment>
+      )}
+      <div class={`ct-layout__inner ${isContainedClass}`}>
+        <section class="ct-layout__main" {...contentAttributes}>
+          <slot />
+        </section>
+        {hasSidebarTopLeft && hasSidebarLeft && (
+          <Fragment>
+            {' '}
+            <aside class="ct-layout__sidebar_top_left" {...sidebarTopLeftAttributes}>
+              <slot name="sidebarTopLeft" />
+            </aside>
+          </Fragment>
+        )}
+        {hasSidebarTopRight && hasSidebarRight && (
+          <Fragment>
+            {' '}
+            <aside class="ct-layout__sidebar_top_right" {...sidebarTopRightAttributes}>
+              <slot name="sidebarTopRight" />
+            </aside>
+          </Fragment>
+        )}
+        {hasSidebarBottomLeft && hasSidebarLeft && (
+          <Fragment>
+            {' '}
+            <aside class="ct-layout__sidebar_bottom_left" {...sidebarBottomLeftAttributes}>
+              <slot name="sidebarBottomLeft" />
+            </aside>
+          </Fragment>
+        )}
+        {hasSidebarBottomRight && hasSidebarRight && (
+          <Fragment>
+            {' '}
+            <aside class="ct-layout__sidebar_bottom_right" {...sidebarBottomRightAttributes}>
+              <slot name="sidebarBottomRight" />
+            </aside>
+          </Fragment>
+        )}
+      </div>
+      {Astro.slots.has('contentBottom') && (
+        <Fragment>
+          {' '}
+          <slot name="contentBottom" />
+        </Fragment>
+      )}
+    </div>
+  )
+}

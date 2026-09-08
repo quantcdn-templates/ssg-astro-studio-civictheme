@@ -87,11 +87,46 @@ export function unwrapSnapshotHtml(html: string): string {
   return wrapper && wrapper.tagName === 'DIV' && !wrapper.attributes.length ? wrapper.innerHTML : html;
 }
 
+// HTML void elements: the only tags where a trailing `/>` is meaningful to
+// an HTML (non-XML) parser. Jest's pretty-format DOM serializer renders ANY
+// childless element self-closed (`<a ... />`) purely as a display
+// convention — but outside foreign content (svg/math), a `/` before `>` on a
+// non-void tag like `<a>` is not real self-closing syntax and is silently
+// ignored by an HTML parser, which then treats everything that follows as
+// nested inside that (still-open) element until it finds a real `</a>`.
+// Rewriting these back into an explicit `<tag ...></tag>` pair before
+// parsing avoids that mis-nesting. Safe to apply blindly to genuinely void
+// tags too (were any to appear) since `<br></br>` parses to the same tree a
+// real parser builds for `<br />`.
+const VOID_ELEMENTS = new Set([
+  'area',
+  'base',
+  'br',
+  'col',
+  'embed',
+  'hr',
+  'img',
+  'input',
+  'link',
+  'meta',
+  'param',
+  'source',
+  'track',
+  'wbr',
+]);
+
+/** See `VOID_ELEMENTS` above. */
+export function fixNonVoidSelfClosingTags(html: string): string {
+  return html.replace(/<([a-zA-Z][a-zA-Z0-9-]*)((?:\s+[^<>]*?)?)\/>/g, (match, tag: string, attrs: string) =>
+    VOID_ELEMENTS.has(tag.toLowerCase()) ? match : `<${tag}${attrs}></${tag}>`
+  );
+}
+
 export function upstreamSnapshot(layer: string, name: string, key: string, root: string = UIKIT): string {
   const file = snapshotFile(root, layer, name);
   const src = readFileSync(file, 'utf8');
   const raw = extractSnapshotBody(src, key, file);
-  const html = unescapeSnapshotBody(raw);
+  const html = fixNonVoidSelfClosingTags(unescapeSnapshotBody(raw));
   return unwrapSnapshotHtml(html);
 }
 

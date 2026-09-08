@@ -1,0 +1,48 @@
+---
+/**
+ * CivicTheme Item List component.
+ *
+ * Props:
+ * - direction: List direction (horizontal or vertical, default horizontal).
+ * - size: List size (large, regular, small; default regular).
+ * - noGap: Whether to render without gaps.
+ * - items: List items (each a raw HTML string).
+ * - class: Additional CSS classes.
+ * - ...rest: Additional HTML attributes, spread onto the root <ul>.
+ */
+interface Props {
+  direction?: 'horizontal' | 'vertical';
+  size?: 'small' | 'regular' | 'large';
+  noGap?: boolean;
+  items?: Array<string | null>;
+  class?: string;
+  [key: string]: unknown;
+}
+
+const {
+  direction: rawDirection,
+  size: rawSize,
+  noGap = false,
+  items = [],
+  class: modifierClass = '',
+  ...rest
+} = Astro.props;
+
+const direction = rawDirection === 'horizontal' || rawDirection === 'vertical' ? rawDirection : 'horizontal';
+const size = rawSize === 'small' || rawSize === 'regular' || rawSize === 'large' ? rawSize : 'regular';
+
+const classes = `${`ct-item-list--${direction}`} ${`ct-item-list--${size}`} ${noGap ? 'ct-item-list--no-gap' : ''} ${modifierClass}`;
+---
+
+{
+  items.length > 0 && (
+    <ul class={`ct-item-list ${classes}`} {...rest}>
+      {items.map((item, i) => (
+        <Fragment>
+          {i > 0 && ' '}
+          {item && <li class="ct-item-list__item" set:html={item} />}
+        </Fragment>
+      ))}
+    </ul>
+  )
+}

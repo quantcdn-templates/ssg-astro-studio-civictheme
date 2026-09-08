@@ -1,0 +1,194 @@
+---
+/**
+ * CivicTheme Menu component.
+ *
+ * Props:
+ * - theme: Theme variation (light or dark).
+ * - items: Menu links array (see MenuItem below).
+ * - menuLevelModifierClass: Mapping of menu level (number) to modifier
+ *   classes for that level's <ul>.
+ * - isCollapsible: Whether to render collapsible submenus.
+ * - class: Additional CSS classes (only applied at the top level).
+ * - ...rest: Additional HTML attributes (only applied at the top level).
+ *
+ * `menuLevel` and `parentItem` are internal recursion parameters (not part
+ * of the public Twig API) used when this component imports itself to render
+ * a `below` submenu — mirrors upstream's `menu_links` / `menu_links_below`
+ * macro pair, which recurse with an incremented `menu_level`.
+ *
+ * Note: upstream's nested collapsible wrapper reads `item.in_active_trail`
+ * from the *parent* item still in scope from the outer `for` loop at the
+ * point of the recursive macro call (a `_self`-import scoping quirk, not a
+ * `below`-item property) — reproduced here by passing `parentItem` down
+ * explicitly instead of relying on any such implicit scoping. See PORTING.md.
+ */
+import Menu from './Menu.astro';
+import TextIcon from './TextIcon.astro';
+
+interface MenuItem {
+  title?: string;
+  url?: string;
+  inActiveTrail?: boolean;
+  isExpanded?: boolean;
+  attributes?: Record<string, unknown>;
+  linkAttributes?: Record<string, unknown>;
+  class?: string;
+  isNewWindow?: boolean;
+  isExternal?: boolean;
+  below?: MenuItem[];
+}
+
+interface Props {
+  theme?: 'light' | 'dark';
+  items?: MenuItem[];
+  menuLevelModifierClass?: Record<number, string>;
+  isCollapsible?: boolean;
+  class?: string;
+  menuLevel?: number;
+  parentItem?: MenuItem;
+  [key: string]: unknown;
+}
+
+const {
+  theme = 'light',
+  items = [],
+  menuLevelModifierClass = {},
+  isCollapsible = false,
+  class: modifierClass = '',
+  menuLevel = 0,
+  parentItem,
+  ...rest
+} = Astro.props;
+
+const themeClass = `ct-theme-${theme}`;
+
+const collapsiblePanelAttrs: Record<string, string> =
+  menuLevel > 0 && isCollapsible ? { 'data-collapsible-panel': '' } : {};
+const ariaHiddenAttrs: Record<string, string> =
+  menuLevel > 0 && isCollapsible ? { 'aria-hidden': parentItem?.inActiveTrail ? 'false' : 'true' } : {};
+const levelModifierClass = menuLevel > 0 ? (menuLevelModifierClass[menuLevel] ?? '') : '';
+
+function itemState(item: MenuItem) {
+  const itemClasses = [
+    'ct-menu__item',
+    `ct-menu__item--level-${menuLevel}`,
+    item.below ? 'ct-menu__item--has-children' : '',
+    item.inActiveTrail ? 'ct-menu__item--active-trail' : '',
+    item.class ?? '',
+  ].join(' ');
+
+  let isActiveExpanded: 'true' | 'false' = 'false';
+  const itemAttrs: Record<string, unknown> = { ...(item.attributes ?? {}) };
+  if (item.below && isCollapsible) {
+    isActiveExpanded = item.inActiveTrail && item.isExpanded ? 'true' : 'false';
+    if (!(item.inActiveTrail && item.isExpanded)) {
+      itemAttrs['data-collapsible-collapsed'] = '';
+    }
+    itemAttrs['data-collapsible'] = '';
+    itemAttrs['data-collapsible-duration'] = '0';
+    itemAttrs['aria-expanded'] = isActiveExpanded;
+  }
+
+  const hasActiveChildren = (item.below ?? []).some((child) => child.inActiveTrail);
+  const linkAttrs: Record<string, unknown> = { ...(item.linkAttributes ?? {}) };
+  if (item.inActiveTrail && !hasActiveChildren) {
+    linkAttrs['aria-current'] = 'page';
+  }
+
+  return { itemClasses, isActiveExpanded, itemAttrs, linkAttrs };
+}
+---
+
+{
+  items.length > 0 &&
+    (menuLevel === 0 ? (
+      <ul class={`ct-menu ct-menu--level-0 ${themeClass} ${modifierClass}`} data-component-name="ct-menu" {...rest}>
+        {items.map((item, i) => {
+          const { itemClasses, isActiveExpanded, itemAttrs, linkAttrs } = itemState(item);
+          return (
+            <Fragment>
+              {i > 0 && ' '}
+              <li class={itemClasses} {...itemAttrs}>
+                <a
+                  class={`ct-link ${themeClass} ct-menu__item__link`}
+                  href={item.url}
+                  title={item.title}
+                  {...linkAttrs}
+                >
+                  <TextIcon text={item.title} />
+                </a>
+                {item.below && isCollapsible && ' '}
+                {item.below && isCollapsible && (
+                  <a
+                    href="#"
+                    class="ct-menu__item__link-trigger"
+                    data-collapsible-trigger=""
+                    aria-expanded={isActiveExpanded}
+                    title={`Expand ${item.title} menu`}
+                  />
+                )}
+                {item.below && ' '}
+                {item.below && (
+                  <Menu
+                    items={item.below}
+                    menuLevel={menuLevel + 1}
+                    theme={theme}
+                    isCollapsible={isCollapsible}
+                    menuLevelModifierClass={menuLevelModifierClass}
+                    parentItem={item}
+                  />
+                )}
+              </li>
+            </Fragment>
+          );
+        })}
+      </ul>
+    ) : (
+      <div
+        class={`ct-menu__sub-menu__wrapper ct-menu__sub-menu__wrapper--level-${menuLevel}`}
+        {...collapsiblePanelAttrs}
+        {...ariaHiddenAttrs}
+      >
+        <ul class={`ct-menu ct-menu__sub-menu ct-menu--level-${menuLevel} ${levelModifierClass}`}>
+          {items.map((item, i) => {
+            const { itemClasses, isActiveExpanded, itemAttrs, linkAttrs } = itemState(item);
+            return (
+              <Fragment>
+                {i > 0 && ' '}
+                <li class={itemClasses} {...itemAttrs}>
+                  <a
+                    class={`ct-link ${themeClass} ct-menu__item__link`}
+                    href={item.url}
+                    title={item.title}
+                    {...linkAttrs}
+                  >
+                    <TextIcon text={item.title} />
+                  </a>
+                  {item.below && isCollapsible && (
+                    <a
+                      href="#"
+                      class="ct-menu__item__link-trigger"
+                      data-collapsible-trigger=""
+                      aria-expanded={isActiveExpanded}
+                      title={`Expand ${item.title} menu`}
+                    />
+                  )}
+                  {item.below && ' '}
+                  {item.below && (
+                    <Menu
+                      items={item.below}
+                      menuLevel={menuLevel + 1}
+                      theme={theme}
+                      isCollapsible={isCollapsible}
+                      menuLevelModifierClass={menuLevelModifierClass}
+                      parentItem={item}
+                    />
+                  )}
+                </li>
+              </Fragment>
+            );
+          })}
+        </ul>
+      </div>
+    ))
+}
