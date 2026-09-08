@@ -1,94 +1,143 @@
 ---
+/**
+ * CivicTheme Table component.
+ *
+ * Props:
+ * - theme: Theme variation (light or dark).
+ * - caption: Table caption.
+ * - captionPosition: Caption position (before, after).
+ * - header: Header cell contents.
+ * - headerSanitized: No-HTML header column names, used for mobile
+ *   `data-title` labels in place of `header` when provided.
+ * - rows: Table rows (each row is an array of cell contents).
+ * - footer: Footer cell contents — a flat array renders as one row; an
+ *   array of arrays renders one row per inner array. Only these two
+ *   "legacy" shapes (the ones exercised by the upstream test suite) are
+ *   ported; upstream's third ("Drupal") shape — a list of rows carrying
+ *   their own `.attributes`/`.cols` objects — and per-row/per-cell
+ *   `attributes` on `rows` are not reproduced (no upstream Table snapshot
+ *   exercises either). See PORTING.md.
+ * - isStriped: Whether to show table with striped rows.
+ * - isDataTable: Whether to show as a data table.
+ * - class: Additional CSS classes.
+ * - ...rest: Additional HTML attributes, spread onto the root <table>.
+ */
 interface Props {
   theme?: 'light' | 'dark';
   caption?: string | null;
-  captionPosition?: string;
-  header?: unknown[];
-  headerSanitized?: unknown[];
-  rows?: unknown[];
-  footer?: unknown[];
+  captionPosition?: 'before' | 'after';
+  header?: string[];
+  headerSanitized?: string[];
+  rows?: string[][];
+  footer?: string[] | string[][];
   isStriped?: boolean | null;
   isDataTable?: boolean | null;
   class?: string;
   [key: string]: unknown;
 }
-const { theme = 'light', caption, captionPosition, header, headerSanitized, rows, footer, isStriped, isDataTable, class: className = '', ...rest } = Astro.props;
+
+const {
+  theme = 'light',
+  caption,
+  captionPosition,
+  header = [],
+  headerSanitized = [],
+  rows = [],
+  footer = [],
+  isStriped,
+  isDataTable,
+  class: className = '',
+  ...rest
+} = Astro.props;
+
+const themeClass = `ct-theme-${theme}`;
+const captionPositionClass = captionPosition === 'after' ? 'ct-table--caption-after' : 'ct-table--caption-before';
+const classes = [
+  'ct-table',
+  themeClass,
+  captionPositionClass,
+  isStriped && 'ct-table--striped',
+  isDataTable && 'ct-table--data',
+  className,
+]
+  .filter(Boolean)
+  .join(' ');
+
+function stripTags(s: string): string {
+  return s.replace(/<[^>]*>/g, '');
+}
+
+const hasContent = rows.length > 0 || header.length > 0 || footer.length > 0 || Boolean(caption);
+
+// footer[0] iterable => "multiple rows" legacy shape (cells as plain <th>,
+// no scope attr); otherwise a single row of cells (each <th scope="col">).
+const footerIsMultiRow = footer.length > 0 && Array.isArray(footer[0]);
+const footerRows: string[][] = footerIsMultiRow ? (footer as string[][]) : [footer as string[]];
 ---
-<!-- TWIG:
-{% set striped_class = is_striped ? 'ct-table--%s'|format('striped') : '' %}
-{% set data_table_class = is_data_table ? 'ct-table--%s'|format('data') : '' %}
-{% set caption_position_class = caption_position == 'after' ? 'ct-table--caption-after' : 'ct-table--caption-before' %}
-{% set theme_class = 'ct-theme-%s'|format(theme|default('light')) %}
-{% set modifier_class = '%s %s %s %s %s'|format(theme_class, caption_position_class, striped_class, data_table_class, modifier_class|default('')) %}
 
-{% if rows is not empty or header is not empty or footer is not empty or caption is not empty %}
-  <table class="ct-table {{ modifier_class -}}" {% if attributes is defined and attributes is not null %}{{- attributes -}}{% endif %}>
-    {% if caption %}
-      <caption>{{ caption }}</caption>
-    {% endif %}
-
-    {% if header is not empty %}
-      <thead>
-      <tr>
-        {% for item in header %}
-          <th scope="col">{{ item }}</th>
-        {% endfor %}
-      </tr>
-      </thead>
-    {% endif %}
-
-    {% if rows is not empty %}
-      <tbody>
-      {% for row in rows %}
-        <tr {{ create_attribute(row.attributes|default({})) }}>
-          {% for col in row.cols|default(row) %}
-            {% if header is not empty %}
-              {% if header_sanitized is not empty and header_sanitized[loop.index0] is defined %}
-                {% set data_title = header_sanitized[loop.index0] %}
-              {% else %}
-                {% set data_title = header[loop.index0] is defined ? header[loop.index0] : '' %}
-              {% endif %}
-            {% endif %}
-            <td {{ create_attribute(col.attributes|default({})) }}{% if data_title is defined %} data-title="{{ data_title|striptags }}"{% endif %}>
-              {{ col.content|default(col) }}
-            </td>
-          {% endfor %}
-        </tr>
-      {% endfor %}
-      </tbody>
-    {% endif %}
-
-    {% if footer is not empty %}
-      <tfoot>
-      {% if footer[0] is defined and footer[0].cols is defined %}
-        {# Drupal format: footer is list of rows with .attributes and .cols #}
-        {% for row in footer %}
-          <tr {{ create_attribute(row.attributes|default({})) }}>
-            {% for col in row.cols %}
-              <th {{ create_attribute(col.attributes|default({})) }}>{{ col.content|default(col) }}</th>
-            {% endfor %}
-          </tr>
-        {% endfor %}
-      {% else %}
-        {# Legacy format: single row (footer = [cell, cell]) or multiple rows (footer = [[cell, cell], ...]) #}
-        {% if footer[0] is defined and footer[0] is iterable %}
-          {% for row in footer %}
-            <tr>
-              {% for col in row %}
-                <th>{{ col }}</th>
-              {% endfor %}
-            </tr>
-          {% endfor %}
-        {% else %}
+{
+  hasContent && (
+    <table class={classes} {...rest}>
+      {caption && <caption>{caption}</caption>}
+      {caption && (header.length > 0 || rows.length > 0 || footer.length > 0) && ' '}
+      {header.length > 0 && (
+        <thead>
           <tr>
-            {% for item in footer %}
-              <th scope="col">{{ item }}</th>
-            {% endfor %}
+            {header.map((item, i) => (
+              <Fragment>
+                {i > 0 && ' '}
+                <th scope="col">{item}</th>
+              </Fragment>
+            ))}
           </tr>
-        {% endif %}
-      {% endif %}
-      </tfoot>
-    {% endif %}
-  </table>
-{% endif %}
--->
+        </thead>
+      )}
+      {header.length > 0 && (rows.length > 0 || footer.length > 0) && ' '}
+      {rows.length > 0 && (
+        <tbody>
+          {rows.map((row, ri) => (
+            <Fragment>
+              {ri > 0 && ' '}
+              <tr>
+                {row.map((col, ci) => {
+                  const dataTitle = header.length > 0 ? (headerSanitized[ci] ?? header[ci] ?? '') : undefined;
+                  return (
+                    <Fragment>
+                      {ci > 0 && ' '}
+                      <td data-title={dataTitle !== undefined ? stripTags(dataTitle) : undefined}>{col}</td>
+                    </Fragment>
+                  );
+                })}
+              </tr>
+            </Fragment>
+          ))}
+        </tbody>
+      )}
+      {rows.length > 0 && footer.length > 0 && ' '}
+      {footer.length > 0 && (
+        <tfoot>
+          {footerRows.map((row, ri) => (
+            <Fragment>
+              {ri > 0 && ' '}
+              <tr>
+                {row.map((item, i) =>
+                  footerIsMultiRow ? (
+                    <Fragment>
+                      {i > 0 && ' '}
+                      <th>{item}</th>
+                    </Fragment>
+                  ) : (
+                    <Fragment>
+                      {i > 0 && ' '}
+                      <th scope="col">{item}</th>
+                    </Fragment>
+                  )
+                )}
+              </tr>
+            </Fragment>
+          ))}
+        </tfoot>
+      )}
+    </table>
+  )
+}

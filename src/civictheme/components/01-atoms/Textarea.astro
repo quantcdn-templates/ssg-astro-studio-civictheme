@@ -12,8 +12,21 @@ interface Props {
   class?: string;
   [key: string]: unknown;
 }
-const { theme = 'light', name, id, value, placeholder, rows, isInvalid, isDisabled, isRequired, class: className = '', ...rest } = Astro.props;
+const {
+  theme = 'light',
+  name,
+  id,
+  value,
+  placeholder,
+  rows,
+  isInvalid,
+  isDisabled,
+  isRequired,
+  class: className = '',
+  ...rest
+} = Astro.props;
 ---
+
 <!-- TWIG:
 {% set theme_class = 'ct-theme-%s'|format(theme|default('light')) %}
 {% set is_invalid_class = is_invalid ? 'ct-textarea--is-invalid' : '' %}

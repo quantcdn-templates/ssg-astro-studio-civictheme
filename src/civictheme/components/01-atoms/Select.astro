@@ -1,49 +1,107 @@
 ---
+/**
+ * CivicTheme Select component.
+ *
+ * Props:
+ * - theme: Theme variation (light or dark).
+ * - id: DOM ID attribute.
+ * - name: DOM name (required).
+ * - isMultiple: Whether to allow multiple selections.
+ * - options: Options — each item is either an 'option' ({ type: 'option',
+ *   label, value, isSelected?, isDisabled? }) or an 'optgroup' ({ type:
+ *   'optgroup', label, isDisabled?, options: Array<{ label, value,
+ *   isSelected?, isDisabled? }> }).
+ * - isInvalid: Whether the select is invalid.
+ * - isDisabled: Whether the select is disabled.
+ * - isRequired: Whether the select is required.
+ * - class: Additional CSS classes.
+ * - ...rest: Additional HTML attributes, spread onto the root <select>.
+ */
+interface SelectOption {
+  type?: 'option' | 'optgroup';
+  label?: string;
+  value?: string | string[];
+  isSelected?: boolean;
+  isDisabled?: boolean;
+  options?: Array<{ label?: string; value?: string; isSelected?: boolean; isDisabled?: boolean }>;
+}
+
 interface Props {
   theme?: 'light' | 'dark';
   id?: string;
   name?: string;
   isMultiple?: boolean;
-  options?: Array<{ type?: string; label?: string; value?: string; isSelected?: boolean; isDisabled?: boolean; options?: unknown[]; label?: string; value?: string; isSelected?: boolean; isDisabled?: boolean }>;
+  options?: SelectOption[];
   isInvalid?: boolean;
   isDisabled?: boolean;
   isRequired?: boolean;
   class?: string;
   [key: string]: unknown;
 }
-const { theme = 'light', id, name, isMultiple, options, isInvalid, isDisabled, isRequired, class: className = '', ...rest } = Astro.props;
----
-<!-- TWIG:
-{% set theme_class = 'ct-theme-%s'|format(theme|default('light')) %}
-{% set is_invalid_class = is_invalid ? 'ct-select--is-invalid' : '' %}
-{% set modifier_class = '%s %s %s'|format(theme_class, is_invalid_class, modifier_class|default(''))|trim %}
 
-{% if name is not empty and options is not empty %}
-  <select
-    class="ct-select {{ modifier_class -}}"
-    name="{{ name }}"
-    {% if id %}id="{{ id }}"{% endif %}
-    {% if is_multiple %}multiple{% endif %}
-    {% if is_disabled %}disabled{% endif %}
-    {% if is_required %}required{% endif %}
-    {% if is_invalid %}aria-invalid="true"{% endif %}
-    {% if attributes is defined and attributes is not null %}{{- attributes -}}{% endif %}
-  >
-    {% for option in options %}
-      {% if option.type == 'optgroup' %}
-        <optgroup label="{{ option.label }}" {% if option.is_disabled %}disabled{% endif %}>
-          {% for sub_option in option.options %}
-            {% if sub_option.label is not empty %}
-              <option value="{{ sub_option.value|default('') }}" {% if sub_option.is_selected %}selected="selected"{% endif %} {% if sub_option.is_disabled %}disabled{% endif %}>{{ sub_option.label }}</option>
-            {% endif %}
-          {% endfor %}
-        </optgroup>
-      {% elseif option.type == 'option' %}
-        {% if option.label is not empty %}
-          <option value="{{ option.value|default('') }}" {% if option.is_selected %}selected="selected"{% endif %} {% if option.is_disabled %}disabled{% endif %}>{{ option.label }}</option>
-        {% endif %}
-      {% endif %}
-    {% endfor %}
-  </select>
-{% endif %}
--->
+const {
+  theme = 'light',
+  id,
+  name,
+  isMultiple,
+  options = [],
+  isInvalid,
+  isDisabled,
+  isRequired,
+  class: className = '',
+  ...rest
+} = Astro.props;
+
+const themeClass = `ct-theme-${theme}`;
+const classes = ['ct-select', themeClass, isInvalid && 'ct-select--is-invalid', className].filter(Boolean).join(' ');
+---
+
+{
+  name && options.length > 0 && (
+    <select
+      class={classes}
+      name={name}
+      id={id || undefined}
+      multiple={isMultiple ? 'multiple' : undefined}
+      disabled={isDisabled ? 'disabled' : undefined}
+      required={isRequired ? 'required' : undefined}
+      aria-invalid={isInvalid ? 'true' : undefined}
+      {...rest}
+    >
+      {options.map((option, i) => (
+        <Fragment>
+          {i > 0 && ' '}
+          {option.type === 'optgroup' ? (
+            <optgroup label={option.label} disabled={option.isDisabled ? 'disabled' : undefined}>
+              {(option.options ?? []).map((subOption, j) => (
+                <Fragment>
+                  {j > 0 && ' '}
+                  {subOption.label && (
+                    <option
+                      value={subOption.value ?? ''}
+                      selected={subOption.isSelected ? 'selected' : undefined}
+                      disabled={subOption.isDisabled ? 'disabled' : undefined}
+                    >
+                      {subOption.label}
+                    </option>
+                  )}
+                </Fragment>
+              ))}
+            </optgroup>
+          ) : (
+            option.type === 'option' &&
+            option.label && (
+              <option
+                value={option.value ?? ''}
+                selected={option.isSelected ? 'selected' : undefined}
+                disabled={option.isDisabled ? 'disabled' : undefined}
+              >
+                {option.label}
+              </option>
+            )
+          )}
+        </Fragment>
+      ))}
+    </select>
+  )
+}

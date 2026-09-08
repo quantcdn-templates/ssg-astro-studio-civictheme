@@ -1,74 +1,99 @@
 ---
+/**
+ * CivicTheme Tag component.
+ *
+ * Props:
+ * - theme: Theme variation (light or dark).
+ * - type: Tag type (primary, secondary, tertiary).
+ * - content: Tag content.
+ * - icon: Icon name.
+ * - iconPlacement: Icon position (before, after).
+ * - url: Optional URL to convert to a link.
+ * - isNewWindow: Whether to open in a new window (only if URL is provided).
+ * - isExternal: Whether the link is external.
+ * - class: Additional CSS classes.
+ * - ...rest: Additional HTML attributes, spread onto the root element.
+ */
 import Icon from '@civictheme/base/Icon.astro';
 
 interface Props {
   theme?: 'light' | 'dark';
-  type?: string;
+  type?: 'primary' | 'secondary' | 'tertiary';
   content?: string;
   icon?: string | null;
-  iconPlacement?: string;
+  iconPlacement?: 'before' | 'after';
   url?: string;
-  isNewWindow?: boolean;
-  isExternal?: boolean;
+  isNewWindow?: boolean | null;
+  isExternal?: boolean | null;
   class?: string;
   [key: string]: unknown;
 }
-const { theme = 'light', type, content, icon, iconPlacement, url, isNewWindow, isExternal, class: className = '', ...rest } = Astro.props;
+
+const {
+  theme = 'light',
+  type: typeProp,
+  content,
+  icon,
+  iconPlacement: iconPlacementProp,
+  url,
+  isNewWindow,
+  isExternal,
+  class: className = '',
+  ...rest
+} = Astro.props;
+
+const type = (['primary', 'secondary', 'tertiary'] as const).includes(typeProp as any) ? typeProp! : 'primary';
+const iconPlacement = (['before', 'after'] as const).includes(iconPlacementProp as any) ? iconPlacementProp! : 'after';
+
+const themeClass = `ct-theme-${theme}`;
+const classes = [
+  'ct-tag',
+  themeClass,
+  `ct-tag--${type}`,
+  icon && 'ct-tag--with-icon',
+  icon && `ct-tag--icon-${iconPlacement}`,
+  isExternal && 'ct-tag--external',
+  className,
+]
+  .filter(Boolean)
+  .join(' ');
+
+const Tag = url ? 'a' : 'span';
+const hasContent = Boolean(content?.trim());
 ---
-<!-- TWIG:
-{% set type = type in ['primary', 'secondary', 'tertiary'] ? type : 'primary' %}
-{% set type_class = 'ct-tag--%s'|format(type) %}
-{% set icon_class = icon is not empty ? 'ct-tag--with-icon' : '' %}
-{% set icon_placement = icon_placement in ['before', 'after'] ? icon_placement : 'after' %}
-{% set icon_placement_class = icon ? 'ct-tag--icon-%s'|format(icon_placement|default('before')) : '' %}
-{% set is_external = is_external ? 'ct-tag--external' : '' %}
-{% set theme_class = 'ct-theme-%s'|format(theme|default('light')) %}
-{% set modifier_class = '%s %s %s %s %s %s'|format(theme_class, type_class, icon_class, icon_placement_class, is_external, modifier_class|default('')) %}
 
-{% if content|trim is not empty %}
-  {% set content_markup %}
-    {% if icon %}
-      {% set icon_markup %}
-        {% include '@base/icon/icon.twig' with {
-          symbol: icon,
-          modifier_class: 'ct-tag__icon',
-        } only %}
-      {% endset %}
-
-      {% if icon_placement == 'before' %}
-        {{- icon_markup -}}{{- content -}}
-      {% else %}
-        {{- content -}}{{- icon_markup -}}
-      {% endif %}
-
-    {% else %}
-      {{- content -}}
-    {% endif %}
-  {% endset %}
-
-  {% if is_new_window %}
-    {% set is_new_window_content %}
-      <span class="ct-visually-hidden">(Opens in a new tab/window)</span>
-    {% endset %}
-  {% endif %}
-
-  {% if is_external %}
-    {% set is_external_content %}
-      {% include '@base/icon/icon.twig' with {
-        symbol: 'upper-right-arrow',
-      } only %}
-    {% endset %}
-  {% endif %}
-
-  {% set tag = url is not empty ? 'a' : 'span' %}
-  <{{ tag }}
-  class="ct-tag {{ modifier_class -}}"
-  {% if url is not empty %}href="{{ url }}"{% endif %}
-  {% if url is not empty %}title="{{- content -}}"{% endif %}
-  {% if url is not empty and is_new_window %}target="_blank" aria-label="Opens in a new tab"{% endif %}
-  {% if attributes is defined and attributes is not null %}{{- attributes -}}{% endif %}
-  >
-  {{- content_markup -}}{{- is_new_window_content -}}{{- is_external_content -}}
-  </{{ tag }}>
-{% endif %}
--->
+{
+  hasContent && (
+    <Tag
+      class={classes}
+      href={url || undefined}
+      title={url ? content : undefined}
+      target={url && isNewWindow ? '_blank' : undefined}
+      aria-label={url && isNewWindow ? 'Opens in a new tab' : undefined}
+      {...rest}
+    >
+      {icon && iconPlacement === 'before' && (
+        <Fragment>
+          <Icon symbol={icon} class="ct-tag__icon" />{' '}
+        </Fragment>
+      )}
+      {content}
+      {icon && iconPlacement === 'after' && <Icon symbol={icon} class="ct-tag__icon" />}
+      {/* is_new_window_content/is_external_content are captured via an untrimmed
+          Twig `{% set %}...{% endset %}` block whose own leading newline+indent
+          becomes part of the printed value — a real leading space, not incidental. */}
+      {isNewWindow && (
+        <Fragment>
+          {' '}
+          <span class="ct-visually-hidden">(Opens in a new tab/window)</span>
+        </Fragment>
+      )}
+      {isExternal && (
+        <Fragment>
+          {' '}
+          <Icon symbol="upper-right-arrow" />
+        </Fragment>
+      )}
+    </Tag>
+  )
+}
