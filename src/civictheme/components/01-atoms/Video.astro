@@ -1,4 +1,19 @@
 ---
+/**
+ * CivicTheme Video component.
+ *
+ * Props:
+ * - theme: Theme variation (light or dark).
+ * - title: Video title.
+ * - hasControls: Whether the video should have controls.
+ * - sources: Video sources ({ url, type }).
+ * - poster: Video poster URL.
+ * - width: Video width.
+ * - height: Video height.
+ * - fallbackText: Message for browsers not supporting HTML5 video.
+ * - class: Additional CSS classes.
+ * - ...rest: Additional HTML attributes, spread onto the root <video>.
+ */
 interface Props {
   theme?: 'light' | 'dark';
   title?: string;
@@ -11,56 +26,43 @@ interface Props {
   class?: string;
   [key: string]: unknown;
 }
+
 const {
   theme = 'light',
   title,
   hasControls,
-  sources,
+  sources = [],
   poster,
   width,
   height,
-  fallbackText,
+  fallbackText: fallbackTextProp,
   class: className = '',
   ...rest
 } = Astro.props;
+
+const themeClass = `ct-theme-${theme}`;
+const classes = ['ct-video', themeClass, className].filter(Boolean).join(' ');
+const fallbackText = fallbackTextProp || "Your browser doesn't support HTML5 video.";
 ---
 
-<!-- TWIG:
-{% set theme_class = 'ct-theme-%s'|format(theme|default('light')) %}
-{% set modifier_class = '%s %s'|format(theme_class, modifier_class|default('')) %}
-
-{% if sources is not empty %}
-  {% if fallback_text is empty %}
-    {% set fallback_text = "Your browser doesn't support HTML5 video." %}
-  {% endif %}
-
-  {% set attributes = attributes is defined and attributes is not null ? attributes : create_attribute({}) %}
-
-  {% if title is not empty %}
-    {% set attributes = attributes.setAttribute('title', title) %}
-  {% endif %}
-
-  {% if has_controls %}
-    {% set attributes = attributes.setAttribute('controls', '') %}
-  {% endif %}
-
-  {% if poster is not empty %}
-    {% set attributes = attributes.setAttribute('poster', poster) %}
-  {% endif %}
-
-  {% if width is not empty %}
-    {% set attributes = attributes.setAttribute('width', width) %}
-  {% endif %}
-
-  {% if height is not empty %}
-    {% set attributes = attributes.setAttribute('height', height) %}
-  {% endif %}
-
-  <video class="ct-video {{ modifier_class -}}" {% if attributes is defined and attributes is not null %}{{- attributes -}}{% endif %}>
-    {% for source in sources %}
-      <source src="{{ source.url }}" type="{{ source.type }}"/>
-    {% endfor %}
-    {{ fallback_text }}
-  </video>
-{% endif %}
--->
+{
+  sources.length > 0 && (
+    <video
+      class={classes}
+      title={title || undefined}
+      controls={hasControls ? 'controls' : undefined}
+      poster={poster || undefined}
+      width={width || undefined}
+      height={height || undefined}
+      {...rest}
+    >
+      {sources.map((source, i) => (
+        <Fragment>
+          {i > 0 && ' '}
+          <source src={source.url} type={source.type} />
+        </Fragment>
+      ))}{' '}
+      {fallbackText}
+    </video>
+  )
+}

@@ -1,4 +1,20 @@
 ---
+/**
+ * CivicTheme Textarea component.
+ *
+ * Props:
+ * - theme: Theme variation (light or dark).
+ * - name: DOM name (required).
+ * - id: DOM ID attribute.
+ * - value: The textarea value.
+ * - placeholder: Placeholder text.
+ * - rows: Display rows count.
+ * - isInvalid: Whether the textarea is invalid.
+ * - isDisabled: Whether the textarea is disabled.
+ * - isRequired: Whether the textarea is required.
+ * - class: Additional CSS classes.
+ * - ...rest: Additional HTML attributes, spread onto the root <textarea>.
+ */
 interface Props {
   theme?: 'light' | 'dark';
   name?: string;
@@ -12,6 +28,7 @@ interface Props {
   class?: string;
   [key: string]: unknown;
 }
+
 const {
   theme = 'light',
   name,
@@ -25,24 +42,27 @@ const {
   class: className = '',
   ...rest
 } = Astro.props;
+
+const themeClass = `ct-theme-${theme}`;
+const classes = ['ct-textarea', themeClass, isInvalid && 'ct-textarea--is-invalid', className]
+  .filter(Boolean)
+  .join(' ');
 ---
 
-<!-- TWIG:
-{% set theme_class = 'ct-theme-%s'|format(theme|default('light')) %}
-{% set is_invalid_class = is_invalid ? 'ct-textarea--is-invalid' : '' %}
-{% set modifier_class = '%s %s %s'|format(theme_class, is_invalid_class, modifier_class|default(''))|trim %}
-
-{% if name is not empty %}
-  <textarea
-    class="ct-textarea {{ modifier_class -}}"
-    name="{{ name }}"
-    {% if rows %}rows="{{ rows }}"{% endif %}
-    {% if id %}id="{{ id }}"{% endif %}
-    {% if is_disabled %}disabled{% endif %}
-    {% if is_required %}required{% endif %}
-    {% if is_invalid %}aria-invalid="true"{% endif %}
-    {% if placeholder %}placeholder="{{ placeholder }}"{% endif %}
-    {% if attributes is defined and attributes is not null %}{{- attributes -}}{% endif %}
-  />{{ value|default('') }}</textarea>
-{% endif %}
--->
+{
+  name && (
+    <textarea
+      class={classes}
+      name={name}
+      rows={rows || undefined}
+      id={id || undefined}
+      disabled={isDisabled ? 'disabled' : undefined}
+      required={isRequired ? 'required' : undefined}
+      aria-invalid={isInvalid ? 'true' : undefined}
+      placeholder={placeholder || undefined}
+      {...rest}
+    >
+      {value ?? ''}
+    </textarea>
+  )
+}
