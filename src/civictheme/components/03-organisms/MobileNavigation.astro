@@ -1,0 +1,86 @@
+---
+/**
+ * CivicTheme Mobile Navigation component.
+ *
+ * Props:
+ * - theme: Theme variation (light or dark).
+ * - topMenu / bottomMenu: Menu item arrays (see `MobileNavigationMenu`).
+ * - contentTop / contentBottom: Documented as Slots upstream, but every
+ *   upstream test passes plain string props — ported as `string` props,
+ *   rendered with `set:html` per this project's autoescape convention.
+ * - class: Additional CSS classes.
+ * - ...rest: Additional HTML attributes, spread onto the root element.
+ *
+ * Note: the root element always carries `data-flyout`,
+ * `data-flyout-direction="right"` and `data-flyout-focus=".ct-link"` —
+ * behaviour hooks read by `src/civictheme/js/behaviours/flyout.js`
+ * (already vendored).
+ */
+import MobileNavigationClose from './MobileNavigationClose.astro';
+import MobileNavigationMenu from './MobileNavigationMenu.astro';
+
+interface MenuItem {
+  title?: string;
+  url?: string;
+  isExternal?: boolean;
+  below?: MenuItem[];
+}
+
+interface Props {
+  theme?: 'light' | 'dark';
+  topMenu?: MenuItem[];
+  bottomMenu?: MenuItem[];
+  contentTop?: string;
+  contentBottom?: string;
+  class?: string;
+  [key: string]: unknown;
+}
+
+const { theme = 'light', topMenu, bottomMenu, contentTop, contentBottom, class: className = '', ...rest } = Astro.props;
+
+const classes = ['ct-mobile-navigation', `ct-theme-${theme}`, className].filter(Boolean).join(' ');
+const hasTopMenu = Boolean(topMenu && topMenu.length > 0);
+const hasBottomMenu = Boolean(bottomMenu && bottomMenu.length > 0);
+---
+
+<div class={classes} data-flyout data-flyout-direction="right" data-flyout-focus=".ct-link" {...rest}>
+  <div data-flyout-panel class="ct-mobile-navigation__panel">
+    <MobileNavigationClose theme={theme} />
+    {
+      contentTop && (
+        <Fragment>
+          {' '}
+          <div class="ct-mobile-navigation__content_top" set:html={contentTop} />
+        </Fragment>
+      )
+    }
+    {
+      hasTopMenu && (
+        <Fragment>
+          {' '}
+          <div class="ct-mobile-navigation__top-menu-wrapper">
+            <MobileNavigationMenu theme={theme} items={topMenu} class="ct-mobile-navigation__top-menu" />
+          </div>
+        </Fragment>
+      )
+    }
+    {
+      hasBottomMenu && (
+        <Fragment>
+          {' '}
+          <div class="ct-mobile-navigation__bottom-menu-wrapper">
+            <MobileNavigationMenu theme={theme} items={bottomMenu} class="ct-mobile-navigation__bottom-menu" />
+          </div>
+        </Fragment>
+      )
+    }
+    {
+      contentBottom && (
+        <Fragment>
+          {' '}
+          <div class="ct-mobile-navigation__content_bottom" set:html={contentBottom} />
+        </Fragment>
+      )
+    }
+  </div>
+</div>

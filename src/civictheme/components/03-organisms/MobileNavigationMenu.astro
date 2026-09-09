@@ -1,0 +1,149 @@
+---
+/**
+ * CivicTheme Mobile Navigation Menu component.
+ *
+ * Props:
+ * - theme: Theme variation (light or dark).
+ * - items: Menu links array (see MenuItem below).
+ * - class: Additional CSS classes.
+ * - ...rest: Additional HTML attributes, spread onto the root <ul>.
+ *
+ * `menuLevel` and `parentItem` are internal recursion parameters (not part
+ * of the public Twig API), mirroring `Menu.astro`'s own recursion
+ * parameters — used when this component imports itself to render a
+ * `below` submenu.
+ *
+ * Note: `mobile-navigation-menu.twig`'s top-level `menu_links` macro is
+ * "copied as-is from `@base/menu/menu.twig`" per its own comment — so the
+ * level-0 `<ul>`/`<li>`/`Link` markup here matches `Menu.astro`'s
+ * non-collapsible branch exactly. Only its `menu_links_below` override
+ * differs from `Menu.astro`: instead of a collapsible in-page panel, each
+ * item with children renders an "open submenu" trigger button plus a
+ * nested `data-flyout` panel (its own `MobileNavigationClose` and a
+ * "back" button, then this same component recursed one level deeper) —
+ * behaviour hooks read by `src/civictheme/js/behaviours/flyout.js`
+ * (already vendored). No upstream snapshot in
+ * `mobile-navigation.test.js.snap` exercises an item with `below`, so this
+ * branch is unverified against a pinned fixture; it is a direct, careful
+ * translation of `menu_links_below`.
+ */
+import MobileNavigationMenu from './MobileNavigationMenu.astro';
+import MobileNavigationClose from './MobileNavigationClose.astro';
+import Link from '@civictheme/atoms/Link.astro';
+import Button from '@civictheme/atoms/Button.astro';
+
+interface MenuItem {
+  title?: string;
+  url?: string;
+  icon?: string | null;
+  inActiveTrail?: boolean;
+  isExpanded?: boolean;
+  isNewWindow?: boolean;
+  isExternal?: boolean;
+  attributes?: Record<string, unknown>;
+  linkAttributes?: Record<string, unknown>;
+  class?: string;
+  below?: MenuItem[];
+}
+
+interface Props {
+  theme?: 'light' | 'dark';
+  items?: MenuItem[];
+  class?: string;
+  menuLevel?: number;
+  parentItem?: MenuItem;
+  [key: string]: unknown;
+}
+
+const { theme = 'light', items = [], class: modifierClass = '', menuLevel = 0, parentItem, ...rest } = Astro.props;
+
+const themeClass = `ct-theme-${theme}`;
+
+function hasChildren(item: MenuItem): boolean {
+  return (item.below?.length ?? 0) > 0;
+}
+---
+
+{
+  items.length > 0 &&
+    (() => {
+      const itemsMarkup = items.map((item, i) => {
+        const itemHasChildren = hasChildren(item);
+        const itemClasses = [
+          'ct-menu__item',
+          `ct-menu__item--level-${menuLevel}`,
+          itemHasChildren ? 'ct-menu__item--has-children' : '',
+          item.inActiveTrail ? 'ct-menu__item--active-trail' : '',
+          item.class ?? '',
+        ].join(' ');
+
+        return (
+          <Fragment>
+            {i > 0 && ' '}
+            <li class={itemClasses} {...(item.attributes ?? {})}>
+              <Link
+                theme={theme}
+                text={item.title}
+                title={item.title}
+                url={item.url}
+                icon={item.icon}
+                iconPlacement="before"
+                class="ct-menu__item__link"
+                isNewWindow={item.isNewWindow ?? false}
+                isExternal={item.isExternal ?? false}
+                {...(item.linkAttributes ?? {})}
+              />
+              {itemHasChildren && ' '}
+              {itemHasChildren && (
+                <Fragment>
+                  <Button
+                    theme={theme}
+                    kind="button"
+                    icon="right-arrow-2"
+                    size="regular"
+                    class="ct-mobile-navigation__open-subsection-trigger"
+                    data-flyout-open-trigger=""
+                    aria-expanded="false"
+                    aria-label={`Open ${item.title} submenu`}
+                  />{' '}
+                  <div data-flyout data-flyout-direction="right" data-flyout-focus=".ct-link">
+                    <div data-flyout-panel>
+                      <MobileNavigationClose theme={theme} />
+                      <div class="ct-mobile-navigation__close-trigger">
+                        <Button
+                          theme={theme}
+                          kind="button"
+                          icon="left-arrow-outline"
+                          iconPlacement="before"
+                          size="regular"
+                          text={item.title}
+                          data-flyout-close-trigger=""
+                          aria-label={`Close ${item.title} submenu`}
+                        />
+                      </div>
+                      <MobileNavigationMenu
+                        items={item.below}
+                        menuLevel={menuLevel + 1}
+                        theme={theme}
+                        class={modifierClass}
+                      />
+                    </div>
+                  </div>
+                </Fragment>
+              )}
+            </li>
+          </Fragment>
+        );
+      });
+
+      return menuLevel === 0 ? (
+        <ul class={`ct-menu ct-menu--level-0 ${themeClass} ${modifierClass}`} data-component-name="ct-menu" {...rest}>
+          {itemsMarkup}
+        </ul>
+      ) : (
+        <div class={`ct-menu__sub-menu__wrapper ct-menu__sub-menu__wrapper--level-${menuLevel}`}>
+          <ul class={`ct-menu ct-menu__sub-menu ct-menu--level-${menuLevel}`}>{itemsMarkup}</ul>
+        </div>
+      );
+    })()
+}

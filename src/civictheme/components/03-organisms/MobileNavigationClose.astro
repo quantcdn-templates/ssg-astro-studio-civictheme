@@ -1,0 +1,43 @@
+---
+/**
+ * CivicTheme Mobile Navigation Close component.
+ *
+ * Props:
+ * - theme: Theme variation (light or dark).
+ * - text: Text for the button (defaults to "Close").
+ * - class: Additional CSS classes.
+ * - ...rest: Additional HTML attributes, spread onto the root element.
+ *
+ * Note: the rendered `Button` always carries `data-flyout-close-all-trigger`
+ * — the behaviour hook read by `src/civictheme/js/behaviours/flyout.js`
+ * (already vendored).
+ */
+import Button from '@civictheme/atoms/Button.astro';
+
+interface Props {
+  theme?: 'light' | 'dark';
+  text?: string | null;
+  class?: string;
+  [key: string]: unknown;
+}
+
+const { theme = 'light', text: textProp, class: className = '', ...rest } = Astro.props;
+
+const text = textProp ?? 'Close';
+const classes = ['ct-mobile-navigation-close', `ct-theme-${theme}`, className].filter(Boolean).join(' ');
+---
+
+<div class={classes}>
+  <Button
+    theme={theme}
+    type="tertiary"
+    kind="button"
+    size="small"
+    text={text}
+    icon="close"
+    iconPlacement="after"
+    class="ct-mobile-navigation-close__button"
+    data-flyout-close-all-trigger=""
+    {...rest}
+  />
+</div>

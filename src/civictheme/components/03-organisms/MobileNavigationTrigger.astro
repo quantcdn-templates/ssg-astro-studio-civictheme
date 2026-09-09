@@ -1,0 +1,45 @@
+---
+/**
+ * CivicTheme Mobile Navigation Trigger component.
+ *
+ * Props:
+ * - theme: Theme variation (light or dark).
+ * - text: Button text.
+ * - icon: Icon symbol name (defaults to "bars").
+ * - class: Additional CSS classes.
+ * - ...rest: Additional HTML attributes, spread onto the root element.
+ *
+ * Note: the rendered `Button` always carries `data-flyout-open-trigger`,
+ * `data-flyout-target=".ct-mobile-navigation"` and
+ * `aria-expanded="false"` — the behaviour hooks read by
+ * `src/civictheme/js/behaviours/flyout.js` (already vendored).
+ */
+import Button from '@civictheme/atoms/Button.astro';
+
+interface Props {
+  theme?: 'light' | 'dark';
+  text?: string | null;
+  icon?: string | null;
+  class?: string;
+  [key: string]: unknown;
+}
+
+const { theme = 'light', text, icon: iconProp, class: className = '', ...rest } = Astro.props;
+
+const icon = iconProp ?? 'bars';
+const classes = ['ct-mobile-navigation-trigger', className].filter(Boolean).join(' ');
+---
+
+<Button
+  theme={theme}
+  kind="button"
+  icon={icon}
+  iconPlacement="after"
+  size="small"
+  text={text}
+  class={classes}
+  data-flyout-open-trigger=""
+  data-flyout-target=".ct-mobile-navigation"
+  aria-expanded="false"
+  {...rest}
+/>
