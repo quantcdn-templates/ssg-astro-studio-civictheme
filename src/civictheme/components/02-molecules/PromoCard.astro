@@ -1,0 +1,220 @@
+---
+/**
+ * CivicTheme Promo Card component.
+ *
+ * Props:
+ * - theme: Theme variation (light or dark).
+ * - image: Card image: { url, alt }.
+ * - isTitleClick: Whether to make only the title clickable instead of the
+ *   whole card.
+ * - dateIso / date / dateEndIso / dateEnd: Date area content.
+ * - link: Card link: { url, isNewWindow, isExternal }.
+ * - subtitle: Subtitle text.
+ * - tags: Card tags: Array<{ content, url, isNewWindow }>.
+ * - title / summary / contentTop / imageOver / contentMiddle /
+ *   contentBottom: Documented as Slots upstream, but every upstream test
+ *   passes plain string props — ported as `string` props, ALL rendered
+ *   with `set:html` per this project's autoescape convention (see
+ *   PORTING.md).
+ * - class: Additional CSS classes.
+ * - ...rest: Additional HTML attributes, spread onto the root element.
+ *
+ * Note: `promo-card.twig`'s `content_tags_block` includes
+ * `@molecules/tag-list/tag-list.twig`, which is not one of this task's 11
+ * ported molecules. Its wrapper (`<div class="ct-tag-list ...">` +
+ * `@base/item-list/item-list.twig`'s `<ul>`) is inlined directly here with
+ * real `Tag` components as children — same precedent as EventCard's
+ * `content_tags_block` (see PORTING.md's tag-list revisit note).
+ *
+ * Note: `date_content`/`Datetime` replicated as a raw HTML string (fed to
+ * `Tag`'s string-only `content` prop) rather than routed through the
+ * Container API — same reasoning as EventCard's `datetimeMarkup`.
+ */
+import Image from '@civictheme/atoms/Image.astro';
+import Tag from '@civictheme/atoms/Tag.astro';
+import Paragraph from '@civictheme/atoms/Paragraph.astro';
+import Icon from '@civictheme/base/Icon.astro';
+
+interface Props {
+  theme?: 'light' | 'dark';
+  image?: { url?: string; alt?: string };
+  isTitleClick?: boolean;
+  dateIso?: string | null;
+  date?: string;
+  dateEndIso?: string | null;
+  dateEnd?: string;
+  link?: { url?: string; isNewWindow?: boolean; isExternal?: boolean };
+  subtitle?: string | null;
+  tags?: Array<string | { content?: string; url?: string; isNewWindow?: boolean }>;
+  title?: string;
+  summary?: string;
+  contentTop?: string;
+  imageOver?: string;
+  contentMiddle?: string;
+  contentBottom?: string;
+  class?: string;
+  [key: string]: unknown;
+}
+
+const {
+  theme = 'light',
+  image,
+  isTitleClick,
+  dateIso,
+  date,
+  dateEndIso,
+  dateEnd,
+  link,
+  subtitle,
+  tags,
+  title,
+  summary,
+  contentTop,
+  imageOver,
+  contentMiddle,
+  contentBottom,
+  class: className = '',
+  ...rest
+} = Astro.props;
+
+const withImage = Boolean(image?.url);
+const withLink = Boolean(link?.url);
+const isCardClickable = withLink && !isTitleClick;
+
+const classes = [
+  'ct-promo-card',
+  `ct-theme-${theme}`,
+  withImage && 'ct-promo-card--with-image',
+  imageOver && 'ct-promo-card--image-over',
+  isCardClickable && 'ct-promo-card--card-clickable',
+  className,
+]
+  .filter(Boolean)
+  .join(' ');
+
+const tagList = tags ?? [];
+
+// See EventCard's `datetimeMarkup` note: `Tag`'s `content` prop is a
+// string, not a JSX slot, so `Datetime` can't be used as a live child here.
+const stripTags = (s: string) => s.replace(/<[^>]*>/g, '');
+const escapeAttr = (v: string) => v.replace(/&/g, '&amp;').replace(/"/g, '&quot;');
+function datetimeMarkup(): string {
+  if (!date) return '';
+  let html = `<span class="ct-datetime"><time class="ct-timestamp__start" datetime="${escapeAttr(stripTags(dateIso ?? date))}">${date}</time>`;
+  if (dateEnd) {
+    html += ` — <time class="ct-timestamp__end" datetime="${escapeAttr(stripTags(dateEndIso ?? dateEnd))}">${dateEnd}</time>`;
+  }
+  html += '</span>';
+  return html;
+}
+---
+
+{
+  title && (
+    <div class={classes} {...rest}>
+      {(image?.url || imageOver) && (
+        <Fragment>
+          <div class="ct-promo-card__image">
+            <Image theme={theme} url={image?.url} alt={image?.alt} />
+            {imageOver && (
+              <Fragment>
+                {' '}
+                <div class="ct-promo-card__image__over" set:html={imageOver} />
+              </Fragment>
+            )}
+          </div>{' '}
+        </Fragment>
+      )}
+      <div class="ct-promo-card__content">
+        {contentTop && (
+          <Fragment>
+            <div class="ct-promo-card__content-top" set:html={contentTop} />{' '}
+          </Fragment>
+        )}
+        {subtitle && (
+          <Fragment>
+            <div class="ct-promo-card__subtitle">
+              <Tag theme={theme} type="tertiary" content={subtitle} />
+            </div>{' '}
+          </Fragment>
+        )}
+        {date && (
+          <Fragment>
+            <div class="ct-promo-card__date">
+              <Tag
+                theme={theme}
+                type={dateEnd ? 'secondary' : 'tertiary'}
+                content={datetimeMarkup()}
+                icon={dateEnd ? 'calendar-2' : null}
+                iconPlacement="before"
+              />
+            </div>{' '}
+          </Fragment>
+        )}
+        <div class="ct-promo-card__title">
+          {withLink ? (
+            <a class="ct-promo-card__title-link" href={link?.url} target={link?.isNewWindow ? '_blank' : undefined}>
+              <Fragment set:html={title} />
+            </a>
+          ) : (
+            <Fragment set:html={title} />
+          )}
+        </div>
+        {contentMiddle && (
+          <Fragment>
+            {' '}
+            <div class="ct-promo-card__content-middle" set:html={contentMiddle} />
+          </Fragment>
+        )}
+        {summary && (
+          <Fragment>
+            {' '}
+            <Paragraph theme={theme} content={summary} noMargin class="ct-promo-card__summary" />
+          </Fragment>
+        )}
+        {(tagList.length > 0 || withLink) && (
+          <Fragment>
+            {' '}
+            <div class="ct-promo-card__tags">
+              {tagList.length > 0 && (
+                <Fragment>
+                  <div class={['ct-tag-list', `ct-theme-${theme}`].join(' ')}>
+                    <ul class="ct-item-list ct-item-list--horizontal ct-item-list--small ct-tag-list__content">
+                      {tagList.map((tag, i) => {
+                        const tagObj = typeof tag === 'string' ? { content: tag } : tag;
+                        return (
+                          <Fragment>
+                            {i > 0 && ' '}
+                            <li class="ct-item-list__item">
+                              <Tag
+                                theme={theme}
+                                content={tagObj.content}
+                                url={tagObj.url}
+                                isNewWindow={tagObj.isNewWindow}
+                              />
+                            </li>
+                          </Fragment>
+                        );
+                      })}
+                    </ul>
+                  </div>{' '}
+                </Fragment>
+              )}
+              {isCardClickable && (
+                <div class="ct-promo-card__link-graphic">
+                  <Icon symbol="right-arrow-2" size="regular" />
+                </div>
+              )}
+            </div>
+          </Fragment>
+        )}
+        {contentBottom && (
+          <Fragment>
+            {' '}
+            <div class="ct-promo-card__content-bottom" set:html={contentBottom} />
+          </Fragment>
+        )}
+      </div>
+    </div>
+  )
+}

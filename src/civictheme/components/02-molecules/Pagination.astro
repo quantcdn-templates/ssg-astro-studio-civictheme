@@ -1,0 +1,232 @@
+---
+/**
+ * CivicTheme Pagination component.
+ *
+ * Props:
+ * - theme: Theme variation (light or dark).
+ * - headingId: Heading ID for accessibility.
+ * - itemsModifierClass: Additional classes for pagination items.
+ * - itemsPerPageTitle: Items per page field title.
+ * - itemsPerPageName: Items per page select field name.
+ * - itemsPerPageId: Items per page select field ID.
+ * - itemsPerPageAttributes: Items per page select element attributes
+ *   (spread onto `Field`'s root, matching `attributes`'s rest-spread
+ *   convention elsewhere in this port).
+ * - useEllipsis: Whether ellipsis should be shown.
+ * - items: { first?, previous?, pages?: Record<string,{href}>, next?,
+ *   last? } — first/previous/next/last are each { text?, href? }.
+ * - itemsPerPageOptions: Options for items per page (passed through
+ *   unmodified to `Field`'s `options`, same shape as `Select`'s).
+ * - current: Current page (documented as a Slot upstream, but used as a
+ *   plain scalar in `current - 1` / `current == key` comparisons — declared
+ *   as a prop since the Twig reads it as one, per the fidelity rule).
+ * - totalPages: Total page count (same "Slot but used as scalar" note as
+ *   `current` — read only in the `current < total_pages` comparison for
+ *   the ellipsis-next / next-disabled / last-disabled checks; never passed
+ *   by any upstream test, so those branches are always false here, exactly
+ *   matching upstream).
+ * - title: Active page title (same "Slot but used as scalar" note; fed
+ *   straight through to each per-page/next `Link`'s own `title` prop,
+ *   which real per-item `attributes.title` always overrides when both are
+ *   present — never exercised by any upstream test with both set).
+ * - class: Additional CSS classes.
+ * - ...rest: Additional HTML attributes, spread onto the root <nav>.
+ *
+ * Note: `hidden_text`/`aria_text` are passed by `pagination.twig` into its
+ * `@atoms/link/link.twig` includes, but `link.twig` itself declares no such
+ * props and never reads them (confirmed against `link.twig`'s doc header
+ * and body) — not declared here, per the fidelity rule to declare only
+ * props actually read.
+ */
+import Link from '@civictheme/atoms/Link.astro';
+import Field from '@civictheme/molecules/Field.astro';
+
+interface LinkTarget {
+  text?: string;
+  href?: string;
+}
+
+interface Props {
+  theme?: 'light' | 'dark';
+  headingId?: string;
+  itemsModifierClass?: string;
+  itemsPerPageTitle?: string;
+  itemsPerPageName?: string;
+  itemsPerPageId?: string;
+  itemsPerPageAttributes?: Record<string, unknown>;
+  useEllipsis?: boolean;
+  items?: {
+    first?: LinkTarget;
+    previous?: LinkTarget;
+    pages?: Record<string, { href?: string }>;
+    next?: LinkTarget;
+    last?: LinkTarget;
+  };
+  itemsPerPageOptions?: unknown[];
+  current?: string | number;
+  totalPages?: string | number;
+  title?: string;
+  class?: string;
+  [key: string]: unknown;
+}
+
+const {
+  theme = 'light',
+  headingId,
+  itemsModifierClass,
+  itemsPerPageTitle,
+  itemsPerPageName,
+  itemsPerPageId,
+  itemsPerPageAttributes,
+  useEllipsis,
+  items,
+  itemsPerPageOptions,
+  current,
+  totalPages,
+  title,
+  class: className = '',
+  ...rest
+} = Astro.props;
+
+const classes = ['ct-pagination', `ct-theme-${theme}`, className].filter(Boolean).join(' ');
+
+// pagination.twig gates on `items is not empty` — Twig's `empty` test on an
+// array/object checks its element count, so `items: []` (no keys) must not
+// render, unlike a plain JS truthiness check on `{}`/`[]`.
+const hasItems = Boolean(items && Object.keys(items).length > 0);
+
+const currentNum = Number(current);
+const totalPagesNum = Number(totalPages);
+const isFirstPrevDisabled = !(currentNum - 1);
+const isNextLastDisabled = !(currentNum < totalPagesNum);
+
+const pageEntries: Array<[string, { href?: string }]> = Object.entries(items?.pages ?? {});
+const pageCount = pageEntries.length;
+---
+
+{
+  hasItems && (
+    <nav class={classes} role="navigation" aria-labelledby={headingId || undefined} {...rest}>
+      <h4 id={headingId || undefined} class="ct-visually-hidden">
+        Pagination
+      </h4>{' '}
+      {itemsPerPageOptions && itemsPerPageOptions.length > 0 && (
+        <div class="ct-pagination__items_per_page">
+          <Field
+            theme={theme}
+            title={itemsPerPageTitle || 'Items per page'}
+            type="select"
+            orientation="horizontal"
+            name={itemsPerPageName}
+            id={itemsPerPageId}
+            options={itemsPerPageOptions as any}
+            class="ct-pagination__items_per_page__field ct-field--horizontal--fluid"
+            {...itemsPerPageAttributes}
+          />
+        </div>
+      )}
+      {itemsPerPageOptions && itemsPerPageOptions.length > 0 && ' '}
+      <ul class={`ct-pagination__items ${itemsModifierClass || ''}`}>
+        {items?.first && (
+          <Fragment>
+            <li class="ct-pagination__item ct-pagination__item--first hide-xxs show-m">
+              <Link
+                theme={theme}
+                text={items.first.text || 'First'}
+                url={items.first.href}
+                isDisabled={isFirstPrevDisabled}
+                icon="left-arrow"
+                iconPlacement="before"
+                title="Go to first page"
+                class="ct-pagination__link"
+              />
+            </li>{' '}
+          </Fragment>
+        )}
+        <li class="ct-pagination__item ct-pagination__item--previous">
+          <Link
+            theme={theme}
+            text={items?.previous?.text || 'Prev'}
+            url={items?.previous?.href}
+            isDisabled={isFirstPrevDisabled}
+            icon="left-arrow"
+            iconPlacement="before"
+            title={isFirstPrevDisabled ? 'Go to previous page' : `Go to previous page - page ${currentNum - 1}`}
+            class="ct-pagination__link"
+          />
+        </li>
+        {pageEntries.map(([key, item], i) => {
+          const isActive = Number(key) === currentNum;
+          const isLoopFirst = i === 0;
+          const isLoopLast = i === pageEntries.length - 1;
+          return (
+            <Fragment>
+              {isLoopLast && useEllipsis && currentNum > 1 && (
+                <Fragment>
+                  {' '}
+                  <li
+                    class="ct-pagination__item ct-pagination__item--ellipsis ct-pagination__item--ellipsis-previous"
+                    role="presentation"
+                  >
+                    &hellip;
+                  </li>
+                </Fragment>
+              )}{' '}
+              <li class={isActive ? 'ct-pagination__item ct-pagination__item--active' : 'ct-pagination__item hide-xxs show-m'}>
+                <Link
+                  theme={theme}
+                  text={`${key}`}
+                  isActive={isActive}
+                  url={item.href}
+                  title={title || (isActive ? 'Current page' : `Go to page ${key} of ${pageCount}`)}
+                  class="ct-pagination__item__link"
+                />
+              </li>
+              {isLoopFirst && useEllipsis && currentNum < totalPagesNum && (
+                <Fragment>
+                  {' '}
+                  <li
+                    class="ct-pagination__item ct-pagination__item--ellipsis ct-pagination__item--ellipsis-next"
+                    role="presentation"
+                  >
+                    &hellip;
+                  </li>
+                </Fragment>
+              )}
+            </Fragment>
+          );
+        })}
+        {pageEntries.length > 0 && ' '}
+        <li class="ct-pagination__item ct-pagination__item--next">
+          <Link
+            theme={theme}
+            text={items?.next?.text || 'Next'}
+            url={items?.next?.href}
+            isDisabled={isNextLastDisabled}
+            icon="right-arrow-2"
+            iconPlacement="after"
+            title={title || (isNextLastDisabled ? 'Go to next page' : `Go to next page - page ${currentNum + 1}`)}
+            class="ct-pagination__link"
+          />
+        </li>
+        {items?.last && (
+          <Fragment>
+            {' '}
+            <li class="ct-pagination__item ct-pagination__item--last hide-xxs show-m">
+              <Link
+                theme={theme}
+                text={items.last.text || 'Last'}
+                url={items.last.href}
+                isDisabled={isNextLastDisabled}
+                icon="right-arrow-2"
+                iconPlacement="after"
+                title="Go to last page"
+                class="ct-pagination__link"
+              />
+            </li>
+          </Fragment>
+        )}
+      </ul>
+    </nav>
+  )
+}
