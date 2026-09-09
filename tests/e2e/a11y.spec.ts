@@ -64,8 +64,10 @@ const listingAndDetailPages = [
   '/publications/annual-report-2025',
 ];
 
-// `/accessibility` is a built public route (`src/pages/accessibility.astro` /
-// `dist/accessibility.html`), same as the other reference pages above.
+// `/accessibility` is a built public route — authored as
+// `src/content/pages/accessibility.mdx` and rendered by the
+// `src/pages/[...slug].astro` catch-all (`dist/accessibility/index.html`),
+// same as the other reference pages above.
 const otherPages = ['/accessibility', '/search', '/404.html'];
 
 const pages = [...referencePages, ...componentPages, ...listingAndDetailPages, ...otherPages];
@@ -154,7 +156,10 @@ test.describe.configure({ mode: 'serial' });
 
 for (const path of pages) {
   test(`no serious/critical axe violations on ${path}`, async ({ page }) => {
-    await page.goto(path);
+    // A 404/500 still renders a page axe can scan cleanly, so assert the
+    // route actually exists before trusting a "no violations" result.
+    const response = await page.goto(path);
+    expect(response!.status(), `expected 200 for ${path}`).toBe(200);
     let builder = new AxeBuilder({ page }).withTags(['wcag2a', 'wcag2aa']);
     for (const selector of [...EXCLUDE_ALWAYS, ...(EXTRA_EXCLUDES[path] ?? [])]) {
       builder = builder.exclude(selector);
