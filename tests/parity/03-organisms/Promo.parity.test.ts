@@ -1,6 +1,6 @@
-import { describe } from 'vitest';
+import { describe, it, expect } from 'vitest';
 import Promo from '@civictheme/organisms/Promo.astro';
-import { parityCase, expectAllKeysCovered } from '../harness';
+import { parityCase, expectAllKeysCovered, renderNormalised } from '../harness';
 
 const meta = { layer: '03-organisms', name: 'promo' };
 
@@ -72,4 +72,13 @@ describe('Promo', () => {
   });
 
   expectAllKeysCovered(meta, [REQUIRED_KEY, ALL_KEY, NO_BOTTOM_LINK_KEY, NO_TOP_BOTTOM_KEY, EMPTY_KEY]);
+
+  // Not exercised by any upstream snapshot: `{% if link %}` is a plain
+  // Twig truthy test on an object, which (like the `is not empty` review
+  // fixes already documented in PORTING.md) is a property-count check —
+  // `link: {}` is falsy, same as `null`/absent, not "any object is truthy".
+  it('does not render the links row for an empty link object', async () => {
+    const html = await renderNormalised(Promo, { title: 'T', content: 'C', link: {} });
+    expect(html).not.toContain('ct-promo__links');
+  });
 });

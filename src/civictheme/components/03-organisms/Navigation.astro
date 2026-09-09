@@ -111,8 +111,14 @@ function dropdownModifierClass(): string {
 
 // Only top-level items are augmented/stripped — mirrors navigation.twig's
 // `items|keys` loop, which never recurses into `below`.
+// `{% if items[key].below %}` is false for an empty array too — Twig
+// arrays are falsy when empty, same as truthy-array semantics elsewhere in
+// this port (see Menu.astro's `hasChildren`). Gate on length, not mere
+// presence: an item with `below: []` must get neither the collapsible
+// attributes/class (dropdown/drawer) nor have `below` stripped (none/inline)
+// — it is already a no-op in both branches, so leave it untouched.
 const menuItems = items.map((item) => {
-  if (!item.below) return item;
+  if ((item.below?.length ?? 0) === 0) return item;
   if (!isDropdownType) return { ...item, below: undefined };
   return { ...item, attributes: collapsibleAttrs(), class: dropdownModifierClass() };
 });

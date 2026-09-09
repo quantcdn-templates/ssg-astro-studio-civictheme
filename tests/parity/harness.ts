@@ -4,6 +4,12 @@
  *
  * Usage contract for every `<Name>.parity.test.ts` file:
  *   1. Define `const meta = { layer: '01-atoms', name: 'paragraph' };` (etc).
+ *      If the upstream `.snap`/`.test.js` file lives in a directory whose
+ *      name differs from `name` (e.g. `slide.test.js.snap` lives inside the
+ *      `slider/` directory, alongside `slider.twig`), add `dir: 'slider'` —
+ *      the directory segment then reads `meta.dir`, while the `.snap`
+ *      filename stem still reads `meta.name` (matching the upstream file's
+ *      own basename, not the directory's).
  *   2. Call `parityCase(meta, key, Component, props?, slots?)` once per
  *      `test(...)` in the upstream `<name>.test.js` that has a matching
  *      snapshot key.
@@ -29,8 +35,22 @@ export async function renderComponent(
   return container.renderToString(Component, { props, slots });
 }
 
-function snapshotFile(root: string, layer: string, name: string): string {
-  return join(root, 'packages/twig/components', layer, name, '__snapshots__', `${name}.test.js.snap`);
+/** A component's location: `dir` is the directory segment when it differs from `name` (see the usage contract above). */
+export interface SnapshotMeta {
+  layer: string;
+  name: string;
+  dir?: string;
+}
+
+function snapshotFile(root: string, meta: SnapshotMeta): string {
+  return join(
+    root,
+    'packages/twig/components',
+    meta.layer,
+    meta.dir ?? meta.name,
+    '__snapshots__',
+    `${meta.name}.test.js.snap`
+  );
 }
 
 /**
@@ -73,9 +93,9 @@ function unescapeSnapshotBody(raw: string): string {
 // another entry's snapshot body) cannot be mistaken for a real entry.
 const SNAPSHOT_ENTRY_RE = /exports\[`((?:\\.|[^`\\])*)`\] = `(?:\\.|[^`\\])*`;/g;
 
-/** Lists every `exports[`…`]` key defined in the `.snap` file for `layer`/`name`. */
-export function listSnapshotKeys(layer: string, name: string, root: string = UIKIT): string[] {
-  const file = snapshotFile(root, layer, name);
+/** Lists every `exports[`…`]` key defined in the `.snap` file for `meta`. */
+export function listSnapshotKeys(meta: SnapshotMeta, root: string = UIKIT): string[] {
+  const file = snapshotFile(root, meta);
   const src = readFileSync(file, 'utf8');
   return [...src.matchAll(SNAPSHOT_ENTRY_RE)].map((m) => unescapeSnapshotBody(m[1]));
 }
@@ -275,8 +295,8 @@ export function dedentPrettyPrintedHtml(body: string): string {
   }, '');
 }
 
-export function upstreamSnapshot(layer: string, name: string, key: string, root: string = UIKIT): string {
-  const file = snapshotFile(root, layer, name);
+export function upstreamSnapshot(meta: SnapshotMeta, key: string, root: string = UIKIT): string {
+  const file = snapshotFile(root, meta);
   const src = readFileSync(file, 'utf8');
   const raw = extractSnapshotBody(src, key, file);
   const dedented = dedentPrettyPrintedHtml(unescapeSnapshotBody(raw));
@@ -383,9 +403,9 @@ export async function renderNormalised(
   return normaliseHtml(await renderComponent(Component, props, slots));
 }
 
-/** Defines one vitest case comparing Astro output to the upstream snapshot `key`. `layer`/`name` are the component's location, given explicitly via `meta`. */
+/** Defines one vitest case comparing Astro output to the upstream snapshot `key`. `meta` is the component's location (see the usage contract above for `dir`). */
 export function parityCase(
-  meta: { layer: string; name: string },
+  meta: SnapshotMeta,
   key: string,
   Component: any,
   props?: Record<string, unknown>,
@@ -393,21 +413,17 @@ export function parityCase(
 ) {
   it(key, async () => {
     const actual = await renderNormalised(Component, props, slots);
-    const expected = normaliseHtml(upstreamSnapshot(meta.layer, meta.name, key));
+    const expected = normaliseHtml(upstreamSnapshot(meta, key));
     expect(actual).toBe(expected);
   });
 }
 
 /**
- * Pure helper: returns every upstream snapshot key for `meta.layer`/`meta.name`
+ * Pure helper: returns every upstream snapshot key for `meta`
  * that is NOT present in `coveredKeys`. Empty when every key is covered.
  */
-export function missingSnapshotKeys(
-  meta: { layer: string; name: string },
-  coveredKeys: string[],
-  root: string = UIKIT
-): string[] {
-  const allKeys = listSnapshotKeys(meta.layer, meta.name, root);
+export function missingSnapshotKeys(meta: SnapshotMeta, coveredKeys: string[], root: string = UIKIT): string[] {
+  const allKeys = listSnapshotKeys(meta, root);
   return allKeys.filter((k) => !coveredKeys.includes(k));
 }
 
@@ -416,11 +432,7 @@ export function missingSnapshotKeys(
  * the missing keys, if the `.snap` file defines a key not present in
  * `coveredKeys` (the keys already passed to `parityCase` in the same file).
  */
-export function expectAllKeysCovered(
-  meta: { layer: string; name: string },
-  coveredKeys: string[],
-  root: string = UIKIT
-) {
+export function expectAllKeysCovered(meta: SnapshotMeta, coveredKeys: string[], root: string = UIKIT) {
   it('covers every upstream snapshot key', () => {
     expect(missingSnapshotKeys(meta, coveredKeys, root)).toEqual([]);
   });

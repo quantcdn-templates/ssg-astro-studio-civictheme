@@ -88,25 +88,24 @@ describe('unwrapSnapshotHtml', () => {
 });
 
 describe('upstreamSnapshot (fixture .snap)', () => {
+  const meta = { layer: 'fixture-atoms', name: 'widget' };
+
   it('unwraps the outer <div> from a real snapshot entry', () => {
-    const html = upstreamSnapshot('fixture-atoms', 'widget', 'Widget renders div wrapper 1', FIXTURE_ROOT);
+    const html = upstreamSnapshot(meta, 'Widget renders div wrapper 1', FIXTURE_ROOT);
     expect(normaliseHtml(html)).toBe(normaliseHtml('<span class="k">v</span>'));
   });
 
   it('unescapes a backtick and a ${ interpolation marker in the snapshot body', () => {
-    const html = upstreamSnapshot(
-      'fixture-atoms',
-      'widget',
-      'Widget renders backtick and interpolation 1',
-      FIXTURE_ROOT
-    );
+    const html = upstreamSnapshot(meta, 'Widget renders backtick and interpolation 1', FIXTURE_ROOT);
     expect(normaliseHtml(html)).toBe(normaliseHtml('<code>`escaped` and ${interpolated}</code>'));
   });
 });
 
 describe('listSnapshotKeys', () => {
+  const meta = { layer: 'fixture-atoms', name: 'widget' };
+
   it('lists every exports[`…`] key in the .snap file, escape-aware', () => {
-    expect(listSnapshotKeys('fixture-atoms', 'widget', FIXTURE_ROOT)).toEqual([
+    expect(listSnapshotKeys(meta, FIXTURE_ROOT)).toEqual([
       'Widget renders div wrapper 1',
       'Widget renders backtick and interpolation 1',
       'Widget `quoted` name 1',
@@ -115,12 +114,39 @@ describe('listSnapshotKeys', () => {
   });
 
   it('round-trips a key containing a backtick through upstreamSnapshot', () => {
-    const html = upstreamSnapshot('fixture-atoms', 'widget', 'Widget `quoted` name 1', FIXTURE_ROOT);
+    const html = upstreamSnapshot(meta, 'Widget `quoted` name 1', FIXTURE_ROOT);
     expect(normaliseHtml(html)).toBe(normaliseHtml('<span class="k">quoted-key</span>'));
   });
 
   it('does not count an exports[`…`] look-alike inside a snapshot body as its own key', () => {
-    expect(listSnapshotKeys('fixture-atoms', 'widget', FIXTURE_ROOT)).not.toContain('not a real key');
+    expect(listSnapshotKeys(meta, FIXTURE_ROOT)).not.toContain('not a real key');
+  });
+});
+
+describe('meta.dir (directory segment differs from the .snap filename stem)', () => {
+  // Mirrors the real `slide.test.js.snap` situation: `slide.twig`/
+  // `slide.test.js` live inside the upstream `slider/` directory, not a
+  // `slide/` directory of their own. This fixture reproduces that shape:
+  // `widget-in-container.test.js.snap` lives inside a `widget-container/`
+  // directory (`dir`), not a `widget-in-container/` directory (`name`).
+  const meta = { layer: 'fixture-atoms', name: 'widget-in-container', dir: 'widget-container' };
+
+  it('listSnapshotKeys finds the .snap file via meta.dir, not meta.name', () => {
+    expect(listSnapshotKeys(meta, FIXTURE_ROOT)).toEqual(['WidgetInContainer renders 1']);
+  });
+
+  it('upstreamSnapshot reads the same file via meta.dir', () => {
+    const html = upstreamSnapshot(meta, 'WidgetInContainer renders 1', FIXTURE_ROOT);
+    expect(normaliseHtml(html)).toBe(normaliseHtml('<span class="k">contained</span>'));
+  });
+
+  it('missingSnapshotKeys/expectAllKeysCovered also thread meta.dir through', () => {
+    expect(missingSnapshotKeys(meta, [], FIXTURE_ROOT)).toEqual(['WidgetInContainer renders 1']);
+    expect(missingSnapshotKeys(meta, ['WidgetInContainer renders 1'], FIXTURE_ROOT)).toEqual([]);
+  });
+
+  it('omitting dir when name does not match the real directory fails to find the file (sanity check)', () => {
+    expect(() => listSnapshotKeys({ layer: 'fixture-atoms', name: 'widget-in-container' }, FIXTURE_ROOT)).toThrow();
   });
 });
 
@@ -218,34 +244,23 @@ describe('dedentPrettyPrintedHtml', () => {
     const meta = { layer: 'fixture-atoms', name: 'spacing' };
 
     it('two sibling <span>s on adjacent indented lines normalise WITHOUT a space between them', () => {
-      const html = upstreamSnapshot(meta.layer, meta.name, 'Spacing adjacent siblings with no gap 1', FIXTURE_ROOT);
+      const html = upstreamSnapshot(meta, 'Spacing adjacent siblings with no gap 1', FIXTURE_ROOT);
       expect(normaliseHtml(html)).toBe(normaliseHtml('<span class="a">Foo</span><span class="b">Bar</span>'));
     });
 
     it('the same siblings with a whitespace-only line between them normalise WITH a single space', () => {
-      const html = upstreamSnapshot(
-        meta.layer,
-        meta.name,
-        'Spacing adjacent siblings with a whitespace gap 1',
-        FIXTURE_ROOT
-      );
+      const html = upstreamSnapshot(meta, 'Spacing adjacent siblings with a whitespace gap 1', FIXTURE_ROOT);
       expect(normaliseHtml(html)).toBe(normaliseHtml('<span class="a">Foo</span> <span class="b">Bar</span>'));
     });
 
     it('a multi-attribute tag split across lines parses with both attributes intact', () => {
-      const html = upstreamSnapshot(
-        meta.layer,
-        meta.name,
-        'Spacing multi-attribute tag split across lines 1',
-        FIXTURE_ROOT
-      );
+      const html = upstreamSnapshot(meta, 'Spacing multi-attribute tag split across lines 1', FIXTURE_ROOT);
       expect(normaliseHtml(html)).toBe(normaliseHtml('<a class="x" href="y">z</a>'));
     });
 
     it('a text node printed with less than its structural indent (field.snap-shaped) keeps its real content intact', () => {
       const html = upstreamSnapshot(
-        meta.layer,
-        meta.name,
+        meta,
         'Spacing text node with less indentation than its structural depth 1',
         FIXTURE_ROOT
       );
@@ -256,12 +271,7 @@ describe('dedentPrettyPrintedHtml', () => {
     });
 
     it('a multi-line text node (embedded newline, no pinned snapshot exercises this) normalises to one space', () => {
-      const html = upstreamSnapshot(
-        meta.layer,
-        meta.name,
-        'Spacing multi-line text node (embedded newline) 1',
-        FIXTURE_ROOT
-      );
+      const html = upstreamSnapshot(meta, 'Spacing multi-line text node (embedded newline) 1', FIXTURE_ROOT);
       expect(normaliseHtml(html)).toBe(normaliseHtml('<span class="a">Hello World</span>'));
     });
   });
@@ -270,7 +280,10 @@ describe('dedentPrettyPrintedHtml', () => {
     it('keeps the real leading space on the text node after </em> intact', () => {
       // No explicit root: uses the default UIKIT path (the real
       // `.upstream/uikit` checkout), not the hand-authored fixtures above.
-      const html = upstreamSnapshot('02-molecules', 'field', 'Field Component textarea with all attributes 1');
+      const html = upstreamSnapshot(
+        { layer: '02-molecules', name: 'field' },
+        'Field Component textarea with all attributes 1'
+      );
       expect(html).toContain('</em> has an error');
     });
   });

@@ -1,98 +1,45 @@
 import { describe, it, expect } from 'vitest';
 import Slide from '@civictheme/organisms/Slide.astro';
-import { renderNormalised, normaliseHtml } from '../harness';
+import { parityCase, expectAllKeysCovered, renderNormalised } from '../harness';
 
 /**
- * `slide.twig` and `slide.test.js` (with its own `__snapshots__/
- * slide.test.js.snap`) live inside the SAME upstream directory as
- * `slider.twig`/`slider.test.js` (`03-organisms/slider/`, not a `slide/`
- * directory of its own) — see the task brief's note on this pairing. The
- * harness's `snapshotFile`/`upstreamSnapshot` build a snapshot's path from
- * a single `name` used for BOTH the directory segment and the `.snap`
- * filename stem, so there is no `meta` shape that reaches
- * `slide.test.js.snap` through `parityCase` without a harness change (out
- * of scope for this task). The 4 upstream `Slide Component` snapshot cases
- * are instead reproduced here as literal expected-markup strings — copied
- * by hand from `__snapshots__/slide.test.js.snap` — compared via the same
- * `normaliseHtml` the harness itself uses, so this is byte-for-byte the
- * same comparison `parityCase` would perform, just without the automatic
- * `.snap`-file lookup.
+ * `slide.twig` and its own `.test.js`/`__snapshots__/slide.test.js.snap`
+ * live inside the SAME upstream directory as `slider.twig`/`slider.test.js`
+ * (`03-organisms/slider/`, not a `slide/` directory of its own) — see the
+ * task brief's note on this pairing. `meta.dir` (added to the harness for
+ * exactly this shape) points the directory segment at `slider` while
+ * `meta.name` stays `slide`, matching the `.snap` filename stem.
  */
+const meta = { layer: '03-organisms', name: 'slide', dir: 'slider' };
+
+const DEFAULT_H3_KEY = 'Slide Component renders with default heading level (h3) 1';
+const LEVEL_2_KEY = 'Slide Component renders with heading level 2 when heading_level is 2 1';
+const LEVEL_3_KEY = 'Slide Component renders with heading level 3 when heading_level is 3 1';
+const NO_TITLE_KEY = 'Slide Component does not render heading when title is empty 1';
+
 describe('Slide', () => {
-  it('renders with default heading level (h3) — matches upstream snapshot', async () => {
-    const actual = await renderNormalised(Slide, { title: 'Slide Title', content: 'Slide content' });
-    const expected = normaliseHtml(`
-      <div aria-roledescription="slide" class="ct-slide ct-theme-light" data-slider-slide="" role="group">
-        <div class="row ct-slide__row">
-          <div class="col-xxs-12 col-m-5 col-m-offset-1 ct-flex-align-self-center">
-            <div class="ct-slide__inner">
-              <h3 class="ct-heading ct-slide__title ct-theme-light" data-toc-exclude="">Slide Title</h3>
-              <div class="ct-paragraph ct-theme-light ct-paragraph--regular ct-slide__content">Slide content</div>
-            </div>
-          </div>
-        </div>
-      </div>
-    `);
-    expect(actual).toBe(expected);
+  parityCase(meta, DEFAULT_H3_KEY, Slide, {
+    title: 'Slide Title',
+    content: 'Slide content',
   });
 
-  it('renders with heading level 2 when headingLevel is 2 — matches upstream snapshot', async () => {
-    const actual = await renderNormalised(Slide, {
-      title: 'Slide Title',
-      content: 'Slide content',
-      headingLevel: 2,
-    });
-    const expected = normaliseHtml(`
-      <div aria-roledescription="slide" class="ct-slide ct-theme-light" data-slider-slide="" role="group">
-        <div class="row ct-slide__row">
-          <div class="col-xxs-12 col-m-5 col-m-offset-1 ct-flex-align-self-center">
-            <div class="ct-slide__inner">
-              <h2 class="ct-heading ct-slide__title ct-theme-light" data-toc-exclude="">Slide Title</h2>
-              <div class="ct-paragraph ct-theme-light ct-paragraph--regular ct-slide__content">Slide content</div>
-            </div>
-          </div>
-        </div>
-      </div>
-    `);
-    expect(actual).toBe(expected);
+  parityCase(meta, LEVEL_2_KEY, Slide, {
+    title: 'Slide Title',
+    content: 'Slide content',
+    headingLevel: 2,
   });
 
-  it('renders with heading level 3 when headingLevel is 3 — matches upstream snapshot', async () => {
-    const actual = await renderNormalised(Slide, {
-      title: 'Slide Title',
-      content: 'Slide content',
-      headingLevel: 3,
-    });
-    const expected = normaliseHtml(`
-      <div aria-roledescription="slide" class="ct-slide ct-theme-light" data-slider-slide="" role="group">
-        <div class="row ct-slide__row">
-          <div class="col-xxs-12 col-m-5 col-m-offset-1 ct-flex-align-self-center">
-            <div class="ct-slide__inner">
-              <h3 class="ct-heading ct-slide__title ct-theme-light" data-toc-exclude="">Slide Title</h3>
-              <div class="ct-paragraph ct-theme-light ct-paragraph--regular ct-slide__content">Slide content</div>
-            </div>
-          </div>
-        </div>
-      </div>
-    `);
-    expect(actual).toBe(expected);
+  parityCase(meta, LEVEL_3_KEY, Slide, {
+    title: 'Slide Title',
+    content: 'Slide content',
+    headingLevel: 3,
   });
 
-  it('does not render heading when title is empty — matches upstream snapshot', async () => {
-    const actual = await renderNormalised(Slide, { content: 'Slide content' });
-    const expected = normaliseHtml(`
-      <div aria-roledescription="slide" class="ct-slide ct-theme-light" data-slider-slide="" role="group">
-        <div class="row ct-slide__row">
-          <div class="col-xxs-12 col-m-5 col-m-offset-1 ct-flex-align-self-center">
-            <div class="ct-slide__inner">
-              <div class="ct-paragraph ct-theme-light ct-paragraph--regular ct-slide__content">Slide content</div>
-            </div>
-          </div>
-        </div>
-      </div>
-    `);
-    expect(actual).toBe(expected);
+  parityCase(meta, NO_TITLE_KEY, Slide, {
+    content: 'Slide content',
   });
+
+  expectAllKeysCovered(meta, [DEFAULT_H3_KEY, LEVEL_2_KEY, LEVEL_3_KEY, NO_TITLE_KEY]);
 
   // None of the following is exercised by any upstream snapshot
   // (slide.test.js only varies heading_level) — direct assertions on the

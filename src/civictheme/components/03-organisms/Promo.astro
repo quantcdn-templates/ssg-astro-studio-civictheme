@@ -65,6 +65,13 @@ const verticalSpacingClass = ['top', 'bottom', 'both'].includes(verticalSpacing 
 const classes = `ct-promo ${themeClass} ${withBackgroundClass} ${verticalSpacingClass} ${className}`;
 
 const contained = isContained === undefined ? true : isContained;
+
+// `{% if link %}` — Twig's plain truthy test on an object is also a
+// property-count check (same underlying `count()` Twig's `empty` test
+// uses), so `link: {}` is falsy, same as `null`/absent. Matches the
+// Banner/Promo `is not empty` review-fix semantics already documented in
+// PORTING.md, just reached via a different Twig operator.
+const hasLink = Object.keys(link ?? {}).length > 0;
 ---
 
 {
@@ -82,17 +89,17 @@ const contained = isContained === undefined ? true : isContained;
               {title && <Heading content={title} level={4} theme={theme} class="ct-promo__title" />}{' '}
               {content && <Paragraph theme={theme} content={content} class="ct-promo__content" />}
             </div>{' '}
-            {link && (
+            {hasLink && (
               <div class="ct-promo__links">
                 <Button
                   theme={theme}
                   type="secondary"
                   kind="link"
                   size="large"
-                  text={link.text}
-                  url={link.url}
-                  isNewWindow={link.isNewWindow ?? false}
-                  isExternal={link.isExternal ?? false}
+                  text={link?.text}
+                  url={link?.url}
+                  isNewWindow={link?.isNewWindow ?? false}
+                  isExternal={link?.isExternal ?? false}
                   class="ct-promo__button"
                 />
               </div>
