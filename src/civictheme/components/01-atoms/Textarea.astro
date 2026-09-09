@@ -61,8 +61,7 @@ const classes = ['ct-textarea', themeClass, isInvalid && 'ct-textarea--is-invali
       aria-invalid={isInvalid ? 'true' : undefined}
       placeholder={placeholder || undefined}
       {...rest}
-    >
-      {value ?? ''}
-    </textarea>
+      set:html={value ?? ''}
+    />
   )
 }
