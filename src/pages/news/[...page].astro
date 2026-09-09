@@ -2,10 +2,11 @@
 /**
  * News listing, ten entries per page (`PAGE_SIZE`).
  *
- * A rest parameter keeps page 1 at `/news` and puts later pages at
- * `/news/2`, `/news/3`, … The sibling `[slug].astro` route owns the
- * detail pages; a numeric entry id would be the only way the two could
- * collide.
+ * A rest parameter keeps page 1 at `/news`, and `listingPaths` puts later
+ * pages under a `page/` segment — `/news/page/2`, `/news/page/3`, … That
+ * segment keeps the pager out of the sibling `[slug].astro` route's
+ * namespace: without it, `/news/2` would be both the second pager page
+ * and the detail page of an entry whose id is `2`.
  */
 import type { GetStaticPaths, Page } from 'astro';
 import type { CollectionEntry } from 'astro:content';

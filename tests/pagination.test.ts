@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest';
 import type { PaginateFunction } from 'astro';
-import { PAGE_SIZE, listingPaths, paginationItems } from '../src/lib/pagination';
+import { PAGE_SIZE, listingPaths, pageHref, paginationItems } from '../src/lib/pagination';
 
 // A type alias, not an interface: an interface has no implicit index
 // signature, so it would not satisfy `listingPaths`'s
@@ -50,10 +50,20 @@ describe('listingPaths', () => {
     expect(paths.every((p) => p.props.page.lastPage === 2)).toBe(true);
   });
 
-  it('keeps page one on the bare collection path and numbers the rest', () => {
+  it('keeps page one on the bare collection path and puts the rest under page/', () => {
     const paths = listingPaths(fakePaginate, entries) as unknown as Array<{ params: { page?: string } }>;
     expect(paths[0]!.params.page).toBeUndefined();
-    expect(paths[1]!.params.page).toBe('2');
+    expect(paths[1]!.params.page).toBe('page/2');
+  });
+
+  it('never emits a bare numeric rest parameter, which would collide with [slug]', () => {
+    const many = Array.from({ length: 25 }, (_, i) => ({ id: `entry-${i + 1}` }));
+    const paths = listingPaths(fakePaginate, many) as unknown as Array<{ params: { page?: string } }>;
+    expect(paths).toHaveLength(3);
+    expect(paths.map((p) => p.params.page)).toEqual([undefined, 'page/2', 'page/3']);
+    for (const path of paths.slice(1)) {
+      expect(path.params.page).not.toMatch(/^\d+$/);
+    }
   });
 
   it('produces a single page when the collection fits on one', () => {
@@ -62,27 +72,45 @@ describe('listingPaths', () => {
   });
 });
 
+describe('pageHref', () => {
+  it('keeps page one bare and puts later pages under page/', () => {
+    expect(pageHref('/events', 1)).toBe('/events');
+    expect(pageHref('/events', 2)).toBe('/events/page/2');
+    expect(pageHref('/events', 7)).toBe('/events/page/7');
+  });
+});
+
 describe('paginationItems', () => {
-  it('links page one to the base path and later pages to numbered paths', () => {
+  it('links page one to the base path and later pages under page/', () => {
     const items = paginationItems({ currentPage: 1, lastPage: 2 }, '/events');
     expect(Object.keys(items.pages)).toEqual(['1', '2']);
     expect(items.pages['1']).toEqual({ href: '/events' });
-    expect(items.pages['2']).toEqual({ href: '/events/2' });
+    expect(items.pages['2']).toEqual({ href: '/events/page/2' });
   });
 
   it('clamps previous on the first page and next on the last page', () => {
     const first = paginationItems({ currentPage: 1, lastPage: 2 }, '/news');
     expect(first.previous).toEqual({ href: '/news' });
-    expect(first.next).toEqual({ href: '/news/2' });
+    expect(first.next).toEqual({ href: '/news/page/2' });
 
     const last = paginationItems({ currentPage: 2, lastPage: 2 }, '/news');
     expect(last.previous).toEqual({ href: '/news' });
-    expect(last.next).toEqual({ href: '/news/2' });
+    expect(last.next).toEqual({ href: '/news/page/2' });
   });
 
   it('always supplies first and last targets — Pagination disables, never omits, them', () => {
     const items = paginationItems({ currentPage: 1, lastPage: 3 }, '/publications');
     expect(items.first).toEqual({ href: '/publications' });
-    expect(items.last).toEqual({ href: '/publications/3' });
+    expect(items.last).toEqual({ href: '/publications/page/3' });
+  });
+
+  it('never produces a bare numeric segment under the collection path', () => {
+    const items = paginationItems({ currentPage: 2, lastPage: 4 }, '/events');
+    const hrefs = [items.first, items.previous, items.next, items.last]
+      .map((target) => target?.href)
+      .concat(Object.values(items.pages).map((target) => target.href));
+    for (const href of hrefs) {
+      expect(href).not.toMatch(/^\/events\/\d+$/);
+    }
   });
 });

@@ -54,6 +54,12 @@ describe('astro build', () => {
     expect(sitemap).toContain('https://example.com/events');
     expect(sitemap).not.toContain('/components/behaviours');
   });
+  it('emits no bare-numeric page in a collection directory (pager lives under page/)', () => {
+    for (const collection of ['events', 'news', 'publications']) {
+      const files = readdirSync(join(root, 'dist', collection));
+      expect(files.filter((file) => /^\d+\.html$/.test(file))).toEqual([]);
+    }
+  });
   it('renders no pagination wrapper while every listing fits on one page', () => {
     const events = readFileSync(join(root, 'dist/events.html'), 'utf8');
     expect(events).not.toContain('ct-list__pagination');
