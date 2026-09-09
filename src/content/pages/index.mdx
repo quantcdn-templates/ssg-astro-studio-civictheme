@@ -6,8 +6,9 @@ bannerType: large
 bannerImage: /civictheme/backgrounds/civictheme_background_2.png
 bannerTheme: dark
 showBreadcrumb: false
-showLastUpdated: false
+showLastUpdated: true
 topics: []
+updated: 2026-09-01
 draft: false
 order: 0
 ---
@@ -16,23 +17,48 @@ order: 0
 
 <ListingAuto collection="events" title="Upcoming events" limit={3} />
 
-<Grid templateColumnCount={4}>
-  <div class="col-xxs-12 col-m-3">
-    <SubjectCard title="For individuals" link={{ url: '/individuals' }} />
-  </div>
-  <div class="col-xxs-12 col-m-3">
-    <SubjectCard title="For businesses" link={{ url: '/businesses' }} />
-  </div>
-  <div class="col-xxs-12 col-m-3">
-    <SubjectCard title="For government" link={{ url: '/government' }} />
-  </div>
-  <div class="col-xxs-12 col-m-3">
-    <SubjectCard title="Home" link={{ url: '/' }} />
-  </div>
-</Grid>
+<div class="ct-vertical-spacing-inset--bottom">
+  <Grid templateColumnCount={4}>
+    <div class="col-xxs-12 col-m-3">
+      <SubjectCard
+        title="For Individuals"
+        image={{ url: '/images/demo/demo-image.jpg', alt: 'Nature' }}
+        link={{ url: '/individuals' }}
+      />
+    </div>
+    <div class="col-xxs-12 col-m-3">
+      <SubjectCard
+        title="For Businesses"
+        image={{
+          url: '/images/demo/demo-image-ricardo-esquivel.jpg',
+          alt: 'Landscape with road going into distance with mountains',
+        }}
+        link={{ url: '/businesses' }}
+      />
+    </div>
+    <div class="col-xxs-12 col-m-3">
+      <SubjectCard
+        title="For government"
+        image={{ url: '/images/demo/demo-nature.jpg', alt: 'Forest' }}
+        link={{ url: '/government' }}
+      />
+    </div>
+    <div class="col-xxs-12 col-m-3">
+      <SubjectCard
+        title="Link text"
+        image={{
+          url: '/images/demo/demo-govcms-visual-white-paper.jpg',
+          alt: 'Computer and devices displaying a website',
+        }}
+        link={{ url: '/' }}
+      />
+    </div>
+  </Grid>
+</div>
 
 <Callout
   title="Learn more about us"
   content="Find out who we are, what we do, and how Your organisation serves the community."
   links={[{ text: 'About us', url: '/about-us' }]}
+  verticalSpacing="bottom"
 />

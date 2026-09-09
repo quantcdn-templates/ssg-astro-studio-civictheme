@@ -8,7 +8,7 @@ bannerTheme: dark
 showBreadcrumb: true
 showLastUpdated: false
 topics: []
-section: audiences
+section: Audiences
 draft: false
 order: 1
 ---
@@ -22,12 +22,27 @@ community programs.
 Body text can include a variety of headings and sub-headings, images,
 embedded video, and block quotes.
 
+### Components
+
+You can add different components on pages like this, including a
+variety of navigation cards, content listings, promo content,
+accordions, and webforms. Here are a few examples:
+
+1. [Navigation cards](/civictheme-60-second-series)
+2. [Content listing page](/news-and-events)
+3. [Promo content](/businesses)
+4. [Webform](/subscribe)
+
 <Grid templateColumnCount={2}>
   <div class="col-xxs-12 col-m-6">
     <PromoCard
       title="CivicTheme in 60 second series"
-      summary="Short videos that introduce the CivicTheme design system, one topic at a time."
-      link={{ url: '/civictheme-60-second-series' }}
+      summary="CivicTheme in 60 second series"
+      image={{
+        url: '/images/demo/tried-and-tested-components.png',
+        alt: 'Illustrated navigation cards in grid over a page design',
+      }}
+      link={{ url: '/about-us' }}
     />
   </div>
 </Grid>

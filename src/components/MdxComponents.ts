@@ -15,6 +15,7 @@ import Tabs from '@civictheme/molecules/Tabs.astro';
 import BasicContent from '@civictheme/molecules/BasicContent.astro';
 import Attachment from '@civictheme/molecules/Attachment.astro';
 import Figure from '@civictheme/molecules/Figure.astro';
+import TableOfContents from '@civictheme/molecules/TableOfContents.astro';
 import Map from '@civictheme/molecules/Map.astro';
 import VideoPlayer from '@civictheme/molecules/VideoPlayer.astro';
 import Table from '@civictheme/atoms/Table.astro';
@@ -44,6 +45,7 @@ export const components = {
   BasicContent,
   Attachment,
   Figure,
+  TableOfContents,
   Table,
   Iframe,
   Map,
