@@ -17,19 +17,26 @@ import BackToTop from '@civictheme/molecules/BackToTop.astro';
 import SiteAlerts from '@/components/SiteAlerts.astro';
 import SiteHeader from '@/components/SiteHeader.astro';
 import SiteFooter from '@/components/SiteFooter.astro';
+import { cleanPath } from '@/lib/url';
 
 interface Props {
   title: string;
   description?: string;
-  /** OG image path, relative to the site root. Defaults to `/og/home.png`. */
-  image?: string;
+  /**
+   * OG image path, relative to the site root. Required: a default would let a
+   * route that forgot the prop silently reuse another page's social card.
+   */
+  image: string;
   theme?: 'light' | 'dark';
 }
 
-const { title, description = '', image = '/og/home.png', theme = 'light' } = Astro.props;
+const { title, description = '', image, theme = 'light' } = Astro.props;
 
-const canonical = new URL(Astro.url.pathname, Astro.site ?? 'https://example.com').href;
-const ogImage = new URL(image, Astro.site ?? 'https://example.com').href;
+// `build.format: 'file'` makes `Astro.url.pathname` the built file path, so
+// canonical and og:url go through `cleanPath` to match the sitemap's URLs.
+const site = Astro.site ?? new URL('https://example.com');
+const canonical = new URL(cleanPath(Astro.url.pathname), site).href;
+const ogImage = new URL(image, site).href;
 ---
 
 <!doctype html>

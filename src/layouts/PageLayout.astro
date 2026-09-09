@@ -10,6 +10,7 @@ import PageBanner from '@/components/PageBanner.astro';
 import SideNavigation from '@civictheme/organisms/SideNavigation.astro';
 import Paragraph from '@civictheme/atoms/Paragraph.astro';
 import { breadcrumbForPage, sectionNav, entryUrl } from '@/lib/content';
+import { ogImagePath } from '@/lib/url';
 
 interface Props {
   entry: CollectionEntry<'pages'>;
@@ -21,13 +22,13 @@ const url = entryUrl('pages', entry.id);
 
 const breadcrumbLinks = data.showBreadcrumb && entry.id !== 'index' ? await breadcrumbForPage(entry) : undefined;
 const sideItems = data.section ? await sectionNav(data.section, url) : [];
-const ogSlug = entry.id === 'index' ? 'home' : entry.id;
+const ogImage = ogImagePath(url);
 const lastUpdated = data.updated
   ? `Last updated: ${data.updated.toLocaleDateString('en-AU', { day: 'numeric', month: 'long', year: 'numeric' })}`
   : '';
 ---
 
-<BaseLayout title={data.title} description={data.summary} image={`/og/${ogSlug}.png`} theme={data.theme}>
+<BaseLayout title={data.title} description={data.summary} image={ogImage} theme={data.theme}>
   <PageBanner
     title={data.title}
     summary={data.summary}

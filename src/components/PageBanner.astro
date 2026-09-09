@@ -14,9 +14,15 @@
  * the Fragment evaluates to false — which would open an empty
  * `.ct-banner__content` wrapper. The shared props therefore live in one
  * `bannerProps` object, spread into both branches.
+ *
+ * `metaTags` (a detail page's date, location or author) share the `content`
+ * slot with the summary rather than taking a second, separately conditional
+ * slot — one optional slot means two branches, two would mean four. Inside a
+ * slot, plain conditionals are ordinary children and behave normally.
  */
 import Banner from '@civictheme/organisms/Banner.astro';
 import Paragraph from '@civictheme/atoms/Paragraph.astro';
+import TagList from '@civictheme/molecules/TagList.astro';
 
 export interface BreadcrumbLink {
   text: string;
@@ -26,6 +32,8 @@ export interface BreadcrumbLink {
 interface Props {
   title: string;
   summary?: string;
+  /** Short metadata (dates, location, author) shown as tags above the summary. */
+  metaTags?: string[];
   siteSection?: string;
   breadcrumbLinks?: BreadcrumbLink[];
   backgroundImage?: string;
@@ -37,6 +45,7 @@ interface Props {
 const {
   title,
   summary,
+  metaTags = [],
   siteSection,
   breadcrumbLinks,
   backgroundImage,
@@ -48,6 +57,8 @@ const {
 const breadcrumb =
   breadcrumbLinks && breadcrumbLinks.length > 0 ? { links: breadcrumbLinks, activeIsLink: false } : undefined;
 const background = backgroundImage ? { url: backgroundImage, alt: '' } : undefined;
+const tagItems = metaTags.filter(Boolean).map((tag) => ({ content: tag }));
+const hasContent = Boolean(summary) || tagItems.length > 0;
 
 const bannerProps = {
   theme,
@@ -62,10 +73,11 @@ const bannerProps = {
 ---
 
 {
-  summary ? (
+  hasContent ? (
     <Banner {...bannerProps}>
       <Fragment slot="content">
-        <Paragraph theme={theme} content={summary} />
+        {tagItems.length > 0 && <TagList theme={theme} tags={tagItems} />}
+        {summary && <Paragraph theme={theme} content={summary} />}
       </Fragment>
     </Banner>
   ) : (

@@ -12,6 +12,9 @@
  * selector `.ct-mobile-navigation`, so a second pair on a page that already
  * has the site header's would silently drive the header's panel. The e2e
  * mobile-navigation test drives the header's pair instead.
+ *
+ * The page is excluded from the sitemap (`astro.config.mjs`) and reuses the
+ * home social card rather than generating one of its own.
  */
 import BaseLayout from '@/layouts/BaseLayout.astro';
 import Accordion from '@civictheme/molecules/Accordion.astro';
@@ -19,7 +22,7 @@ import Tabs from '@civictheme/molecules/Tabs.astro';
 import TableOfContents from '@civictheme/molecules/TableOfContents.astro';
 ---
 
-<BaseLayout title="CivicTheme — Behaviours">
+<BaseLayout title="CivicTheme — Behaviours" image="/og/home.png">
   <h1>Behaviours</h1>
 
   <Accordion

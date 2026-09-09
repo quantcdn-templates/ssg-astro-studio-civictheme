@@ -1,0 +1,42 @@
+---
+/**
+ * Publications listing, ten entries per page (`PAGE_SIZE`).
+ *
+ * A rest parameter keeps page 1 at `/publications` and puts later pages at
+ * `/publications/2`, `/publications/3`, … The sibling `[slug].astro` route owns the
+ * detail pages; a numeric entry id would be the only way the two could
+ * collide.
+ */
+import type { GetStaticPaths, Page } from 'astro';
+import type { CollectionEntry } from 'astro:content';
+import BaseLayout from '@/layouts/BaseLayout.astro';
+import PageBanner from '@/components/PageBanner.astro';
+import ListingAuto from '@/components/ListingAuto.astro';
+import { listPublished } from '@/lib/content';
+import { listingPaths } from '@/lib/pagination';
+
+export const getStaticPaths = (async ({ paginate }) => {
+  const entries = await listPublished('publications');
+  return listingPaths(paginate, entries);
+}) satisfies GetStaticPaths;
+
+const { page } = Astro.props as { page: Page<CollectionEntry<'publications'>> };
+
+const title = 'Publications';
+const summary = 'Browse all published publications from Your organisation.';
+---
+
+<BaseLayout title={title} description={summary} image="/og/publications.png">
+  <PageBanner
+    title={title}
+    summary={summary}
+    breadcrumbLinks={[
+      { text: 'Home', url: '/' },
+      { text: title, url: '/publications' },
+    ]}
+    backgroundImage="/civictheme/backgrounds/civictheme_background_3.png"
+  />
+  <div class="ct-vertical-spacing-inset--both">
+    <ListingAuto collection="publications" entries={page.data} page={page} pageBase="/publications" />
+  </div>
+</BaseLayout>

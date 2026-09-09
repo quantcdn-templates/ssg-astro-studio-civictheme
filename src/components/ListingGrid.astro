@@ -1,37 +1,32 @@
 ---
 /**
- * Shared card-grid renderer used by `ListingAuto` and `ManualList`.
+ * Shared card-grid renderer used by `ListingAuto`, `ManualList` and the
+ * paginated listing routes.
  *
- * `List`/`Grid` now accept real Astro slots (Task 14b) in addition to
- * their pre-rendered-string props, so this composes `List` (rows passed
- * as `<Fragment slot="rows">`) and `Grid` (cards passed as children,
- * taking precedence over its `items` string-array prop) instead of
- * inlining their wrapper markup — real card components (EventCard,
- * PromoCard, …) are live children throughout, with no HTML-string
- * pre-rendering step. See PORTING.md.
+ * `List`/`Grid` accept real Astro slots (Task 14b) in addition to their
+ * pre-rendered-string props, so this composes `List` (rows via
+ * `<Fragment slot="rows">`, the pager via `<Fragment slot="pagination">`)
+ * instead of inlining their wrapper markup — real card components are live
+ * children throughout, with no HTML-string pre-rendering step.
  *
  * `Grid` is used with `useContainer={false}` and its own `.container` div
- * built here instead, so the rendered `.ct-list__rows` div (from `List`'s
- * `rows` slot wrapper) doesn't also duplicate `Grid`'s own
- * `aria-live="polite"` container attribute — see PORTING.md for the
- * resulting (semantically inert) markup delta against the pre-Task-14b
- * inlined version.
+ * built in `ListingRows` instead, so the rendered `.ct-list__rows` div (from
+ * `List`'s `rows` slot wrapper) doesn't also duplicate `Grid`'s own
+ * `aria-live="polite"` container attribute — see PORTING.md for the resulting
+ * (semantically inert) markup delta against the pre-Task-14b inlined version.
  *
- * All per-entry data extraction happens here, in the frontmatter script —
- * the Astro template's JSX-like expressions can't parse TS type
- * assertions (`as X`) or generics, so every cast is done before the
- * template runs, and the template itself only reads a plain, pre-shaped
- * `CardViewModel`.
+ * The two `<List>` branches are deliberate: Astro registers a named slot at
+ * compile time, so a conditional `<Fragment slot="pagination">` would open an
+ * empty `.ct-list__pagination` wrapper on every unpaginated listing. The
+ * shared props live in one `listProps` object and the rows in `ListingRows`.
  */
 import type { CollectionEntry } from 'astro:content';
+import type { Page } from 'astro';
 import List from '@civictheme/organisms/List.astro';
-import Grid from '@civictheme/base/Grid.astro';
-import Paragraph from '@civictheme/atoms/Paragraph.astro';
-import EventCard from '@civictheme/molecules/EventCard.astro';
-import PromoCard from '@civictheme/molecules/PromoCard.astro';
-import PublicationCard from '@civictheme/molecules/PublicationCard.astro';
-import NavigationCard from '@civictheme/molecules/NavigationCard.astro';
-import { entryUrl, type CardCollection } from '../lib/content';
+import Pagination from '@civictheme/molecules/Pagination.astro';
+import ListingRows from './ListingRows.astro';
+import { paginationItems } from '@/lib/pagination';
+import type { CardCollection } from '@/lib/content';
 
 interface Props {
   collection: CardCollection;
@@ -39,132 +34,41 @@ interface Props {
   title?: string;
   theme?: 'light' | 'dark';
   columns?: 2 | 3 | 4;
+  /** Astro `paginate()` page, when the listing route is paginated. */
+  page?: Pick<Page, 'currentPage' | 'lastPage'>;
+  /** Base path the pager builds its hrefs from, e.g. `/events`. */
+  pageBase?: string;
 }
 
-interface CardViewModel {
-  url: string;
-  title: string;
-  summary: string;
-  image?: { url: string; alt: string };
-  tags: Array<{ content: string }>;
-  date?: string;
-  dateIso?: string;
-  dateEnd?: string;
-  dateEndIso?: string;
-  location?: string;
-  file?: { url: string; ext: string; size?: string };
-}
+const { collection, entries, title, theme = 'light', columns = 3, page, pageBase = '' } = Astro.props;
 
-const { collection, entries, title, theme = 'light', columns = 3 } = Astro.props;
-const colClass = `col-xxs-12 col-m-6 col-l-${Math.floor(12 / columns)}`;
-
-const fmt = (d?: Date) =>
-  d ? d.toLocaleDateString('en-AU', { day: 'numeric', month: 'short', year: 'numeric' }) : undefined;
-
-function toViewModel(entry: CollectionEntry<CardCollection>): CardViewModel {
-  // The four card collections don't share a single data shape, so every
-  // field beyond `title`/`summary`/`image`/`topics` is read defensively.
-  const data = entry.data as Record<string, unknown>;
-  const image = data.image ? { url: data.image as string, alt: '' } : undefined;
-  const topics = (data.topics as string[]) ?? [];
-  const base: CardViewModel = {
-    url: entryUrl(collection, entry.id),
-    title: data.title as string,
-    summary: (data.summary as string) ?? '',
-    image,
-    tags: topics.map((topic) => ({ content: topic })),
-  };
-  if (collection === 'events') {
-    const startDate = data.startDate as Date | undefined;
-    const endDate = data.endDate as Date | undefined;
-    return {
-      ...base,
-      date: fmt(startDate),
-      dateIso: startDate?.toISOString(),
-      dateEnd: fmt(endDate),
-      dateEndIso: endDate?.toISOString(),
-      location: data.location as string | undefined,
-    };
-  }
-  if (collection === 'news') {
-    const date = data.date as Date | undefined;
-    return { ...base, date: fmt(date), dateIso: date?.toISOString() };
-  }
-  if (collection === 'publications') {
-    return {
-      ...base,
-      file: {
-        url: data.fileUrl as string,
-        ext: data.fileFormat as string,
-        size: data.fileSize as string | undefined,
-      },
-    };
-  }
-  return base;
-}
-
-const cards = entries.map(toViewModel);
+const listProps = { title, theme, class: 'ct-listing-grid' };
+const rowsProps = { collection, entries, theme, columns };
+const showPager = Boolean(page && page.lastPage > 1);
+const pagerItems = page ? paginationItems(page, pageBase) : undefined;
 ---
 
-<List title={title} theme={theme} class="ct-listing-grid">
-  <Fragment slot="rows">
-    <div class="container">
-      <Grid useContainer={false}>
-        {
-          cards.length === 0 ? (
-            <div class="col-xxs-12">
-              <Paragraph theme={theme} content="No results found." noMargin class="ct-list__empty-results__inner" />
-            </div>
-          ) : (
-            cards.map((card, i) => (
-              <>
-                {i > 0 && ' '}
-                <div class={colClass}>
-                  {collection === 'events' && (
-                    <EventCard
-                      theme={theme}
-                      title={card.title}
-                      summary={card.summary}
-                      image={card.image}
-                      date={card.date}
-                      dateIso={card.dateIso}
-                      dateEnd={card.dateEnd}
-                      dateEndIso={card.dateEndIso}
-                      location={card.location}
-                      link={{ url: card.url }}
-                      tags={card.tags}
-                    />
-                  )}
-                  {collection === 'publications' && (
-                    <PublicationCard
-                      theme={theme}
-                      title={card.title}
-                      summary={card.summary}
-                      image={card.image}
-                      file={card.file}
-                    />
-                  )}
-                  {collection === 'pages' && (
-                    <NavigationCard theme={theme} title={card.title} summary={card.summary} link={{ url: card.url }} />
-                  )}
-                  {collection === 'news' && (
-                    <PromoCard
-                      theme={theme}
-                      title={card.title}
-                      summary={card.summary}
-                      image={card.image}
-                      date={card.date}
-                      dateIso={card.dateIso}
-                      link={{ url: card.url }}
-                      tags={card.tags}
-                    />
-                  )}
-                </div>
-              </>
-            ))
-          )
-        }
-      </Grid>
-    </div>
-  </Fragment>
-</List>
+{
+  showPager ? (
+    <List {...listProps}>
+      <Fragment slot="rows">
+        <ListingRows {...rowsProps} />
+      </Fragment>
+      <Fragment slot="pagination">
+        <Pagination
+          theme={theme}
+          items={pagerItems}
+          current={page?.currentPage}
+          totalPages={page?.lastPage}
+          headingId={`${collection}-pagination`}
+        />
+      </Fragment>
+    </List>
+  ) : (
+    <List {...listProps}>
+      <Fragment slot="rows">
+        <ListingRows {...rowsProps} />
+      </Fragment>
+    </List>
+  )
+}

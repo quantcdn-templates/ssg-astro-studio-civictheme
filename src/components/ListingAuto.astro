@@ -4,6 +4,8 @@
  * via `listPublished` and renders them with `ListingGrid`, which composes
  * `List`/`Grid` directly via slots (see that component's header comment).
  */
+import type { CollectionEntry } from 'astro:content';
+import type { Page } from 'astro';
 import ListingGrid from './ListingGrid.astro';
 import { listPublished, type CardCollection, type ListSort } from '../lib/content';
 
@@ -15,10 +17,37 @@ interface Props {
   title?: string;
   theme?: 'light' | 'dark';
   columns?: 2 | 3 | 4;
+  /**
+   * Pre-sliced entries, from a paginated route's `page.data`. When given, the
+   * component renders these instead of fetching the collection itself, so the
+   * route stays the single owner of filtering and slicing.
+   */
+  entries?: CollectionEntry<CardCollection>[];
+  page?: Pick<Page, 'currentPage' | 'lastPage'>;
+  pageBase?: string;
 }
 
-const { collection, topics, limit, sort = 'date-desc', title, theme = 'light', columns = 3 } = Astro.props;
-const entries = await listPublished(collection, { topics, limit, sort });
+const {
+  collection,
+  topics,
+  limit,
+  sort = 'date-desc',
+  title,
+  theme = 'light',
+  columns = 3,
+  entries: providedEntries,
+  page,
+  pageBase,
+} = Astro.props;
+const entries = providedEntries ?? (await listPublished(collection, { topics, limit, sort }));
 ---
 
-<ListingGrid collection={collection} entries={entries} title={title} theme={theme} columns={columns} />
+<ListingGrid
+  collection={collection}
+  entries={entries}
+  title={title}
+  theme={theme}
+  columns={columns}
+  page={page}
+  pageBase={pageBase}
+/>

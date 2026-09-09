@@ -41,6 +41,23 @@ describe('astro build', () => {
     expect(existsSync(join(root, 'dist/news/new-library-hours.html'))).toBe(true);
     expect(existsSync(join(root, 'dist/publications/annual-report-2025.html'))).toBe(true);
   });
+  it('emits clean canonical URLs that match the sitemap, not the .html file paths', () => {
+    const index = readFileSync(join(root, 'dist/index.html'), 'utf8');
+    const events = readFileSync(join(root, 'dist/events.html'), 'utf8');
+    expect(index).toContain('<link rel="canonical" href="https://example.com/"');
+    expect(events).toContain('<link rel="canonical" href="https://example.com/events"');
+    expect(index).toContain('content="https://example.com/"');
+    expect(events).toContain('content="https://example.com/events"');
+  });
+  it('excludes the behaviours smoke page from the sitemap', () => {
+    const sitemap = readFileSync(join(root, 'dist/sitemap-0.xml'), 'utf8');
+    expect(sitemap).toContain('https://example.com/events');
+    expect(sitemap).not.toContain('/components/behaviours');
+  });
+  it('renders no pagination wrapper while every listing fits on one page', () => {
+    const events = readFileSync(join(root, 'dist/events.html'), 'utf8');
+    expect(events).not.toContain('ct-list__pagination');
+  });
   it('renders the CivicTheme header, footer and banner on the home page', () => {
     const index = readFileSync(join(root, 'dist/index.html'), 'utf8');
     expect(index).toContain('class="ct-header');

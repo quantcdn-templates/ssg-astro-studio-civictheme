@@ -62,6 +62,7 @@ export const getStaticPaths: GetStaticPaths = async () => {
 
   return [
     { params: { slug: 'search' }, props: { title: 'Search' } },
+    { params: { slug: '404' }, props: { title: 'Page not found' } },
     ...pages.map((entry) => ({ params: { slug: ogSlug('pages', entry.id) }, props: { title: entry.data.title } })),
     ...events.map((entry) => ({ params: { slug: ogSlug('events', entry.id) }, props: { title: entry.data.title } })),
     ...news.map((entry) => ({ params: { slug: ogSlug('news', entry.id) }, props: { title: entry.data.title } })),

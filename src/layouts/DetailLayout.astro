@@ -16,6 +16,7 @@ import TagList from '@civictheme/molecules/TagList.astro';
 import Attachment from '@civictheme/molecules/Attachment.astro';
 import Button from '@civictheme/atoms/Button.astro';
 import { humanise, type CardCollection } from '@/lib/content';
+import { ogImagePath } from '@/lib/url';
 
 interface Props {
   collection: Exclude<CardCollection, 'pages'>;
@@ -41,9 +42,13 @@ const location = data.location as string | undefined;
 const author = data.author as string | undefined;
 const registrationUrl = data.registrationUrl as string | undefined;
 
-const metaParts = [startDate && endDate ? `${startDate} – ${endDate}` : (startDate ?? date), location, author].filter(
-  Boolean
-) as string[];
+// Date, location and author read as banner tags; the entry's own summary
+// stays the banner's text.
+const metaTags = [
+  startDate && endDate && endDate !== startDate ? `${startDate} – ${endDate}` : (startDate ?? date),
+  location,
+  author,
+].filter(Boolean) as string[];
 
 const files =
   collection === 'publications'
@@ -65,10 +70,11 @@ const breadcrumbLinks = [
 const tagItems = topics.map((topic) => ({ content: topic }));
 ---
 
-<BaseLayout title={title} description={summary} image={`/og/${collection}/${entry.id}.png`} theme={theme}>
+<BaseLayout title={title} description={summary} image={ogImagePath(`/${collection}/${entry.id}`)} theme={theme}>
   <PageBanner
     title={title}
-    summary={metaParts.join(' · ')}
+    summary={summary}
+    metaTags={metaTags}
     siteSection={humanise(collection)}
     breadcrumbLinks={breadcrumbLinks}
     backgroundImage={image}
