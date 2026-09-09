@@ -28,10 +28,38 @@
  * image/video URLs (`./demo/images/demo1.jpg`, `./demo/videos/demo.mp4`),
  * which `scripts/vendor-civictheme.mjs` vendors into `public/civictheme/demo/`
  * (only the files these fixtures actually reference — see that script's
- * step 6). `rewriteDemoPaths` walks every prop value recursively and
- * rewrites a string starting with `./demo/` (or `demo/`) to
- * `/civictheme/demo/`, so the rendered component's `<img>`/`<video>` `src`
- * resolves against this site instead of 404ing.
+ * step 6). `rewriteDemoPath` rewrites a `./demo/*` reference anywhere in a
+ * string to `/civictheme/demo/*`, so the rendered component's
+ * `<img>`/`<video>` `src` resolves against this site instead of 404ing.
+ *
+ * Per-instance id uniqueness (post-review fix): several stories' pre-rendered
+ * HTML-string props (a "wrapper-only" story per `SOURCE.md` — e.g. `Header`'s
+ * `content_middle3`, which embeds a full `MobileNavigationTrigger` +
+ * `MobileNavigation` pair) and several plain scalar props (`Textarea`'s
+ * `id: 'textarea-id'`, reused verbatim across its light/dark stories and
+ * even across sibling components) carry ids/`href="#…"` fragments that are
+ * NOT unique per rendered demo instance. Two problems follow:
+ * - `MobileNavigationTrigger` hardcodes `data-flyout-target=".ct-mobile-navigation"`
+ *   (a CLASS selector) and `flyout.js` binds only the FIRST element on the
+ *   page matching a given target, so every embedded trigger after the first
+ *   (the real site header's, and every other Header-family story after it)
+ *   opens the same one panel — the others are dead.
+ * - Two demo instances sharing a literal `id` is invalid HTML and breaks any
+ *   same-page `for`/`aria-controls`/`href="#…"` reference between them.
+ *
+ * `propsFor` fixes both, driven by `suffix = "<exportName>-<theme>"` (unique
+ * per fixture): `isolateFlyoutTarget` rewrites an embedded
+ * `data-flyout-target=".ct-mobile-navigation"` to a per-instance `#id`
+ * selector and gives the matching panel `<div class="ct-mobile-navigation…">`
+ * that same id; `suffixIdsInHtml` appends the suffix to every
+ * `id`/`for`/`aria-controls`/`aria-labelledby`/`aria-describedby`/
+ * `data-tabs-tab`/`data-tabs-panel` attribute value and `href="#…"` fragment
+ * found anywhere in a string prop (recursively — covers both a pre-rendered
+ * HTML blob and a plain scalar value); `suffixIdLikeProp` does the same for
+ * a STRUCTURED prop keyed literally `id`/`for`/`ariaControls`/
+ * `ariaLabelledby`/`ariaDescribedby`/`href`/`url`. Every reference sharing
+ * the same original value still shares the same suffixed value, so
+ * same-blob id/label relationships stay intact.
  */
 
 /** Shared-reference R2: snake_case Twig arg key → camelCase Astro prop key. */
@@ -70,11 +98,76 @@ function rewriteDemoPath(value: string): string {
 }
 
 /**
+ * Rewrites an embedded `MobileNavigationTrigger`'s hardcoded
+ * `data-flyout-target=".ct-mobile-navigation"` (a class selector matching
+ * ANY `.ct-mobile-navigation` panel on the page — see this file's header
+ * comment) to a per-instance id selector, and gives the matching embedded
+ * `MobileNavigation` panel that same id, so each demo instance's trigger
+ * only ever opens its own panel.
+ */
+function isolateFlyoutTarget(html: string, suffix: string): string {
+  if (!html.includes('data-flyout-target=".ct-mobile-navigation"')) return html;
+  const id = `components-mobile-nav-${suffix}`;
+  return html
+    .replace(/data-flyout-target="\.ct-mobile-navigation"/g, `data-flyout-target="#${id}"`)
+    .replace(/<div class="ct-mobile-navigation(?=["\s])/g, `<div id="${id}" class="ct-mobile-navigation`);
+}
+
+/**
+ * Whether a camelCase Astro prop key is an id-like reference, suffixed by
+ * `suffixIdLikeProp` — `id`, `for`, `ariaControls`/`ariaLabelledby`/
+ * `ariaDescribedby`, and any key ending `…Id` (`headingId`,
+ * `itemsPerPageId` — Twig's own `*_id` convention, e.g. `Pagination`'s
+ * `heading_id`/`items_per_page_id`).
+ */
+function isIdLikeKey(key: string): boolean {
+  return key === 'id' || key === 'for' || key.endsWith('Id') || /^aria(Controls|Labelledby|Describedby)$/.test(key);
+}
+
+const ID_LIKE_HTML_ATTR =
+  /\b(id|for|aria-controls|aria-labelledby|aria-describedby|data-tabs-tab|data-tabs-panel)="([^"]+)"/g;
+const HREF_FRAGMENT = /href="#([^"]+)"/g;
+
+/** One or more whitespace-separated id tokens, each suffixed (an `aria-labelledby` can reference several ids). */
+function suffixIdTokens(value: string, suffix: string): string {
+  return value
+    .split(/\s+/)
+    .filter(Boolean)
+    .map((token) => `${token}-${suffix}`)
+    .join(' ');
+}
+
+/**
+ * Appends `suffix` to every id-like attribute value and `href="#…"`
+ * fragment found anywhere in a string — covers a pre-rendered HTML blob
+ * (e.g. `Header`'s `content_middle3`) as well as a plain scalar value that
+ * happens to look like a bare id (`suffixIdTokens` on a value with no
+ * whitespace is a no-op change other than the suffix, so this is also safe
+ * to run unconditionally on every string).
+ */
+function suffixIdsInHtml(html: string, suffix: string): string {
+  return html
+    .replace(ID_LIKE_HTML_ATTR, (_match, attr: string, value: string) => `${attr}="${suffixIdTokens(value, suffix)}"`)
+    .replace(HREF_FRAGMENT, (_match, value: string) => `href="#${suffixIdTokens(value, suffix)}"`);
+}
+
+/** Suffixes a STRUCTURED prop's value when its key is an id-like reference (`id`, `for`, `ariaControls`, a `#…` `href`/`url`). */
+function suffixIdLikeProp(key: string, value: string, suffix: string): string {
+  if (isIdLikeKey(key)) return suffixIdTokens(value, suffix);
+  if ((key === 'href' || key === 'url') && value.startsWith('#') && value.length > 1) {
+    return `#${suffixIdTokens(value.slice(1), suffix)}`;
+  }
+  return value;
+}
+
+/**
  * Maps a story's snake_case Twig args onto Astro props, per shared-reference
  * R2, applied RECURSIVELY (a nested object such as `message` or a `control`
  * item is itself a set of Twig props for a child component, so it obeys the
- * same rules), and rewrites `./demo/*` asset paths to their vendored
- * `/civictheme/demo/*` site path:
+ * same rules), rewrites `./demo/*` asset paths to their vendored
+ * `/civictheme/demo/*` site path, isolates any embedded mobile-navigation
+ * flyout target, and suffixes every id-like value with `suffix` so two demo
+ * instances on the same page never collide:
  * - `modifier_class` → `class`
  * - `attributes` → rest props merged into the SAME object (a `null` value
  *   contributes nothing; a raw attribute string is parsed by
@@ -86,11 +179,11 @@ function rewriteDemoPath(value: string): string {
  * as `undefined`: these are Twig `create_attribute()` placeholders, and
  * every captured story leaves them empty.
  */
-export function argsToProps(args: Record<string, unknown>): Record<string, unknown> {
+export function argsToProps(args: Record<string, unknown>, suffix: string): Record<string, unknown> {
   const convert = (value: unknown): unknown => {
-    if (typeof value === 'string') return rewriteDemoPath(value);
+    if (typeof value === 'string') return suffixIdsInHtml(isolateFlyoutTarget(rewriteDemoPath(value), suffix), suffix);
     if (Array.isArray(value)) return value.map(convert);
-    if (value && typeof value === 'object') return argsToProps(value as Record<string, unknown>);
+    if (value && typeof value === 'object') return argsToProps(value as Record<string, unknown>, suffix);
     return value;
   };
 
@@ -102,7 +195,9 @@ export function argsToProps(args: Record<string, unknown>): Record<string, unkno
       continue;
     }
     if (value === null && key.endsWith('attributes')) continue;
-    props[key === 'modifier_class' ? 'class' : camelCase(key)] = convert(value);
+    const finalKey = key === 'modifier_class' ? 'class' : camelCase(key);
+    const converted = convert(value);
+    props[finalKey] = typeof converted === 'string' ? suffixIdLikeProp(finalKey, converted, suffix) : converted;
   }
   return props;
 }
@@ -133,9 +228,7 @@ const ALL_FIXTURES: StoryFixture[] = Object.entries(rawModules)
   .sort((a, b) => a.key.localeCompare(b.key));
 
 if (ALL_FIXTURES.length === 0) {
-  throw new Error(
-    'component-demos: no story fixtures found under src/data/component-demos — run `npm run demos:sync`'
-  );
+  throw new Error('component-demos: no story fixtures found under src/data/component-demos — run `npm run demos:sync`');
 }
 
 /** Every captured story for one component (`<layer>/<name>`), in fixture-file order. */
@@ -143,9 +236,14 @@ export function storiesFor(component: string): StoryFixture[] {
   return ALL_FIXTURES.filter((fixture) => fixture.component === component);
 }
 
-/** The story's args, mapped to camelCase Astro props (shared-reference R2), with demo asset paths rewritten. */
+/**
+ * The story's args, mapped to camelCase Astro props (shared-reference R2),
+ * with demo asset paths rewritten and every id-like value suffixed by this
+ * fixture's `<exportName>-<theme>` so it never collides with another demo
+ * instance on the same page (see this file's header comment).
+ */
 export function propsFor(fixture: StoryFixture): Record<string, unknown> {
-  return argsToProps(fixture.args);
+  return argsToProps(fixture.args, `${fixture.exportName}-${fixture.theme ?? 'light'}`);
 }
 
 /** `03-organisms/promo-card` → `PromoCard` — the Astro/MDX tag name for a component path. */

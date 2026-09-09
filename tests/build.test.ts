@@ -188,4 +188,25 @@ describe('components reference section (Task 17)', () => {
     expect(table).toContain('ct-table');
     expect(table).toContain('ct-theme-dark');
   });
+
+  function duplicateIds(html: string): string[] {
+    const counts = new Map<string, number>();
+    for (const match of html.matchAll(/\bid="([^"]*)"/g)) {
+      counts.set(match[1], (counts.get(match[1]) ?? 0) + 1);
+    }
+    return [...counts.entries()].filter(([, count]) => count > 1).map(([id]) => id);
+  }
+
+  it('has no duplicate ids on the forms, tabs and accordion family pages', () => {
+    for (const page of ['forms', 'tabs', 'accordion']) {
+      const html = readFileSync(join(root, `dist/components/${page}.html`), 'utf8');
+      expect(duplicateIds(html), `duplicate ids on ${page}.html`).toEqual([]);
+    }
+  });
+
+  it("gives every Header-family mobile navigation demo its own flyout target, not the real header's", () => {
+    const html = readFileSync(join(root, 'dist/components/navigation.html'), 'utf8');
+    const targets = [...html.matchAll(/data-flyout-target="([^"]*)"/g)].map((match) => match[1]);
+    expect(targets.filter((target) => target === '.ct-mobile-navigation')).toHaveLength(1);
+  });
 });
