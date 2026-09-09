@@ -1,54 +1,112 @@
 ---
+/**
+ * CivicTheme Table of Contents component.
+ *
+ * Props:
+ * - theme: Theme variation (light or dark).
+ * - title: Link title.
+ * - position: TOC position ('before', 'after', 'prepend', 'append').
+ * - anchorSelector: CSS selector for headings to include in TOC (e.g.
+ *   'h2, h3').
+ * - scopeSelector: CSS selector for the content area to generate TOC from.
+ * - links: Table of contents links: Array<{ title, url }>. When given, a
+ *   static list is rendered (matching upstream's `links is not empty`
+ *   branch); otherwise (when `scopeSelector` is given) the behaviour-hook
+ *   markup is rendered, and CivicTheme's `table-of-contents.js` builds the
+ *   link list client-side from the DOM.
+ * - content: Content HTML (only used in the automatic/behaviour-hook
+ *   branch, i.e. when `links` is absent) — documented as a Slot upstream,
+ *   ported as a `string` prop rendered with `set:html` per this project's
+ *   autoescape convention.
+ * - class: Additional CSS classes.
+ * - ...rest: Additional HTML attributes, spread onto the static-list
+ *   branch's root element (matching upstream's `attributes` usage there;
+ *   the automatic branch's root never prints `attributes` upstream).
+ *
+ * Note: `table-of-contents.twig` has no upstream `.test.js` /
+ * `__snapshots__` at all (only `.scss`/`.stories.*` files exist in
+ * `.upstream/uikit/packages/twig/components/02-molecules/table-of-
+ * contents`) — smoke test per the task brief's rule for components with
+ * no upstream test, matching `InlineFilter`'s precedent. Behaviour-hook
+ * attribute names (`data-table-of-contents-*`) are copied verbatim from
+ * the Twig; confirmed against `src/civictheme/js/behaviours/table-of-
+ * contents.js`, which reads exactly these names off the element it
+ * initialises.
+ */
+interface TocLink {
+  title?: string;
+  url?: string;
+}
+
 interface Props {
   theme?: 'light' | 'dark';
   title?: string;
-  position?: string;
+  position?: 'before' | 'after' | 'prepend' | 'append';
   anchorSelector?: string;
   scopeSelector?: string;
+  links?: TocLink[];
+  content?: string;
   class?: string;
   [key: string]: unknown;
 }
-const { theme = 'light', title, position, anchorSelector, scopeSelector, class: className = '', ...rest } = Astro.props;
----
-<!-- TWIG:
-{% if links is not empty or scope_selector is not empty %}
-  <div class="container">
-    <div class="row">
-      <div class="col-xxs-12">
-        {% if links %}
-          {% set theme_class = 'ct-theme-%s'|format(theme|default('light')) %}
-          {% set position_class = 'ct-table-of-contents--position-%s'|format(position|default('before')) %}
-          {% set modifier_class = '%s %s %s'|format(theme_class, position_class, modifier_class|default('')) %}
 
-          <div class="ct-table-of-contents {{ modifier_class }}" {% if attributes is defined and attributes is not null %}{{- attributes -}}{% endif %}>
-            {% if title %}
-              <h2 class="ct-table-of-contents__title">{{ title }}</h2>
-            {% endif %}
-            {% if links %}
+const {
+  theme = 'light',
+  title,
+  position,
+  anchorSelector,
+  scopeSelector,
+  links,
+  content,
+  class: className = '',
+  ...rest
+} = Astro.props;
+
+const hasLinks = Boolean(links && links.length > 0);
+const shouldRender = hasLinks || Boolean(scopeSelector);
+const classes = [
+  'ct-table-of-contents',
+  `ct-theme-${theme}`,
+  `ct-table-of-contents--position-${position || 'before'}`,
+  className,
+]
+  .filter(Boolean)
+  .join(' ');
+---
+
+{
+  shouldRender && (
+    <div class="container">
+      <div class="row">
+        <div class="col-xxs-12">
+          {hasLinks ? (
+            <div class={classes} {...rest}>
+              {title && <h2 class="ct-table-of-contents__title">{title}</h2>}
               <ul class="ct-table-of-contents__links">
-                {% for link in links %}
-                  <li class="ct-table-of-contents__link-item">
-                    <a class="ct-table-of-contents__link" href="{{ link.url }}">{{ link.title }}</a>
-                  </li>
-                {% endfor %}
+                {(links ?? []).map((link, i) => (
+                  <Fragment>
+                    {i > 0 && ' '}
+                    <li class="ct-table-of-contents__link-item">
+                      <a class="ct-table-of-contents__link" href={link.url}>
+                        {link.title}
+                      </a>
+                    </li>
+                  </Fragment>
+                ))}
               </ul>
-            {% endif %}
-          </div>
-        {% else %}
-          <div
-            data-table-of-contents-theme="{{ theme }}"
-            data-table-of-contents-title="{{ title }}"
-            data-table-of-contents-anchor-selector="{{ anchor_selector }}"
-            data-table-of-contents-anchor-scope-selector="{{ scope_selector }}"
-            data-table-of-contents-position="{{ position }}"
-          >
-            {%- block content_block -%}
-              {{- content -}}
-            {%- endblock -%}
-          </div>
-        {% endif %}
+            </div>
+          ) : (
+            <div
+              data-table-of-contents-theme={theme}
+              data-table-of-contents-title={title}
+              data-table-of-contents-anchor-selector={anchorSelector}
+              data-table-of-contents-anchor-scope-selector={scopeSelector}
+              data-table-of-contents-position={position}
+              set:html={content}
+            />
+          )}
+        </div>
       </div>
     </div>
-  </div>
-{% endif %}
--->
+  )
+}

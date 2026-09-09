@@ -23,16 +23,15 @@
  * - ...rest: Additional HTML attributes, spread onto the root element.
  *
  * Note: `event-card.twig`'s `content_tags_block` includes
- * `@molecules/tag-list/tag-list.twig`, which is not one of this task's 10
- * ported molecules. Its wrapper (`<div class="ct-tag-list ...">` +
- * `@base/item-list/item-list.twig`'s `<ul>`) is inlined directly here with
- * real `Tag` components as children — same "single string items target"
- * limitation as Attachment/Breadcrumb/Callout/Grid.
+ * `@molecules/tag-list/tag-list.twig` with exactly `{ theme, tags }` — now
+ * ported (Task 10), so this renders a real `<TagList>` with the same two
+ * props, rather than inlining its markup.
  */
 import Image from '@civictheme/atoms/Image.astro';
 import Tag from '@civictheme/atoms/Tag.astro';
 import Paragraph from '@civictheme/atoms/Paragraph.astro';
 import Icon from '@civictheme/base/Icon.astro';
+import TagList from '@civictheme/molecules/TagList.astro';
 
 interface Props {
   theme?: 'light' | 'dark';
@@ -175,26 +174,7 @@ function datetimeMarkup(): string {
             <div class="ct-event-card__tags">
               {tagList.length > 0 && (
                 <Fragment>
-                  <div class={['ct-tag-list', `ct-theme-${theme}`].join(' ')}>
-                    <ul class="ct-item-list ct-item-list--horizontal ct-item-list--small ct-tag-list__content">
-                      {tagList.map((tag, i) => {
-                        const tagObj = typeof tag === 'string' ? { content: tag } : tag;
-                        return (
-                          <Fragment>
-                            {i > 0 && ' '}
-                            <li class="ct-item-list__item">
-                              <Tag
-                                theme={theme}
-                                content={tagObj.content}
-                                url={tagObj.url}
-                                isNewWindow={tagObj.isNewWindow}
-                              />
-                            </li>
-                          </Fragment>
-                        );
-                      })}
-                    </ul>
-                  </div>{' '}
+                  <TagList theme={theme} tags={tagList} />{' '}
                 </Fragment>
               )}
               {isCardClickable && (
