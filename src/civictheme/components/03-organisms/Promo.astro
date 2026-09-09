@@ -1,0 +1,119 @@
+---
+/**
+ * CivicTheme Promo component.
+ *
+ * Props:
+ * - theme: Theme variation (light or dark).
+ * - isContained: Whether the content is contained in a container.
+ * - verticalSpacing: Vertical spacing for the promo (top, bottom, or both).
+ * - withBackground: Whether to display with a background.
+ * - link: Call-to-action link ({ text, url, isNewWindow, isExternal }).
+ * - class: Additional CSS classes.
+ * - ...rest: Additional HTML attributes, spread onto the root element.
+ *
+ * Slots (rendered with `set:html`, per this project's autoescape-off
+ * convention — html-bearing string props):
+ * - contentTop: Top content area.
+ * - title: Title text.
+ * - content: Main content text.
+ * - contentBottom: Bottom promo content.
+ */
+import Heading from '@civictheme/atoms/Heading.astro';
+import Paragraph from '@civictheme/atoms/Paragraph.astro';
+import Button from '@civictheme/atoms/Button.astro';
+
+interface PromoLink {
+  text?: string;
+  url?: string;
+  isNewWindow?: boolean;
+  isExternal?: boolean;
+}
+
+interface Props {
+  theme?: 'light' | 'dark';
+  isContained?: boolean;
+  verticalSpacing?: 'top' | 'bottom' | 'both' | string;
+  withBackground?: boolean;
+  link?: PromoLink | null;
+  contentTop?: string;
+  title?: string;
+  content?: string;
+  contentBottom?: string;
+  class?: string;
+  [key: string]: unknown;
+}
+
+const {
+  theme = 'light',
+  isContained,
+  verticalSpacing,
+  withBackground,
+  link,
+  contentTop,
+  title,
+  content,
+  contentBottom,
+  class: className = '',
+  ...rest
+} = Astro.props;
+
+const themeClass = `ct-theme-${theme}`;
+const withBackgroundClass = withBackground ? 'ct-promo--with-background' : '';
+const verticalSpacingClass = ['top', 'bottom', 'both'].includes(verticalSpacing ?? '')
+  ? `ct-vertical-spacing--${verticalSpacing}`
+  : '';
+const classes = `ct-promo ${themeClass} ${withBackgroundClass} ${verticalSpacingClass} ${className}`;
+
+const contained = isContained === undefined ? true : isContained;
+---
+
+{
+  (title || content) &&
+    (() => {
+      const inner = (
+        <Fragment>
+          {contentTop && (
+            <Fragment>
+              <div class="ct-promo__content-top" set:html={contentTop} />{' '}
+            </Fragment>
+          )}
+          <div class="ct-promo__wrapper">
+            <div class="ct-promo__inner">
+              {title && <Heading content={title} level={4} theme={theme} class="ct-promo__title" />}{' '}
+              {content && <Paragraph theme={theme} content={content} class="ct-promo__content" />}
+            </div>{' '}
+            {link && (
+              <div class="ct-promo__links">
+                <Button
+                  theme={theme}
+                  type="secondary"
+                  kind="link"
+                  size="large"
+                  text={link.text}
+                  url={link.url}
+                  isNewWindow={link.isNewWindow ?? false}
+                  isExternal={link.isExternal ?? false}
+                  class="ct-promo__button"
+                />
+              </div>
+            )}
+          </div>{' '}
+          {contentBottom && <div class="ct-promo__content-bottom" set:html={contentBottom} />}
+        </Fragment>
+      );
+
+      return (
+        <div class={classes} {...rest}>
+          {contained ? (
+            <div class="container">
+              <div class="row">
+                <div class="col-xxs-12">{inner}</div>
+              </div>
+            </div>
+          ) : (
+            inner
+          )}
+        </div>
+      );
+    })()
+}

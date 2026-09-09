@@ -1,0 +1,41 @@
+---
+/**
+ * CivicTheme Skip Link component.
+ *
+ * Props:
+ * - theme: Theme variation (light or dark).
+ * - text: Link text.
+ * - url: Link URL.
+ * - class: Additional CSS classes.
+ * - ...rest: Additional HTML attributes, spread onto the root <div>.
+ */
+import Link from '@civictheme/atoms/Link.astro';
+
+interface Props {
+  theme?: 'light' | 'dark';
+  text?: string;
+  url?: string;
+  class?: string;
+  [key: string]: unknown;
+}
+
+const { theme = 'light', text: textProp, url, class: className = '', ...rest } = Astro.props;
+
+const text = textProp || 'Skip to main content';
+const themeClass = `ct-theme-${theme}`;
+---
+
+{
+  text && (
+    <div class={`ct-skip-link ${themeClass} ${className}`} {...rest}>
+      <Link
+        theme={theme}
+        text={text}
+        url={url}
+        title={text}
+        data-platform=""
+        class="ct-skip-link__link ct-visually-hidden"
+      />
+    </div>
+  )
+}
