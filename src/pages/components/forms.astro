@@ -113,7 +113,15 @@ const searchStories = storiesFor('02-molecules/search');
           props={props}
           theme={fixture.theme}
         >
-          <Select {...props} />
+          {
+            // The `Select` atom never renders its own label (that is the
+            // `Field`/`Label` molecule's job upstream) — the standalone
+            // atom demo on this page has no such wrapper, so axe's
+            // `select-name` flags it. `aria-label` here is a demo-only
+            // stand-in, not part of the upstream story's own args (see
+            // PORTING.md).
+          }
+          <Select {...props} aria-label={fixture.name} />
         </ComponentDemoBlock>
       );
     })
@@ -240,8 +248,22 @@ const searchStories = storiesFor('02-molecules/search');
 
   <h2 class="ct-basic-content">Webform</h2>
   {
+    // Upstream's `referenced_webform` story arg is a bare text placeholder
+    // ("Webform title") standing in for what would, on a real site, be
+    // full rendered webform HTML — CivicTheme's own render pipeline would
+    // wrap real webform markup in something theme-aware. The bare
+    // placeholder has no such wrapper, so `Webform.astro`'s dark-theme demo
+    // prints default (light-theme) text on the dark stage (axe
+    // `color-contrast`). Wrapping it in `ct-basic-content ct-theme-<theme>`
+    // here — the same themed-content wrapper CivicTheme itself uses for
+    // freeform rendered content — is a demo-only fix, not a change to
+    // `Webform.astro` or its upstream markup (see PORTING.md).
     webformStories.map((fixture) => {
       const props = propsFor(fixture);
+      const referencedWebform = props.referencedWebform as string | undefined;
+      if (referencedWebform) {
+        props.referencedWebform = `<div class="ct-basic-content ct-theme-${fixture.theme ?? 'light'}">${referencedWebform}</div>`;
+      }
       return (
         <ComponentDemoBlock
           heading={fixture.name}

@@ -324,7 +324,15 @@ const gridProps = {
           props={props}
           theme={fixture.theme}
         >
-          <Iframe {...props} />
+          {
+            // Upstream's `Atoms/Iframe` story passes no `title`/`attributes`
+            // at all (`iframe.twig` has no title concept of its own — only
+            // a caller-supplied `attributes` could add one, and this story
+            // supplies none), so the rendered `<iframe>` has no accessible
+            // name (axe `frame-title`). Demo-only fallback title, not part
+            // of the upstream story's own args (see PORTING.md).
+          }
+          <Iframe {...props} title={(props.title as string | undefined) ?? fixture.name} />
         </ComponentDemoBlock>
       );
     })

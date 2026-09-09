@@ -98,6 +98,24 @@ function rewriteDemoPath(value: string): string {
 }
 
 /**
+ * Fixes a `ct-theme-*` class mismatch inside a pre-rendered HTML-string prop
+ * (a11y pass, Task 18): the upstream `TableOfContentsAutomatic--dark` story
+ * hardcodes its `content` blob's wrapper as `class="ct-basic-content
+ * ct-theme-light …"` even though the story itself is `theme: dark` —
+ * verbatim upstream fixture data, not something this port introduced (see
+ * PORTING.md). That mismatch puts CivicTheme's light-theme text colours on
+ * this project's dark demo-stage background, which fails axe's
+ * `color-contrast` check. Every captured fixture only ever nests ONE
+ * embedded `ct-theme-*` block matching the OUTER story's own theme, so a
+ * plain token swap on the whole string is safe.
+ */
+function syncEmbeddedTheme(value: string, theme: string): string {
+  if (theme === 'dark') return value.replace(/\bct-theme-light\b/g, 'ct-theme-dark');
+  if (theme === 'light') return value.replace(/\bct-theme-dark\b/g, 'ct-theme-light');
+  return value;
+}
+
+/**
  * Rewrites an embedded `MobileNavigationTrigger`'s hardcoded
  * `data-flyout-target=".ct-mobile-navigation"` (a class selector matching
  * ANY `.ct-mobile-navigation` panel on the page — see this file's header
@@ -179,11 +197,17 @@ function suffixIdLikeProp(key: string, value: string, suffix: string): string {
  * as `undefined`: these are Twig `create_attribute()` placeholders, and
  * every captured story leaves them empty.
  */
-export function argsToProps(args: Record<string, unknown>, suffix: string): Record<string, unknown> {
+export function argsToProps(
+  args: Record<string, unknown>,
+  suffix: string,
+  theme: string = 'light'
+): Record<string, unknown> {
   const convert = (value: unknown): unknown => {
-    if (typeof value === 'string') return suffixIdsInHtml(isolateFlyoutTarget(rewriteDemoPath(value), suffix), suffix);
+    if (typeof value === 'string') {
+      return suffixIdsInHtml(syncEmbeddedTheme(isolateFlyoutTarget(rewriteDemoPath(value), suffix), theme), suffix);
+    }
     if (Array.isArray(value)) return value.map(convert);
-    if (value && typeof value === 'object') return argsToProps(value as Record<string, unknown>, suffix);
+    if (value && typeof value === 'object') return argsToProps(value as Record<string, unknown>, suffix, theme);
     return value;
   };
 
@@ -243,7 +267,7 @@ export function storiesFor(component: string): StoryFixture[] {
  * instance on the same page (see this file's header comment).
  */
 export function propsFor(fixture: StoryFixture): Record<string, unknown> {
-  return argsToProps(fixture.args, `${fixture.exportName}-${fixture.theme ?? 'light'}`);
+  return argsToProps(fixture.args, `${fixture.exportName}-${fixture.theme ?? 'light'}`, fixture.theme ?? 'light');
 }
 
 /** `03-organisms/promo-card` → `PromoCard` — the Astro/MDX tag name for a component path. */

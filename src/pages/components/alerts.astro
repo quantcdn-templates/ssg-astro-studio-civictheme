@@ -23,6 +23,39 @@ const chipStories = storiesFor('01-atoms/chip');
 const tagStories = storiesFor('01-atoms/tag');
 const tagListStories = storiesFor('02-molecules/tag-list');
 const socialLinksStories = storiesFor('02-molecules/social-links');
+
+/**
+ * a11y pass (Task 18): upstream's `SocialLinks` story includes an item with
+ * a raw `icon_html: '<img … src="./demo/images/demo1.jpg"/>'` and no
+ * `title` — the icon has no `alt` and the link has no other accessible
+ * name (axe `image-alt`). That is the upstream story's own fixture data,
+ * not a `SocialLinks.astro` markup gap (see PORTING.md), so the fix is
+ * applied here, to the demo props, rather than inside the vendored
+ * component: derive a label from the link's URL and inject it as the
+ * image's `alt`.
+ */
+function hostnameLabel(url?: string): string {
+  if (!url) return 'Link';
+  try {
+    const name = new URL(url).hostname.replace(/^www\./, '').split('.')[0];
+    return name.charAt(0).toUpperCase() + name.slice(1);
+  } catch {
+    return 'Link';
+  }
+}
+
+function withSocialLinksAltFix(props: Record<string, unknown>): Record<string, unknown> {
+  const items = props.items as Array<Record<string, unknown>> | undefined;
+  if (!items) return props;
+  const items2 = items.map((item) => {
+    const iconHtml = item.iconHtml as string | undefined;
+    const needsAlt = iconHtml && !item.title && /<img\b(?![^>]*\balt=)/i.test(iconHtml);
+    if (!needsAlt) return item;
+    const alt = hostnameLabel(item.url as string | undefined);
+    return { ...item, iconHtml: iconHtml!.replace('<img ', `<img alt="${alt}" `) };
+  });
+  return { ...props, items: items2 };
+}
 ---
 
 <BaseLayout
@@ -157,7 +190,7 @@ const socialLinksStories = storiesFor('02-molecules/social-links');
   <h2 class="ct-basic-content">Social links</h2>
   {
     socialLinksStories.map((fixture) => {
-      const props = propsFor(fixture);
+      const props = withSocialLinksAltFix(propsFor(fixture));
       return (
         <ComponentDemoBlock
           heading={fixture.name}
