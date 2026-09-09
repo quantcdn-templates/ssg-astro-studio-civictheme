@@ -85,7 +85,15 @@ const classes = ['ct-single-filter', `ct-theme-${theme}`, className].filter(Bool
 const withForm = Boolean(formAttributes);
 const formWrapperProps = formAttributes ?? {};
 
-const filterItems = (items ?? []).filter((item) => item.text);
+// item-list.twig's `item is not empty` check does not filter items out of
+// the array — a text-less item still gets its own `<li>` (Twig's `empty`
+// test on a string is only true for the literal empty string `''`, and
+// single-filter.twig's per-item `{% set filter_item %}...{% endset %}`
+// capture, un-trimmed, is never truly empty even when `item.text` is —
+// it carries the whitespace between the `set`/`endset` tags). So this
+// maps over every item, rendering an empty `<li>` for a text-less one,
+// rather than filtering the array first.
+const filterItems = items ?? [];
 
 const submitClasses = [
   'ct-button',
@@ -120,17 +128,19 @@ const submitClasses = [
                         <Fragment>
                           {i > 0 && ' '}
                           <li class="ct-item-list__item">
-                            <Chip
-                              theme={theme}
-                              kind="input"
-                              size="small"
-                              isMultiple={isMultiple}
-                              isSelected={isSelected ?? false}
-                              content={text}
-                              groupParent=".ct-single-filter"
-                              name={name ?? (isMultiple ? `single-filter-${i + 1}` : 'single-filter')}
-                              {...itemRest}
-                            />
+                            {text && (
+                              <Chip
+                                theme={theme}
+                                kind="input"
+                                size="small"
+                                isMultiple={isMultiple}
+                                isSelected={isSelected ?? false}
+                                content={text}
+                                groupParent=".ct-single-filter"
+                                name={name ?? (isMultiple ? `single-filter-${i + 1}` : 'single-filter')}
+                                {...itemRest}
+                              />
+                            )}
                           </li>
                         </Fragment>
                       ))}
@@ -174,17 +184,19 @@ const submitClasses = [
                         <Fragment>
                           {i > 0 && ' '}
                           <li class="ct-item-list__item">
-                            <Chip
-                              theme={theme}
-                              kind="input"
-                              size="small"
-                              isMultiple={isMultiple}
-                              isSelected={isSelected ?? false}
-                              content={text}
-                              groupParent=".ct-single-filter"
-                              name={name ?? (isMultiple ? `single-filter-${i + 1}` : 'single-filter')}
-                              {...itemRest}
-                            />
+                            {text && (
+                              <Chip
+                                theme={theme}
+                                kind="input"
+                                size="small"
+                                isMultiple={isMultiple}
+                                isSelected={isSelected ?? false}
+                                content={text}
+                                groupParent=".ct-single-filter"
+                                name={name ?? (isMultiple ? `single-filter-${i + 1}` : 'single-filter')}
+                                {...itemRest}
+                              />
+                            )}
                           </li>
                         </Fragment>
                       ))}

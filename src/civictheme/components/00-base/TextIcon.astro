@@ -98,12 +98,30 @@ const displayText = showFullText ? text : `${textStart} `;
 // that trailing newline (it is stripped at map-generation time), so this
 // component must add it back explicitly for this one branch.
 const spaceBeforeNewWindow = Boolean(hasIconOrExternal && (text ? showFullText : Boolean(resolvedIcon)));
+// text-icon.twig:35-40 — the `{%- if text is not empty -%}` branch's very
+// first line of *real output* is not `before_text`/the span at all: it is
+// the literal newline+indentation sitting between the `{# Prepare the text
+// #}` comment (line 36, no trim dashes on either delimiter, so a Twig
+// comment never strips it) and the following `{% set rendered_text -%}`
+// (line 37, no LEADING trim dash, so it doesn't strip backwards either).
+// Every other line inside this branch is a pure `{% set %}` assignment
+// wrapped in `{%- ... -%}` (fully trimmed, no output), so that one
+// unclaimed whitespace run is the ONLY literal text this branch emits
+// before the real content — collapsing to a single space ahead of
+// `<span class="ct-text-icon__text">` whenever `hasIconOrExternal && text`,
+// unconditionally (not gated on icon placement, `showFullText`, or
+// `isExternal`). This is what Chip.astro's `kind === 'input'` markup was
+// previously special-casing itself (conditioned on `isDismissible ||
+// isMultiple`, i.e. "has an icon") — moved here since it belongs to every
+// caller of the text+icon-or-external branch, not just Chip.
+const leadingSpace = Boolean(hasIconOrExternal && text);
 ---
 
 {
   hasIconOrExternal ? (
     text ? (
       <Fragment>
+        {leadingSpace && ' '}
         {iconPlacement === 'before' && resolvedIcon && (
           <Fragment>
             <Icon symbol={resolvedIcon} class={iconClass} />{' '}

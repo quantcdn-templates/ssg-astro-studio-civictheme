@@ -1,6 +1,6 @@
-import { describe } from 'vitest';
+import { describe, it, expect } from 'vitest';
 import VideoPlayer from '@civictheme/molecules/VideoPlayer.astro';
-import { parityCase, expectAllKeysCovered } from '../harness';
+import { parityCase, expectAllKeysCovered, renderNormalised } from '../harness';
 
 const meta = { layer: '02-molecules', name: 'video-player' };
 
@@ -40,4 +40,25 @@ describe('VideoPlayer', () => {
   parityCase(meta, EMPTY_KEY, VideoPlayer, {});
 
   expectAllKeysCovered(meta, [REQUIRED_KEY, OEMBED_KEY, RAW_KEY, TRANSCRIPT_KEY, EMPTY_KEY]);
+
+  // verticalSpacing and the transcript-block-without-url case have no
+  // upstream snapshot exercising them (no `.test.js` case sets either) —
+  // verified by hand against `video-player.twig` lines 12, 40-41 (class)
+  // and 74 (outer transcript-block gate), and asserted directly here.
+  it('folds verticalSpacing into the root class list', async () => {
+    const html = await renderNormalised(VideoPlayer, {
+      sources: [{ url: 'video.mp4', type: 'video/mp4' }],
+      verticalSpacing: 'both',
+    });
+    expect(html).toContain('ct-vertical-spacing--both');
+  });
+
+  it('opens the transcript block for a non-empty transcriptLink object even without a url', async () => {
+    const html = await renderNormalised(VideoPlayer, {
+      sources: [{ url: 'video.mp4', type: 'video/mp4' }],
+      transcriptLink: { text: 'View Transcript' },
+    });
+    expect(html).toContain('ct-video-player__transcript-block');
+    expect(html).not.toContain('ct-video-player__links');
+  });
 });

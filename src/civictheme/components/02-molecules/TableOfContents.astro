@@ -32,6 +32,14 @@
  * the Twig; confirmed against `src/civictheme/js/behaviours/table-of-
  * contents.js`, which reads exactly these names off the element it
  * initialises.
+ *
+ * Note: `table-of-contents.twig` prints all five `data-table-of-contents-*`
+ * attributes unconditionally (an unset value prints as an empty string,
+ * never omits the attribute) — each is coerced with `?? ''` here to match,
+ * since Astro omits an attribute whose value is `undefined`. This matters
+ * for real behaviour, not just markup fidelity: `table-of-contents.js`
+ * selects on `[data-table-of-contents-position]` existing at all, so an
+ * omitted `position` attribute would mean the behaviour never initialises.
  */
 interface TocLink {
   title?: string;
@@ -97,11 +105,11 @@ const classes = [
             </div>
           ) : (
             <div
-              data-table-of-contents-theme={theme}
-              data-table-of-contents-title={title}
-              data-table-of-contents-anchor-selector={anchorSelector}
-              data-table-of-contents-anchor-scope-selector={scopeSelector}
-              data-table-of-contents-position={position}
+              data-table-of-contents-theme={theme ?? ''}
+              data-table-of-contents-title={title ?? ''}
+              data-table-of-contents-anchor-selector={anchorSelector ?? ''}
+              data-table-of-contents-anchor-scope-selector={scopeSelector ?? ''}
+              data-table-of-contents-position={position ?? ''}
               set:html={content}
             />
           )}

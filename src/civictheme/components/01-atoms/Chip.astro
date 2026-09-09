@@ -85,7 +85,6 @@ const classes = [
           checked={isSelected ? 'checked' : undefined}
           {...rest}
         />
-        {(isDismissible || isMultiple) && ' '}
         <TextIcon
           text={content}
           icon={isDismissible || isMultiple ? 'cancel' : null}

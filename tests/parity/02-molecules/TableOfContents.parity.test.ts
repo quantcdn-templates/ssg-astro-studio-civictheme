@@ -63,4 +63,18 @@ describe('TableOfContents (smoke — no upstream test.js)', () => {
     expect(html).toContain('<h2>Heading</h2><p>Body</p>');
     expect(html).not.toContain('ct-table-of-contents__title');
   });
+
+  it('prints all five data-table-of-contents-* attributes (empty) even with no optional props', async () => {
+    const html = await renderNormalised(TableOfContents, { scopeSelector: '.ct-basic-content' });
+    // An empty-string attribute value serialises bare (no `=""`), which is
+    // the HTML-equivalent form (an attribute with no `=value` parses to an
+    // empty-string value) — what matters for fidelity is that the attribute
+    // is present at all, since `table-of-contents.js` selects on
+    // `[data-table-of-contents-position]` existing, not on its value.
+    expect(html).toContain('data-table-of-contents-theme="light"');
+    expect(html).toMatch(/\sdata-table-of-contents-title(\s|=|>)/);
+    expect(html).toMatch(/\sdata-table-of-contents-anchor-selector(\s|=|>)/);
+    expect(html).toContain('data-table-of-contents-anchor-scope-selector=".ct-basic-content"');
+    expect(html).toMatch(/\sdata-table-of-contents-position(\s|=|>)/);
+  });
 });

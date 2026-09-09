@@ -1,6 +1,6 @@
-import { describe } from 'vitest';
+import { describe, it, expect } from 'vitest';
 import SingleFilter from '@civictheme/molecules/SingleFilter.astro';
-import { parityCase, expectAllKeysCovered } from '../harness';
+import { parityCase, expectAllKeysCovered, renderNormalised } from '../harness';
 
 const meta = { layer: '02-molecules', name: 'single-filter' };
 
@@ -42,4 +42,20 @@ describe('SingleFilter', () => {
   });
 
   expectAllKeysCovered(meta, [REQUIRED_KEY, OPTIONAL_KEY, EMPTY_KEY, MULTIPLE_KEY]);
+
+  // No upstream snapshot exercises a text-less item — verified by hand
+  // against item-list.twig:27-32 (an item is only skipped when truly empty,
+  // and single-filter.twig's per-item capture is whitespace, not empty,
+  // when item.text is empty, so it still gets its own <li>).
+  it('renders an empty <li> for a text-less item rather than omitting it', async () => {
+    const html = await renderNormalised(SingleFilter, {
+      title: 'Filter results by:',
+      items: [{ text: 'Filter 1' }, { text: '' }],
+      submitText: 'Apply filter',
+    });
+    const items = [...html.matchAll(/<li class="ct-item-list__item">(.*?)<\/li>/g)];
+    expect(items).toHaveLength(2);
+    expect(items[0][1]).toContain('ct-chip');
+    expect(items[1][1]).toBe('');
+  });
 });
