@@ -89,17 +89,41 @@ const hasFeaturedImage = Boolean(featuredImage && Object.keys(featuredImage).len
 const hasBackgroundImageUrl = Boolean(backgroundImage?.url);
 const hasBackgroundImageAlt = Boolean(backgroundImage?.alt);
 
-const shouldRender = Boolean(
-  contentTop1 ||
-  contentTop2 ||
-  contentTop3 ||
-  siteSection ||
-  title ||
-  contentMiddle ||
-  content ||
-  contentBelow ||
-  contentBottom
-);
+// Slot-vs-string-prop precedence (same convention as `List.astro`): every
+// Slot-documented prop from banner.twig's doc header gets a same-named named
+// slot. When the slot is present it takes precedence over the string prop,
+// and every `{% if %}` gate widens to "string prop OR slot" so a slot-only
+// usage still opens the wrapper markup.
+const hasContentTop1Slot = Astro.slots.has('contentTop1');
+const hasContentTop2Slot = Astro.slots.has('contentTop2');
+const hasContentTop3Slot = Astro.slots.has('contentTop3');
+const hasSiteSectionSlot = Astro.slots.has('siteSection');
+const hasTitleSlot = Astro.slots.has('title');
+const hasContentMiddleSlot = Astro.slots.has('contentMiddle');
+const hasContentSlot = Astro.slots.has('content');
+const hasContentBelowSlot = Astro.slots.has('contentBelow');
+const hasContentBottomSlot = Astro.slots.has('contentBottom');
+
+const hasContentTop1 = Boolean(contentTop1) || hasContentTop1Slot;
+const hasContentTop2 = Boolean(contentTop2) || hasContentTop2Slot;
+const hasContentTop3 = Boolean(contentTop3) || hasContentTop3Slot;
+const hasSiteSection = Boolean(siteSection) || hasSiteSectionSlot;
+const hasTitle = Boolean(title) || hasTitleSlot;
+const hasContentMiddle = Boolean(contentMiddle) || hasContentMiddleSlot;
+const hasContent = Boolean(content) || hasContentSlot;
+const hasContentBelow = Boolean(contentBelow) || hasContentBelowSlot;
+const hasContentBottom = Boolean(contentBottom) || hasContentBottomSlot;
+
+const shouldRender =
+  hasContentTop1 ||
+  hasContentTop2 ||
+  hasContentTop3 ||
+  hasSiteSection ||
+  hasTitle ||
+  hasContentMiddle ||
+  hasContent ||
+  hasContentBelow ||
+  hasContentBottom;
 
 const innerClasses = ['ct-banner__inner', backgroundImageBlendMode && `ct-background--${backgroundImageBlendMode}`]
   .filter(Boolean)
@@ -123,16 +147,18 @@ const contentColClass = hasFeaturedImage ? 'col-xxs-12 col-m-6' : 'col-xxs-12';
             </Fragment>
           )}
           <div class="container">
-            {contentTop1 && (
+            {hasContentTop1 && (
               <Fragment>
                 <div class="row">
                   <div class="col-xxs-12">
-                    <div class="ct-banner__content-top" set:html={contentTop1} />
+                    <div class="ct-banner__content-top">
+                      {hasContentTop1Slot ? <slot name="contentTop1" /> : <Fragment set:html={contentTop1} />}
+                    </div>
                   </div>
                 </div>{' '}
               </Fragment>
             )}
-            {(hasBreadcrumb || contentTop2) && (
+            {(hasBreadcrumb || hasContentTop2) && (
               <Fragment>
                 <div class="row">
                   {hasBreadcrumb && (
@@ -145,54 +171,70 @@ const contentColClass = hasFeaturedImage ? 'col-xxs-12 col-m-6' : 'col-xxs-12';
                       />
                     </div>
                   )}{' '}
-                  {contentTop2 && (
+                  {hasContentTop2 && (
                     <div class="col-xxs-12 col-m-6">
-                      <div class="ct-banner__content-top2" set:html={contentTop2} />
+                      <div class="ct-banner__content-top2">
+                        {hasContentTop2Slot ? <slot name="contentTop2" /> : <Fragment set:html={contentTop2} />}
+                      </div>
                     </div>
                   )}
                 </div>{' '}
               </Fragment>
             )}
-            {contentTop3 && (
+            {hasContentTop3 && (
               <Fragment>
                 <div class="row">
                   <div class="col-xxs-12">
-                    <div class="ct-banner__content-top3" set:html={contentTop3} />
+                    <div class="ct-banner__content-top3">
+                      {hasContentTop3Slot ? <slot name="contentTop3" /> : <Fragment set:html={contentTop3} />}
+                    </div>
                   </div>
                 </div>{' '}
               </Fragment>
             )}
-            {siteSection && (
+            {hasSiteSection && (
               <Fragment>
                 <div class="row">
                   <div class="col-xxs-12">
-                    <Heading theme={theme} content={siteSection} level={5} class="ct-banner__site-section" />
+                    {hasSiteSectionSlot ? (
+                      <slot name="siteSection" />
+                    ) : (
+                      <Heading theme={theme} content={siteSection} level={5} class="ct-banner__site-section" />
+                    )}
                   </div>
                 </div>{' '}
               </Fragment>
             )}
-            {title && (
+            {hasTitle && (
               <Fragment>
                 <div class="row">
                   <div class={contentColClass}>
-                    <Heading theme={theme} content={title} level={1} class="ct-banner__title" />
+                    {hasTitleSlot ? (
+                      <slot name="title" />
+                    ) : (
+                      <Heading theme={theme} content={title} level={1} class="ct-banner__title" />
+                    )}
                   </div>
                 </div>{' '}
               </Fragment>
             )}
-            {contentMiddle && (
+            {hasContentMiddle && (
               <Fragment>
                 <div class="row">
                   <div class={contentColClass}>
-                    <div class="ct-banner__content-middle" set:html={contentMiddle} />
+                    <div class="ct-banner__content-middle">
+                      {hasContentMiddleSlot ? <slot name="contentMiddle" /> : <Fragment set:html={contentMiddle} />}
+                    </div>
                   </div>
                 </div>{' '}
               </Fragment>
             )}
-            {content && (
+            {hasContent && (
               <div class="row">
                 <div class={contentColClass}>
-                  <div class="ct-banner__content" set:html={content} />
+                  <div class="ct-banner__content">
+                    {hasContentSlot ? <slot name="content" /> : <Fragment set:html={content} />}
+                  </div>
                 </div>
               </div>
             )}
@@ -204,22 +246,26 @@ const contentColClass = hasFeaturedImage ? 'col-xxs-12 col-m-6' : 'col-xxs-12';
           </div>
         )}
       </div>{' '}
-      {contentBelow && (
+      {hasContentBelow && (
         <Fragment>
           <div class="container">
             <div class="row">
               <div class="col-xxs-12">
-                <div class="ct-banner__content-below" set:html={contentBelow} />
+                <div class="ct-banner__content-below">
+                  {hasContentBelowSlot ? <slot name="contentBelow" /> : <Fragment set:html={contentBelow} />}
+                </div>
               </div>
             </div>
           </div>{' '}
         </Fragment>
       )}
-      {contentBottom && (
+      {hasContentBottom && (
         <div class="container">
           <div class="row">
             <div class="col-xxs-12">
-              <div class="ct-banner__content-bottom" set:html={contentBottom} />
+              <div class="ct-banner__content-bottom">
+                {hasContentBottomSlot ? <slot name="contentBottom" /> : <Fragment set:html={contentBottom} />}
+              </div>
             </div>
           </div>
         </div>

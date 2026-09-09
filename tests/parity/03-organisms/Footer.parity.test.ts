@@ -69,4 +69,39 @@ describe('Footer', () => {
     const html = await renderNormalised(Footer, { contentMiddle1: 'Middle content 1' });
     expect(html).toContain('ct-footer__middle__content-middle1');
   });
+
+  describe('slots', () => {
+    const NAMES = [
+      'contentTop1',
+      'contentTop2',
+      'contentMiddle1',
+      'contentMiddle2',
+      'contentMiddle3',
+      'contentMiddle4',
+      'contentBottom1',
+      'contentBottom2',
+    ] as const;
+
+    for (const name of NAMES) {
+      it(`${name}: slot renders identically to the string prop`, async () => {
+        const viaProp = await renderNormalised(Footer, { [name]: 'Slotted content' });
+        const viaSlot = await renderNormalised(Footer, {}, { [name]: 'Slotted content' });
+        expect(viaSlot).toBe(viaProp);
+      });
+    }
+
+    // contentMiddle5 alone never opens the root <footer> (footer.twig:40) —
+    // true for the slot exactly as it is for the string prop.
+    it('contentMiddle5: slot renders identically to the string prop', async () => {
+      const viaProp = await renderNormalised(Footer, { contentMiddle1: 'A', contentMiddle5: 'Slotted content' });
+      const viaSlot = await renderNormalised(Footer, { contentMiddle1: 'A' }, { contentMiddle5: 'Slotted content' });
+      expect(viaSlot).toBe(viaProp);
+    });
+
+    it('a slot alone (no string prop) still opens its wrapper markup', async () => {
+      const html = await renderNormalised(Footer, {}, { contentMiddle1: 'Live Menu' });
+      expect(html).toContain('ct-footer__middle__content-middle1');
+      expect(html).toContain('Live Menu');
+    });
+  });
 });

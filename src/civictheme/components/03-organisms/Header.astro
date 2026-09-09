@@ -49,13 +49,32 @@ const {
 
 const classes = ['ct-header', `ct-theme-${theme}`, className].filter(Boolean).join(' ');
 
-const hasTop = Boolean(contentTop1 || contentTop2 || contentTop3);
-const hasTop2Or3 = Boolean(contentTop2 || contentTop3);
-const hasMiddle = Boolean(contentMiddle1 || contentMiddle2 || contentMiddle3);
-const hasMiddle2Or3 = Boolean(contentMiddle2 || contentMiddle3);
-const shouldRender = Boolean(
-  contentTop1 || contentTop2 || contentTop3 || contentMiddle1 || contentMiddle2 || contentMiddle3 || contentBottom1
-);
+// Slot-vs-string-prop precedence (same convention as `List.astro`): every
+// Slot-documented prop from header.twig's doc header gets a same-named
+// named slot. When the slot is present it takes precedence over the string
+// prop, and every `{% if %}` gate widens to "string prop OR slot" so a
+// slot-only usage still opens the wrapper markup.
+const hasTop1Slot = Astro.slots.has('contentTop1');
+const hasTop2Slot = Astro.slots.has('contentTop2');
+const hasTop3Slot = Astro.slots.has('contentTop3');
+const hasMiddle1Slot = Astro.slots.has('contentMiddle1');
+const hasMiddle2Slot = Astro.slots.has('contentMiddle2');
+const hasMiddle3Slot = Astro.slots.has('contentMiddle3');
+const hasBottom1Slot = Astro.slots.has('contentBottom1');
+
+const hasTop1 = Boolean(contentTop1) || hasTop1Slot;
+const hasTop2 = Boolean(contentTop2) || hasTop2Slot;
+const hasTop3 = Boolean(contentTop3) || hasTop3Slot;
+const hasMiddle1 = Boolean(contentMiddle1) || hasMiddle1Slot;
+const hasMiddle2 = Boolean(contentMiddle2) || hasMiddle2Slot;
+const hasMiddle3 = Boolean(contentMiddle3) || hasMiddle3Slot;
+const hasBottom1 = Boolean(contentBottom1) || hasBottom1Slot;
+
+const hasTop = hasTop1 || hasTop2 || hasTop3;
+const hasTop2Or3 = hasTop2 || hasTop3;
+const hasMiddle = hasMiddle1 || hasMiddle2 || hasMiddle3;
+const hasMiddle2Or3 = hasMiddle2 || hasMiddle3;
+const shouldRender = hasTop || hasMiddle || hasBottom1;
 ---
 
 {
@@ -64,12 +83,14 @@ const shouldRender = Boolean(
       {hasTop && (
         <Fragment>
           <div class="ct-header__top hide-xxs show-m">
-            {contentTop1 && (
+            {hasTop1 && (
               <Fragment>
                 <div class="container">
                   <div class="row">
                     <div class="col-xxs-12">
-                      <div class="ct-header__content-top1" set:html={contentTop1} />
+                      <div class="ct-header__content-top1">
+                        {hasTop1Slot ? <slot name="contentTop1" /> : <Fragment set:html={contentTop1} />}
+                      </div>
                     </div>
                   </div>
                 </div>{' '}
@@ -79,10 +100,14 @@ const shouldRender = Boolean(
               <div class="container">
                 <div class="row">
                   <div class="col-xxs-12 col-m-4">
-                    <div class="ct-header__content-top2" set:html={contentTop2} />
+                    <div class="ct-header__content-top2">
+                      {hasTop2Slot ? <slot name="contentTop2" /> : <Fragment set:html={contentTop2} />}
+                    </div>
                   </div>{' '}
                   <div class="col-xxs-12 col-m-8">
-                    <div class="ct-header__content-top3" set:html={contentTop3} />
+                    <div class="ct-header__content-top3">
+                      {hasTop3Slot ? <slot name="contentTop3" /> : <Fragment set:html={contentTop3} />}
+                    </div>
                   </div>
                 </div>
               </div>
@@ -93,12 +118,14 @@ const shouldRender = Boolean(
       {hasMiddle && (
         <Fragment>
           <div class="ct-header__middle">
-            {contentMiddle1 && (
+            {hasMiddle1 && (
               <Fragment>
                 <div class="container">
                   <div class="row">
                     <div class="col-xxs-12">
-                      <div class="ct-header__content-middle1" set:html={contentMiddle1} />
+                      <div class="ct-header__content-middle1">
+                        {hasMiddle1Slot ? <slot name="contentMiddle1" /> : <Fragment set:html={contentMiddle1} />}
+                      </div>
                     </div>
                   </div>
                 </div>{' '}
@@ -107,16 +134,20 @@ const shouldRender = Boolean(
             {hasMiddle2Or3 && (
               <div class="container">
                 <div class="row row--no-wrap">
-                  {contentMiddle2 && (
+                  {hasMiddle2 && (
                     <Fragment>
                       <div class="col col--no-grow">
-                        <div class="ct-header__content-middle2" set:html={contentMiddle2} />
+                        <div class="ct-header__content-middle2">
+                          {hasMiddle2Slot ? <slot name="contentMiddle2" /> : <Fragment set:html={contentMiddle2} />}
+                        </div>
                       </div>{' '}
                     </Fragment>
                   )}
-                  {contentMiddle3 && (
+                  {hasMiddle3 && (
                     <div class="col">
-                      <div class="ct-header__content-middle3" set:html={contentMiddle3} />
+                      <div class="ct-header__content-middle3">
+                        {hasMiddle3Slot ? <slot name="contentMiddle3" /> : <Fragment set:html={contentMiddle3} />}
+                      </div>
                     </div>
                   )}
                 </div>
@@ -125,12 +156,14 @@ const shouldRender = Boolean(
           </div>{' '}
         </Fragment>
       )}
-      {contentBottom1 && (
+      {hasBottom1 && (
         <div class="ct-header__bottom">
           <div class="container">
             <div class="row">
               <div class="col-xxs-12">
-                <div class="ct-header__content-bottom1" set:html={contentBottom1} />
+                <div class="ct-header__content-bottom1">
+                  {hasBottom1Slot ? <slot name="contentBottom1" /> : <Fragment set:html={contentBottom1} />}
+                </div>
               </div>
             </div>
           </div>

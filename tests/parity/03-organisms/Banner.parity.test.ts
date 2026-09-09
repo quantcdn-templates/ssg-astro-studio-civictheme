@@ -70,4 +70,53 @@ describe('Banner', () => {
     // Image.astro's own `url` gate still means no <img> renders.
     expect(html).not.toContain('<img');
   });
+
+  describe('slots', () => {
+    const NAMES = [
+      'contentTop1',
+      'contentTop2',
+      'contentTop3',
+      'contentMiddle',
+      'content',
+      'contentBelow',
+      'contentBottom',
+    ] as const;
+
+    for (const name of NAMES) {
+      it(`${name}: slot renders identically to the string prop`, async () => {
+        const viaProp = await renderNormalised(Banner, { [name]: 'Slotted content' });
+        const viaSlot = await renderNormalised(Banner, {}, { [name]: 'Slotted content' });
+        expect(viaSlot).toBe(viaProp);
+      });
+    }
+
+    // `title`/`siteSection` route their string prop through `Heading`, which
+    // adds its own wrapper markup — the slot renders the caller's markup
+    // directly, so parity is checked against Heading's own known output.
+    it('title: slot renders identically to the string prop', async () => {
+      const viaProp = await renderNormalised(Banner, { title: 'Banner Title' });
+      const viaSlot = await renderNormalised(
+        Banner,
+        {},
+        { title: '<h1 class="ct-heading ct-banner__title ct-theme-light">Banner Title</h1>' }
+      );
+      expect(viaSlot).toBe(viaProp);
+    });
+
+    it('siteSection: slot renders identically to the string prop', async () => {
+      const viaProp = await renderNormalised(Banner, { siteSection: 'Section' });
+      const viaSlot = await renderNormalised(
+        Banner,
+        {},
+        { siteSection: '<h5 class="ct-heading ct-banner__site-section ct-theme-light">Section</h5>' }
+      );
+      expect(viaSlot).toBe(viaProp);
+    });
+
+    it('a slot alone (no string prop) still opens its wrapper markup', async () => {
+      const html = await renderNormalised(Banner, {}, { content: 'Live Content' });
+      expect(html).toContain('ct-banner__content');
+      expect(html).toContain('Live Content');
+    });
+  });
 });

@@ -1,6 +1,6 @@
-import { describe } from 'vitest';
+import { describe, it, expect } from 'vitest';
 import Header from '@civictheme/organisms/Header.astro';
-import { parityCase, expectAllKeysCovered } from '../harness';
+import { parityCase, expectAllKeysCovered, renderNormalised } from '../harness';
 
 const meta = { layer: '03-organisms', name: 'header' };
 
@@ -43,6 +43,32 @@ describe('Header', () => {
     contentMiddle3: '',
     contentBottom1: '',
     class: '',
+  });
+
+  describe('slots', () => {
+    const NAMES = [
+      'contentTop1',
+      'contentTop2',
+      'contentTop3',
+      'contentMiddle1',
+      'contentMiddle2',
+      'contentMiddle3',
+      'contentBottom1',
+    ] as const;
+
+    for (const name of NAMES) {
+      it(`${name}: slot renders identically to the string prop`, async () => {
+        const viaProp = await renderNormalised(Header, { [name]: 'Slotted content' });
+        const viaSlot = await renderNormalised(Header, {}, { [name]: 'Slotted content' });
+        expect(viaSlot).toBe(viaProp);
+      });
+    }
+
+    it('a slot alone (no string prop) still opens its wrapper markup', async () => {
+      const html = await renderNormalised(Header, {}, { contentMiddle3: 'Live Nav' });
+      expect(html).toContain('ct-header__content-middle3');
+      expect(html).toContain('Live Nav');
+    });
   });
 
   expectAllKeysCovered(meta, [ALL_KEY, MISSING_KEY, EMPTY_KEY]);
