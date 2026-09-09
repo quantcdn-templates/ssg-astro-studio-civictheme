@@ -1,0 +1,137 @@
+---
+/**
+ * CivicTheme Tabs component.
+ *
+ * Props:
+ * - theme: Theme variation (light or dark).
+ * - verticalSpacing: Vertical spacing for the tabs (none, top, bottom, both).
+ * - panels: Tab panels: Array<{ title, content, id, isSelected }>.
+ * - links: Optional links (if not provided, generated from panels):
+ *   Array<{ text, url, class, isNewWindow, isExternal, ...rest }>.
+ * - class: Additional CSS classes.
+ * - ...rest: Additional HTML attributes, spread onto the root element.
+ *
+ * Note: `tabs.twig` includes `@base/item-list/item-list.twig` with each
+ * generated link's rendered `Link` markup captured as a string. `ItemList`'s
+ * `items` prop is typed for raw HTML strings, which a live `Link` component
+ * can't be turned into without a nested Container render — so, matching
+ * `TagList`/`SocialLinks`'s precedent, the `<ul>`/`<li>` wrapper is
+ * reproduced directly here with real `Link` children (`ItemList`'s
+ * class-list formula for `direction=horizontal, size=regular, noGap=true`
+ * is `ct-item-list ct-item-list--horizontal ct-item-list--regular
+ * ct-item-list--no-gap ct-tabs__links`).
+ *
+ * Note: `panel.content` is documented as `[string]` (not HTML-bearing) but
+ * every upstream `.snap` fixture is generated with Twig's `autoescape` off
+ * (see PORTING.md), so it is rendered with `set:html` per this project's
+ * autoescape convention, consistent with every other dynamic content print.
+ */
+import Link from '@civictheme/atoms/Link.astro';
+
+interface TabPanel {
+  title?: string;
+  content?: string;
+  id?: string;
+  isSelected?: boolean;
+}
+
+interface TabLink {
+  text?: string;
+  url?: string;
+  class?: string;
+  isNewWindow?: boolean;
+  isExternal?: boolean;
+  [key: string]: unknown;
+}
+
+interface Props {
+  theme?: 'light' | 'dark';
+  verticalSpacing?: 'top' | 'bottom' | 'both';
+  panels?: TabPanel[];
+  links?: TabLink[];
+  class?: string;
+  [key: string]: unknown;
+}
+
+const {
+  theme = 'light',
+  verticalSpacing,
+  panels: panelsProp,
+  links: linksProp,
+  class: className = '',
+  ...rest
+} = Astro.props;
+
+const panels = panelsProp ?? [];
+
+// Create links from panels if not provided, matching tabs.twig's fallback.
+const links: Array<TabLink & { linkId: string }> =
+  linksProp && linksProp.length > 0
+    ? linksProp.map((link) => ({ ...link, linkId: '' }))
+    : panels.map((panel) => {
+        const linkId = `${panel.id}-tab`;
+        return {
+          text: panel.title,
+          url: `#${linkId}`,
+          role: 'tab',
+          id: linkId,
+          'aria-controls': panel.id,
+          linkId,
+        };
+      });
+
+const verticalSpacingClass = (['top', 'bottom', 'both'] as const).includes(verticalSpacing as any)
+  ? `ct-vertical-spacing--${verticalSpacing}`
+  : '';
+const classes = ['ct-tabs', `ct-theme-${theme}`, verticalSpacingClass, className].filter(Boolean).join(' ');
+const hasContent = panels.length > 0 || links.length > 0;
+---
+
+{
+  hasContent && (
+    <div class={classes} data-tabs-panel {...rest}>
+      <ul class="ct-item-list ct-item-list--horizontal ct-item-list--regular ct-item-list--no-gap ct-tabs__links">
+        {links.map(({ text, url, class: linkClass, isNewWindow, isExternal, linkId, ...linkRest }, i) => (
+          <Fragment>
+            {i > 0 && ' '}
+            <li class="ct-item-list__item">
+              <Link
+                theme={theme}
+                text={text}
+                url={url}
+                isNewWindow={isNewWindow ?? false}
+                isExternal={isExternal ?? false}
+                class={linkClass || ''}
+                {...linkRest}
+                data-tabs-tab=""
+              />
+            </li>
+          </Fragment>
+        ))}
+      </ul>
+      {panels.length > 0 && (
+        <Fragment>
+          {' '}
+          <div class="ct-tabs__panels">
+            {panels.map(
+              (panel, k) =>
+                panel.content && (
+                  <Fragment>
+                    {k > 0 && ' '}
+                    <div
+                      class={`ct-tabs__panels__panel ${panel.isSelected ? 'selected' : ''}`}
+                      data-tabs-panel
+                      id={panel.id}
+                      role="tabpanel"
+                      aria-labelledby={links[k]?.linkId}
+                      set:html={panel.content}
+                    />
+                  </Fragment>
+                )
+            )}
+          </div>
+        </Fragment>
+      )}
+    </div>
+  )
+}

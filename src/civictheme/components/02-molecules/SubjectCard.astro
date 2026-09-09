@@ -1,0 +1,75 @@
+---
+/**
+ * CivicTheme Subject Card component.
+ *
+ * Props:
+ * - theme: Theme variation (light or dark).
+ * - image: Card image: { url, alt }.
+ * - link: Card link: { url, isNewWindow }.
+ * - isTitleClick: Whether to make only the title clickable instead of the
+ *   whole card.
+ * - title / imageOver: Documented as Slots upstream, but every upstream
+ *   test passes plain string props — ported as `string` props, rendered
+ *   with `set:html` per this project's autoescape convention.
+ * - class: Additional CSS classes.
+ * - ...rest: Additional HTML attributes, spread onto the root element.
+ */
+import Image from '@civictheme/atoms/Image.astro';
+
+interface Props {
+  theme?: 'light' | 'dark';
+  image?: { url?: string; alt?: string };
+  link?: { url?: string; isNewWindow?: boolean };
+  isTitleClick?: boolean;
+  title?: string;
+  imageOver?: string;
+  class?: string;
+  [key: string]: unknown;
+}
+
+const { theme = 'light', image, link, isTitleClick, title, imageOver, class: className = '', ...rest } = Astro.props;
+
+const withImage = Boolean(image?.url);
+const withLink = Boolean(link?.url);
+const isCardClickable = withLink && !isTitleClick;
+
+const classes = [
+  'ct-subject-card',
+  `ct-theme-${theme}`,
+  withImage && 'ct-subject-card--with-image',
+  isCardClickable && 'ct-subject-card--card-clickable',
+  className,
+]
+  .filter(Boolean)
+  .join(' ');
+---
+
+{
+  title && (
+    <div class={classes} {...rest}>
+      <div class="ct-subject-card__content">
+        {withImage && (
+          <Fragment>
+            <div class="ct-subject-card__image">
+              <Image theme={theme} url={image?.url} alt={image?.alt} />
+            </div>{' '}
+          </Fragment>
+        )}
+        {imageOver && (
+          <Fragment>
+            <div class="ct-subject-card__image__over" set:html={imageOver} />{' '}
+          </Fragment>
+        )}
+        <div class="ct-subject-card__title">
+          {withLink ? (
+            <a class="ct-subject-card__title-link" href={link?.url} target={link?.isNewWindow ? '_blank' : undefined}>
+              <Fragment set:html={title} />
+            </a>
+          ) : (
+            <Fragment set:html={title} />
+          )}
+        </div>
+      </div>
+    </div>
+  )
+}

@@ -80,11 +80,24 @@ const displayText = showFullText ? text : `${textStart} `;
 // true (regardless of whether any icon follows it) — that space is what
 // ends up directly before `is_new_window_content` in the real markup, via
 // `{{- content_markup -}}{{- is_new_window_content -}}` (both tightly
-// trimmed, so the ONLY separator between them is this one, conditional,
-// literal space). Every other content_markup branch (grouped/not-full-text,
-// icon-only, plain-span-no-icon) is wrapped in tags that trim tightly on
-// both sides, so none of them leave any space before is_new_window_content.
-const spaceBeforeNewWindow = Boolean(hasIconOrExternal && text && showFullText);
+// trimmed, so that Twig-level gap is the ONLY *template* whitespace
+// separator between them). The grouped/not-full-text and plain-span-no-icon
+// branches are wrapped in tags that trim tightly on both sides, so neither
+// leaves any space before `is_new_window_content`.
+//
+// The icon-only branch (`text` empty, `hasIconOrExternal` true) is
+// different: `content_markup` there is exactly `icon_markup`, which is
+// `icon.twig`'s `source(...)`'d SVG *file content* re-emitted through
+// `{{- ... -}}` — a trim that only strips Twig template whitespace, not a
+// literal trailing `\n` that is already part of the returned string value
+// (every icon asset file ends with `</svg>\n`). That raw newline survives
+// into the DOM as a real text node, which is what a real browser/JSDOM
+// collapses to a single space before `is_new_window_content`. Confirmed
+// against Social Links' "required attributes" snapshot (icon, no text,
+// `isNewWindow: true`) — `Icon.astro`'s own `icons.ts` map does not carry
+// that trailing newline (it is stripped at map-generation time), so this
+// component must add it back explicitly for this one branch.
+const spaceBeforeNewWindow = Boolean(hasIconOrExternal && (text ? showFullText : Boolean(resolvedIcon)));
 ---
 
 {

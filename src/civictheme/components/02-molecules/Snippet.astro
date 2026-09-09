@@ -1,0 +1,98 @@
+---
+/**
+ * CivicTheme Snippet component.
+ *
+ * Props:
+ * - theme: Theme variation (light or dark).
+ * - link: Snippet link object: { text, url, isNewWindow, isExternal }.
+ * - contentTop / contentMiddle / contentBottom / title / summary / tags:
+ *   Documented as Slots upstream, but every upstream test passes plain
+ *   string/array props — ported as props, string ones rendered with
+ *   `set:html` per this project's autoescape convention.
+ * - tags: Snippet tags, passed straight through to `TagList` (see
+ *   PORTING.md's tag-list revisit note).
+ * - class: Additional CSS classes.
+ * - ...rest: Additional HTML attributes, spread onto the root element.
+ */
+import Paragraph from '@civictheme/atoms/Paragraph.astro';
+import TagList from '@civictheme/molecules/TagList.astro';
+
+interface Props {
+  theme?: 'light' | 'dark';
+  link?: { text?: string; url?: string; isNewWindow?: boolean; isExternal?: boolean };
+  contentTop?: string;
+  contentMiddle?: string;
+  contentBottom?: string;
+  title?: string;
+  summary?: string;
+  tags?: Array<string | Record<string, unknown>>;
+  class?: string;
+  [key: string]: unknown;
+}
+
+const {
+  theme = 'light',
+  link,
+  contentTop,
+  contentMiddle,
+  contentBottom,
+  title,
+  summary,
+  tags,
+  class: className = '',
+  ...rest
+} = Astro.props;
+
+const withLink = Boolean(link?.url);
+const classes = ['ct-snippet', `ct-theme-${theme}`, className].filter(Boolean).join(' ');
+const hasTags = Boolean(tags && tags.length > 0);
+---
+
+{
+  title && (
+    <div class={classes} {...rest}>
+      <div class="ct-snippet__content">
+        {contentTop && (
+          <Fragment>
+            <div class="ct-snippet__content-top" set:html={contentTop} />{' '}
+          </Fragment>
+        )}
+        <div class="ct-snippet__title">
+          {withLink ? (
+            <a class="ct-snippet__title-link" href={link?.url} target={link?.isNewWindow ? '_blank' : undefined}>
+              <Fragment set:html={title} />
+            </a>
+          ) : (
+            <Fragment set:html={title} />
+          )}
+        </div>
+        {contentMiddle && (
+          <Fragment>
+            {' '}
+            <div class="ct-snippet__content-middle" set:html={contentMiddle} />
+          </Fragment>
+        )}
+        {summary && (
+          <Fragment>
+            {' '}
+            <Paragraph theme={theme} content={summary} noMargin class="ct-snippet__summary" />
+          </Fragment>
+        )}
+        {hasTags && (
+          <Fragment>
+            {' '}
+            <div class="ct-snippet__tags">
+              <TagList theme={theme} tags={tags} />
+            </div>
+          </Fragment>
+        )}
+        {contentBottom && (
+          <Fragment>
+            {' '}
+            <div class="ct-snippet__content-bottom" set:html={contentBottom} />
+          </Fragment>
+        )}
+      </div>
+    </div>
+  )
+}

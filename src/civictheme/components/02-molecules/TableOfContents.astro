@@ -1,0 +1,54 @@
+---
+interface Props {
+  theme?: 'light' | 'dark';
+  title?: string;
+  position?: string;
+  anchorSelector?: string;
+  scopeSelector?: string;
+  class?: string;
+  [key: string]: unknown;
+}
+const { theme = 'light', title, position, anchorSelector, scopeSelector, class: className = '', ...rest } = Astro.props;
+---
+<!-- TWIG:
+{% if links is not empty or scope_selector is not empty %}
+  <div class="container">
+    <div class="row">
+      <div class="col-xxs-12">
+        {% if links %}
+          {% set theme_class = 'ct-theme-%s'|format(theme|default('light')) %}
+          {% set position_class = 'ct-table-of-contents--position-%s'|format(position|default('before')) %}
+          {% set modifier_class = '%s %s %s'|format(theme_class, position_class, modifier_class|default('')) %}
+
+          <div class="ct-table-of-contents {{ modifier_class }}" {% if attributes is defined and attributes is not null %}{{- attributes -}}{% endif %}>
+            {% if title %}
+              <h2 class="ct-table-of-contents__title">{{ title }}</h2>
+            {% endif %}
+            {% if links %}
+              <ul class="ct-table-of-contents__links">
+                {% for link in links %}
+                  <li class="ct-table-of-contents__link-item">
+                    <a class="ct-table-of-contents__link" href="{{ link.url }}">{{ link.title }}</a>
+                  </li>
+                {% endfor %}
+              </ul>
+            {% endif %}
+          </div>
+        {% else %}
+          <div
+            data-table-of-contents-theme="{{ theme }}"
+            data-table-of-contents-title="{{ title }}"
+            data-table-of-contents-anchor-selector="{{ anchor_selector }}"
+            data-table-of-contents-anchor-scope-selector="{{ scope_selector }}"
+            data-table-of-contents-position="{{ position }}"
+          >
+            {%- block content_block -%}
+              {{- content -}}
+            {%- endblock -%}
+          </div>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+{% endif %}
+-->

@@ -1,0 +1,73 @@
+---
+/**
+ * CivicTheme Social Links component.
+ *
+ * Props:
+ * - theme: Theme variation (light or dark).
+ * - withBorder: Whether icons have borders.
+ * - items: Social media links: Array<{ icon, iconHtml, url, title }>.
+ * - class: Additional CSS classes.
+ * - ...rest: Additional HTML attributes, spread onto the root element.
+ *
+ * Note: `social-links.twig` includes `@base/item-list/item-list.twig` with
+ * each item's rendered `Button` markup captured as a string. `ItemList`'s
+ * `items` prop is typed for raw HTML strings, which a live `Button`
+ * component can't be turned into without a nested Container render — so,
+ * matching `TagList`/`GroupFilter`'s precedent, the `<ul>`/`<li>` wrapper
+ * is reproduced directly here with real `Button` children (`ItemList`'s
+ * class-list formula for `direction=horizontal, size=regular, noGap=false`
+ * is `ct-item-list ct-item-list--horizontal ct-item-list--regular
+ * ct-social-links__list`).
+ */
+import Button from '@civictheme/atoms/Button.astro';
+
+interface SocialLinkItem {
+  icon?: string;
+  iconHtml?: string;
+  url?: string;
+  title?: string;
+}
+
+interface Props {
+  theme?: 'light' | 'dark';
+  withBorder?: boolean;
+  items?: SocialLinkItem[];
+  class?: string;
+  [key: string]: unknown;
+}
+
+const { theme = 'light', withBorder, items, class: className = '', ...rest } = Astro.props;
+
+const hasItems = Boolean(items && items.length > 0);
+const classes = ['ct-social-links', `ct-theme-${theme}`, withBorder && 'ct-social-links--with-border', className]
+  .filter(Boolean)
+  .join(' ');
+---
+
+{
+  hasItems && (
+    <div class={classes} {...rest}>
+      <ul class="ct-item-list ct-item-list--horizontal ct-item-list--regular ct-social-links__list">
+        {(items ?? []).map((item, i) => (
+          <Fragment>
+            {i > 0 && ' '}
+            <li class="ct-item-list__item">
+              <Button
+                theme={theme}
+                kind="link"
+                type="tertiary"
+                icon={!item.iconHtml ? item.icon : null}
+                text={item.iconHtml || null}
+                url={item.url}
+                isExternal={false}
+                isNewWindow
+                class="ct-social-links__button"
+                title={item.title || undefined}
+              />
+            </li>
+          </Fragment>
+        ))}
+      </ul>
+    </div>
+  )
+}

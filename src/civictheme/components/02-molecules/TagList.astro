@@ -1,0 +1,100 @@
+---
+/**
+ * CivicTheme Tag List component.
+ *
+ * Props:
+ * - theme: Theme variation (light or dark).
+ * - verticalSpacing: Tag list vertical spacing (none, top, bottom, both).
+ * - tags: Tags: Array<string | { content, url, isNewWindow, ... }>. Each
+ *   entry is merged onto `{ theme }` and spread onto `Tag`, exactly like
+ *   `tag-list.twig`'s `{theme: theme}|merge(tag)` (a string tag becomes
+ *   `{ content: tag }` first).
+ * - contentTop / contentBottom: Documented as Slots upstream, but every
+ *   upstream test passes plain string props — ported as `string` props,
+ *   rendered with `set:html` per this project's autoescape convention.
+ * - class: Additional CSS classes.
+ * - ...rest: Additional HTML attributes, spread onto the root element.
+ *
+ * Note: `tag-list.twig` includes `@base/item-list/item-list.twig` with each
+ * tag's rendered markup captured as a string. `ItemList.astro`'s own
+ * `items` prop is typed for raw HTML strings, which a live `Tag` component
+ * can't be turned into without a nested Container render — so, matching
+ * `EventCard`/`GroupFilter`'s precedent for this exact situation, the
+ * `<ul>`/`<li>` wrapper is reproduced directly here with real `Tag`
+ * children (`ItemList`'s class-list formula for
+ * `direction=horizontal, size=small, noGap=false` is `ct-item-list
+ * ct-item-list--horizontal ct-item-list--small ct-tag-list__content`).
+ */
+import Tag from '@civictheme/atoms/Tag.astro';
+
+interface TagItem {
+  theme?: 'light' | 'dark';
+  content?: string;
+  icon?: string | null;
+  iconPlacement?: 'before' | 'after';
+  url?: string;
+  isNewWindow?: boolean | null;
+  isExternal?: boolean | null;
+  class?: string;
+  [key: string]: unknown;
+}
+
+interface Props {
+  theme?: 'light' | 'dark';
+  verticalSpacing?: 'top' | 'bottom' | 'both';
+  tags?: Array<string | TagItem>;
+  contentTop?: string;
+  contentBottom?: string;
+  class?: string;
+  [key: string]: unknown;
+}
+
+const {
+  theme = 'light',
+  verticalSpacing,
+  tags,
+  contentTop,
+  contentBottom,
+  class: className = '',
+  ...rest
+} = Astro.props;
+
+const hasTags = Boolean(tags && tags.length > 0);
+const verticalSpacingClass = (['top', 'bottom', 'both'] as const).includes(verticalSpacing as any)
+  ? `ct-vertical-spacing--${verticalSpacing}`
+  : '';
+const classes = ['ct-tag-list', `ct-theme-${theme}`, verticalSpacingClass, className].filter(Boolean).join(' ');
+
+const tagProps = (tags ?? []).map((tag): TagItem => {
+  const tagObj = typeof tag === 'string' ? { content: tag } : tag;
+  return { theme, ...tagObj };
+});
+---
+
+{
+  hasTags && (
+    <div class={classes} {...rest}>
+      {contentTop && (
+        <Fragment>
+          <div class="ct-tag-list__content-top" set:html={contentTop} />{' '}
+        </Fragment>
+      )}
+      <ul class="ct-item-list ct-item-list--horizontal ct-item-list--small ct-tag-list__content">
+        {tagProps.map((props, i) => (
+          <Fragment>
+            {i > 0 && ' '}
+            <li class="ct-item-list__item">
+              <Tag {...props} />
+            </li>
+          </Fragment>
+        ))}
+      </ul>
+      {contentBottom && (
+        <Fragment>
+          {' '}
+          <div class="ct-tag-list__content-bottom" set:html={contentBottom} />
+        </Fragment>
+      )}
+    </div>
+  )
+}
