@@ -13,6 +13,11 @@
  * - items: Field items to display. Ideally a single text field.
  * - itemsEnd: Field items to appear after the `items` slot.
  *
+ * Both slots also have a same-named `string` prop rendered with `set:html`;
+ * the slot TAKES PRECEDENCE when present. Upstream's
+ * `inline-filter.stories.js` passes pre-rendered field markup as strings,
+ * which is also how a Drupal caller feeds `items`/`items_end`.
+ *
  * Note: `inline-filter.twig` has no upstream `.test.js` / `__snapshots__`
  * in `.upstream/uikit/packages/twig/components/02-molecules/inline-filter`
  * (only `.scss`/`.stories.*` files exist there) — ported as a real Astro
@@ -32,15 +37,19 @@ interface Props {
   theme?: 'light' | 'dark';
   title?: string;
   submitText?: string;
+  items?: string;
+  itemsEnd?: string;
   class?: string;
   [key: string]: unknown;
 }
 
-const { theme = 'light', title, submitText, class: className = '', ...rest } = Astro.props;
+const { theme = 'light', title, submitText, items, itemsEnd, class: className = '', ...rest } = Astro.props;
 
 const classes = ['ct-inline-filter', `ct-theme-${theme}`, className].filter(Boolean).join(' ');
-const hasItems = Astro.slots.has('items');
-const hasItemsEnd = Astro.slots.has('itemsEnd');
+const hasItemsSlot = Astro.slots.has('items');
+const hasItemsEndSlot = Astro.slots.has('itemsEnd');
+const hasItems = hasItemsSlot || Boolean(items);
+const hasItemsEnd = hasItemsEndSlot || Boolean(itemsEnd);
 const submitClasses = [
   'ct-button',
   `ct-theme-${theme}`,
@@ -54,12 +63,18 @@ const submitClasses = [
 ---
 
 <div class={classes} {...rest}>
-  {title && <div class="ct-inline-filter__title">{title}</div>}
+  {
+    title && (
+      <Fragment>
+        <div class="ct-inline-filter__title">{title}</div>{' '}
+      </Fragment>
+    )
+  }
   <div class="ct-inline-filter__content">
     {
       hasItems && (
         <div class="ct-inline-filter__items">
-          <slot name="items" />
+          {hasItemsSlot ? <slot name="items" /> : <Fragment set:html={items} />}{' '}
           <div class="ct-inline-filter__actions">
             <button class={submitClasses} data-component-name="button" type="submit">
               <TextIcon text={submitText || 'Search'} />
@@ -71,7 +86,7 @@ const submitClasses = [
     {
       hasItemsEnd && (
         <div class="ct-inline-filter__items-end">
-          <slot name="itemsEnd" />
+          {hasItemsEndSlot ? <slot name="itemsEnd" /> : <Fragment set:html={itemsEnd} />}
         </div>
       )
     }
