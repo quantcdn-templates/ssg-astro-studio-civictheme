@@ -32,6 +32,13 @@ interface AcceptedVisualDifference {
 
 const FIXTURES = join(process.cwd(), 'tests/story-parity/fixtures');
 const OUT = join(process.cwd(), 'test-results/story-parity');
+/**
+ * Per-story pixel deltas for `scripts/story-parity-report.mjs`. Deliberately
+ * NOT under `test-results/`: Playwright wipes its `outputDir` at the start of
+ * every run, including the e2e config's, so results written there do not
+ * survive another suite running afterwards.
+ */
+const RESULTS = join(process.cwd(), '.story-parity-results');
 
 /** Same options as `scripts/capture-upstream-stories.mjs`. */
 const MASK_SELECTORS = ['.ct-iframe', '.ct-map--canvas', '.ct-video-player', '.ct-video', 'video'];
@@ -144,6 +151,26 @@ for (const name of stories) {
     const delta = differing / (width * height);
 
     const limit = difference ? difference.maxDelta : TOLERANCE;
+
+    // One file per story (workers run in parallel, so nothing is appended to
+    // a shared file). `scripts/story-parity-report.mjs` reads these to fill in
+    // PARITY.md's pixel-delta column.
+    const deltaFile = join(RESULTS, `${name.replace(/\//g, '__')}.json`);
+    mkdirSync(dirname(deltaFile), { recursive: true });
+    writeFileSync(
+      deltaFile,
+      `${JSON.stringify({
+        story: name,
+        delta,
+        limit,
+        width,
+        height,
+        renderSize: `${actual.width}x${actual.height}`,
+        fixtureSize: `${expectedPng.width}x${expectedPng.height}`,
+        accepted: difference?.reason ?? null,
+      })}\n`
+    );
+
     if (delta > limit) {
       const base = join(OUT, name);
       mkdirSync(dirname(base), { recursive: true });

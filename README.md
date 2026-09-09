@@ -52,3 +52,24 @@ swap these for a real brand mark.
 This template does not enable Astro's `<ClientRouter>` (view transitions) — every
 navigation is a full page load, which the vendored CivicTheme behaviours rely on to
 re-initialise. See `PORTING.md` for why. (Task 19 expands this README further.)
+
+## Parity with upstream
+
+Every component is checked against the pinned CivicTheme UI Kit
+(`packages/twig`, commit `fe4291907b1ea15cfc0ea5d9ca47d31964a5b91a`) by two
+independent oracles:
+
+1. **Upstream's Jest snapshots** — `npm run test:parity` (697 cases). These
+   cover the prop combinations upstream's own unit tests use.
+2. **Upstream's Storybook stories** — the complete documented argument set for
+   every variant, captured once into `tests/story-parity/fixtures/` (markup,
+   screenshots and args) so the suite runs without the upstream checkout.
+
+```bash
+npm run test:story-parity          # HTML comparison, no browser
+npm run test:story-parity:visual   # pixel comparison, builds the site and runs Playwright
+```
+
+`PARITY.md` lists every story with its HTML result, its pixel delta, and the
+reason for any accepted difference. Regenerate it with
+`node scripts/story-parity-report.mjs`.

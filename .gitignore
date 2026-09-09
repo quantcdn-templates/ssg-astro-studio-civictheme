@@ -7,3 +7,4 @@ test-results/
 playwright-report/
 .superpowers/
 dist-story-parity/
+.story-parity-results/
