@@ -1,0 +1,266 @@
+---
+/**
+ * CivicTheme List component.
+ *
+ * Props:
+ * - theme: Theme variation (light or dark).
+ * - verticalSpacing: List vertical spacing (top, bottom, or both).
+ * - withBackground: Whether to display with a background.
+ * - linkAbove / linkBelow: Link objects: { text, url, isNewWindow, isExternal }.
+ * - rowsAbove / rowsBelow: Above/below rows content — a string or array of
+ *   strings; each entry is concatenated raw (matching the un-trimmed-once
+ *   `{%- rows_above_row -%}` loop upstream, which drops all inter-row
+ *   whitespace).
+ * - title / content / filters / resultsCount / rows / empty / pagination /
+ *   footer: Documented as Slots upstream, but every upstream test passes
+ *   plain string props — ported as `string` props, rendered with
+ *   `set:html` per this project's autoescape convention.
+ * - class: Additional CSS classes.
+ * - ...rest: Additional HTML attributes, spread onto the root element.
+ *
+ * Note: `empty_block` gates on `empty is defined and (rows is not defined
+ * or rows is empty)` — the "is defined" half of that can't be replicated
+ * exactly with plain props (every prop key is always "defined" once
+ * destructured), so this ports it as `!rows && typeof empty !==
+ * 'undefined'`, which matches every upstream test case.
+ */
+import Heading from '@civictheme/atoms/Heading.astro';
+import Button from '@civictheme/atoms/Button.astro';
+import Paragraph from '@civictheme/atoms/Paragraph.astro';
+
+interface ListLink {
+  text?: string;
+  url?: string;
+  isNewWindow?: boolean;
+  isExternal?: boolean;
+}
+
+interface Props {
+  theme?: 'light' | 'dark';
+  verticalSpacing?: 'top' | 'bottom' | 'both' | string | null;
+  withBackground?: boolean;
+  linkAbove?: ListLink | null;
+  linkBelow?: ListLink | null;
+  rowsAbove?: string | string[];
+  rowsBelow?: string | string[];
+  title?: string;
+  content?: string;
+  filters?: string;
+  resultsCount?: string;
+  rows?: string;
+  empty?: string;
+  pagination?: string;
+  footer?: string;
+  class?: string;
+  [key: string]: unknown;
+}
+
+const {
+  theme = 'light',
+  verticalSpacing,
+  withBackground,
+  linkAbove,
+  linkBelow,
+  rowsAbove,
+  rowsBelow,
+  title,
+  content,
+  filters,
+  resultsCount,
+  rows,
+  empty,
+  pagination,
+  footer,
+  class: className = '',
+  ...rest
+} = Astro.props;
+
+const verticalSpacingClass = (['top', 'bottom', 'both'] as const).includes(verticalSpacing as 'top')
+  ? `ct-vertical-spacing-inset--${verticalSpacing}`
+  : '';
+
+const classes = [
+  'ct-list',
+  `ct-theme-${theme}`,
+  withBackground && 'ct-list--with-background',
+  verticalSpacingClass,
+  className,
+]
+  .filter(Boolean)
+  .join(' ');
+
+const hasLinkAbove = Boolean(linkAbove && Object.keys(linkAbove).length > 0);
+const hasLinkBelow = Boolean(linkBelow && Object.keys(linkBelow).length > 0);
+const hasHeader = Boolean(title || hasLinkAbove);
+const hasRows = Boolean(rows);
+const hasEmpty = !hasRows && typeof empty !== 'undefined';
+
+const toArray = (v: string | string[] | undefined): string[] => (v == null ? [] : Array.isArray(v) ? v : [v]);
+const rowsAboveHtml = toArray(rowsAbove).join('');
+const rowsBelowHtml = toArray(rowsBelow).join('');
+---
+
+<div class={classes} {...rest}>
+  <div class="ct-list__inner">
+    {
+      hasHeader && (
+        <Fragment>
+          <div class="ct-list__header">
+            <div class="container">
+              <div class="row">
+                <div class="col-xxs-12 col-m-9">
+                  {title && <Heading content={title} level={2} theme={theme} class="ct-list__title" />}
+                </div>{' '}
+                <div class="col-xxs-12 col-m-3">
+                  {hasLinkAbove && (
+                    <div class="ct-list__link-above ct-flex-justify-content-center">
+                      <Button
+                        theme={theme}
+                        type="secondary"
+                        kind="link"
+                        size="regular"
+                        text={linkAbove?.text}
+                        url={linkAbove?.url}
+                        isNewWindow={linkAbove?.isExternal}
+                        isExternal={linkAbove?.isExternal}
+                        icon={linkAbove?.isExternal ? '' : 'right-arrow-2'}
+                        class="ct-list__link-above__link"
+                      />
+                    </div>
+                  )}
+                </div>
+              </div>
+            </div>
+          </div>{' '}
+        </Fragment>
+      )
+    }
+    {
+      content && (
+        <Fragment>
+          <div class="ct-list__content">
+            <div class="container">
+              <div class="row">
+                <div class="col-xxs-12">
+                  <Paragraph content={content} theme={theme} class="ct-list__content__inner" />
+                </div>
+              </div>
+            </div>
+          </div>{' '}
+        </Fragment>
+      )
+    }
+    {
+      filters && (
+        <Fragment>
+          <div class="ct-list__filters">
+            <div class="container">
+              <div class="row">
+                <div class="col-xxs-12" set:html={filters} />
+              </div>
+            </div>
+          </div>{' '}
+        </Fragment>
+      )
+    }
+    {
+      hasRows && (
+        <Fragment>
+          {rowsAboveHtml && (
+            <Fragment>
+              <div class="container ct-list__rows-above">
+                <div class="row">
+                  <div class="col-xxs-12" set:html={rowsAboveHtml} />
+                </div>
+              </div>{' '}
+            </Fragment>
+          )}
+          {resultsCount && (
+            <Fragment>
+              <div class="container">
+                <div class="row">
+                  <div class="col-xxs-12">
+                    <div class="ct-list__results-count">{resultsCount}</div>
+                  </div>
+                </div>
+              </div>{' '}
+            </Fragment>
+          )}
+          <div class="ct-list__rows" set:html={rows} />
+          {rowsBelowHtml && (
+            <Fragment>
+              {' '}
+              <div class="container ct-list__rows-below">
+                <div class="row">
+                  <div class="col-xxs-12" set:html={rowsBelowHtml} />
+                </div>
+              </div>
+            </Fragment>
+          )}
+        </Fragment>
+      )
+    }
+    {
+      hasEmpty && (
+        <div class="container ct-list__empty-results">
+          <div class="row">
+            <div class="col-xxs-12">
+              <Paragraph content={empty} theme={theme} class="ct-list__empty-results__inner" />
+            </div>
+          </div>
+        </div>
+      )
+    }
+    {
+      hasLinkBelow && (
+        <Fragment>
+          {' '}
+          <div class="ct-list__link-below ct-flex-justify-content-center container">
+            <Button
+              theme={theme}
+              type="secondary"
+              kind="link"
+              size="large"
+              text={linkBelow?.text}
+              url={linkBelow?.url}
+              isNewWindow={linkBelow?.isExternal}
+              isExternal={linkBelow?.isExternal}
+              icon={linkBelow?.isExternal ? '' : 'right-arrow-2'}
+              class="ct-list__link-below__link"
+            />
+          </div>
+        </Fragment>
+      )
+    }
+    {
+      pagination && (
+        <Fragment>
+          {' '}
+          <div class="ct-list__results-below">
+            <div class="container">
+              <div class="row">
+                <div class="col-xxs-12">
+                  <div class="ct-list__pagination" set:html={pagination} />
+                </div>
+              </div>
+            </div>
+          </div>
+        </Fragment>
+      )
+    }
+    {
+      footer && (
+        <Fragment>
+          {' '}
+          <footer class="ct-list__footer">
+            <div class="container">
+              <div class="row">
+                <div class="col-xxs-12" set:html={footer} />
+              </div>
+            </div>
+          </footer>
+        </Fragment>
+      )
+    }
+  </div>
+</div>

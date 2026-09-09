@@ -1,0 +1,183 @@
+---
+/**
+ * CivicTheme Campaign component.
+ *
+ * Props:
+ * - theme: Theme variation (light or dark).
+ * - imagePosition: Image position relative to content (left or right).
+ * - verticalSpacing: Campaign vertical spacing (top, bottom, or both).
+ * - image: Campaign image: { url, alt }.
+ * - tags: Campaign tags: Array<string | { content, url, isNewWindow }>.
+ * - links: Campaign links: Array<{ text, url, isNewWindow, isExternal }>.
+ * - date: Campaign date.
+ * - contentTop / title / content / contentBottom: Documented as Slots
+ *   upstream, but every upstream test passes plain string props — ported
+ *   as `string` props, rendered with `set:html` per this project's
+ *   autoescape convention.
+ * - class: Additional CSS classes.
+ * - ...rest: Additional HTML attributes, spread onto the root element.
+ *
+ * Note: `links_block`'s per-link `{% include button.twig %}` markup is
+ * captured as a string then passed to `@base/item-list/item-list.twig` —
+ * matching `TagList`/`SocialLinks`'s precedent, rendered here directly as
+ * real `Button` children inside the `ItemList` class-list formula
+ * (`ct-item-list ct-item-list--horizontal ct-item-list--regular
+ * ct-campaign__links ct-item-list--horizontal-middle`).
+ */
+import Heading from '@civictheme/atoms/Heading.astro';
+import Tag from '@civictheme/atoms/Tag.astro';
+import Paragraph from '@civictheme/atoms/Paragraph.astro';
+import Button from '@civictheme/atoms/Button.astro';
+import Image from '@civictheme/atoms/Image.astro';
+import TagList from '@civictheme/molecules/TagList.astro';
+
+interface CampaignLink {
+  text?: string;
+  url?: string;
+  isNewWindow?: boolean;
+  isExternal?: boolean;
+}
+
+interface Props {
+  theme?: 'light' | 'dark';
+  imagePosition?: 'left' | 'right';
+  verticalSpacing?: 'top' | 'bottom' | 'both' | string | null;
+  image?: { url?: string; alt?: string };
+  tags?: Array<string | { content?: string; url?: string; isNewWindow?: boolean }>;
+  links?: CampaignLink[];
+  date?: string | null;
+  contentTop?: string;
+  title?: string;
+  content?: string;
+  contentBottom?: string;
+  class?: string;
+  [key: string]: unknown;
+}
+
+const {
+  theme = 'light',
+  imagePosition: imagePositionProp,
+  verticalSpacing,
+  image,
+  tags,
+  links,
+  date,
+  contentTop,
+  title,
+  content,
+  contentBottom,
+  class: className = '',
+  ...rest
+} = Astro.props;
+
+const imagePosition = imagePositionProp === 'left' ? 'left' : 'right';
+const verticalSpacingClass = (['top', 'bottom', 'both'] as const).includes(verticalSpacing as 'top')
+  ? `ct-vertical-spacing-inset--${verticalSpacing}`
+  : '';
+
+const classes = [
+  'ct-campaign',
+  `ct-theme-${theme}`,
+  verticalSpacingClass,
+  `ct-campaign--image-${imagePosition}`,
+  className,
+]
+  .filter(Boolean)
+  .join(' ');
+
+const hasImage = Boolean(image?.url);
+const tagItems = tags ?? [];
+const linkItems = links ?? [];
+---
+
+<div class={classes} {...rest}>
+  <div class="container">
+    <div class="row">
+      <div class="col-xxs-12 col-m-5 col-m-offset-1 ct-flex-align-self-center">
+        <div class="ct-campaign__inner">
+          {
+            contentTop && (
+              <Fragment>
+                <div class="ct-campaign__content-top" set:html={contentTop} />{' '}
+              </Fragment>
+            )
+          }
+          {
+            tagItems.length > 0 && (
+              <Fragment>
+                <TagList theme={theme} tags={tagItems} class="ct-campaign__tags" />{' '}
+              </Fragment>
+            )
+          }
+          {
+            title && (
+              <Fragment>
+                <Heading theme={theme} content={title} level={2} class="ct-campaign__title" />{' '}
+              </Fragment>
+            )
+          }
+          {
+            date && (
+              <Fragment>
+                <Tag theme={theme} content={date} type="tertiary" class="ct-campaign__date" />{' '}
+              </Fragment>
+            )
+          }
+          {
+            content && (
+              <Fragment>
+                <Paragraph theme={theme} content={content} class="ct-campaign__content" size="large" />{' '}
+              </Fragment>
+            )
+          }
+          {
+            linkItems.length > 0 && (
+              <ul class="ct-item-list ct-item-list--horizontal ct-item-list--regular ct-campaign__links ct-item-list--horizontal-middle">
+                {linkItems.map((link, i) => (
+                  <Fragment>
+                    {i > 0 && ' '}
+                    <li class="ct-item-list__item">
+                      <Button
+                        theme={theme}
+                        kind="link"
+                        type={i === 0 ? 'primary' : 'secondary'}
+                        text={link.text}
+                        url={link.url}
+                        isNewWindow={link.isNewWindow}
+                        isExternal={link.isExternal}
+                      />
+                    </li>
+                  </Fragment>
+                ))}
+              </ul>
+            )
+          }
+          {
+            contentBottom && (
+              <Fragment>
+                {' '}
+                <div class="ct-campaign__content-bottom" set:html={contentBottom} />
+              </Fragment>
+            )
+          }
+        </div>
+      </div>{' '}
+      <div
+        class:list={[
+          'col-xxs-12',
+          'first',
+          imagePosition === 'right' ? ['col-m-5', 'col-m-offset-1', 'last-m'] : ['col-m-5', 'first-m'],
+          'ct-flex-align-self-start',
+        ]}
+      >
+        {
+          hasImage && (
+            <div class="ct-campaign__image">
+              <Image theme={theme} url={image?.url} alt={image?.alt} />
+            </div>
+          )
+        }
+      </div>
+    </div>
+  </div>
+</div>

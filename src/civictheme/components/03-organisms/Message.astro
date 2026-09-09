@@ -1,0 +1,101 @@
+---
+/**
+ * CivicTheme Message component.
+ *
+ * Props:
+ * - theme: Theme variation (light or dark).
+ * - type: Message type (information, error, warning, success).
+ * - verticalSpacing: Message vertical spacing (none, top, bottom, both).
+ * - withBackground: Whether to display with a background.
+ * - hasAria: Whether to render `role`/`aria-label`/`aria-live` — defaults
+ *   to `true`; when `false` all three attributes are omitted entirely
+ *   (not just empty), matching `{% if has_aria %}` upstream.
+ * - title / content: Documented as Slots upstream, but every upstream
+ *   test passes plain string props — ported as `string` props, rendered
+ *   with `set:html` per this project's autoescape convention.
+ * - class: Additional CSS classes.
+ * - ...rest: Additional HTML attributes, spread onto the root element.
+ *
+ * Note: `message.twig`'s content include is `@atoms/paragraph/paragraph.twig`
+ * with `{ theme, content, modifier_class: 'ct-message__content' }` — ported
+ * as a real `Paragraph`.
+ */
+import Icon from '@civictheme/base/Icon.astro';
+import Paragraph from '@civictheme/atoms/Paragraph.astro';
+
+interface Props {
+  theme?: 'light' | 'dark';
+  type?: 'information' | 'error' | 'warning' | 'success' | string;
+  verticalSpacing?: 'top' | 'bottom' | 'both' | string | null;
+  withBackground?: boolean;
+  hasAria?: boolean;
+  title?: string;
+  content?: string;
+  class?: string;
+  [key: string]: unknown;
+}
+
+const ICONS: Record<string, string> = {
+  information: 'information-mark',
+  warning: 'exclamation-mark-2',
+  error: 'exclamation-mark-1',
+  success: 'approve',
+};
+
+const {
+  theme = 'light',
+  type: typeProp,
+  verticalSpacing,
+  withBackground,
+  hasAria = true,
+  title,
+  content,
+  class: className = '',
+  ...rest
+} = Astro.props;
+
+const type = (['information', 'error', 'warning', 'success'] as const).includes(typeProp as 'information')
+  ? typeProp!
+  : 'information';
+const verticalSpacingClass = (['top', 'bottom', 'both'] as const).includes(verticalSpacing as 'top')
+  ? `ct-vertical-spacing--${verticalSpacing}`
+  : '';
+
+const classes = [
+  'ct-message',
+  `ct-theme-${theme}`,
+  `ct-message--${type}`,
+  withBackground && 'ct-message--with-background',
+  verticalSpacingClass,
+  className,
+]
+  .filter(Boolean)
+  .join(' ');
+
+const icon = ICONS[type];
+const role = type === 'error' ? 'alert' : 'contentinfo';
+---
+
+{
+  (title || content) && (
+    <div class={classes} {...(hasAria ? { role, 'aria-label': type, 'aria-live': 'assertive' } : {})} {...rest}>
+      <div class="ct-message__inner">
+        {icon && (
+          <Fragment>
+            <div class="ct-message__icon">
+              <Icon symbol={icon} size="regular" />
+            </div>{' '}
+          </Fragment>
+        )}
+        <div class="ct-message__inner-wrapper">
+          {title && (
+            <Fragment>
+              <div class="ct-message__title" set:html={title} />{' '}
+            </Fragment>
+          )}
+          {content && <Paragraph theme={theme} content={content} class="ct-message__content" />}
+        </div>
+      </div>
+    </div>
+  )
+}

@@ -1,0 +1,100 @@
+---
+/**
+ * CivicTheme Alert component.
+ *
+ * Props:
+ * - theme: Theme variation (light or dark).
+ * - type: Alert type (information, error, warning, success).
+ * - id: Unique identifier for the alert.
+ * - title / description: Documented as Slots upstream, but every upstream
+ *   test passes plain string props — ported as `string` props, rendered
+ *   with `set:html` per this project's autoescape convention.
+ * - class: Additional CSS classes.
+ * - ...rest: Additional HTML attributes, spread onto the root element.
+ *
+ * Note: the dismiss button is rendered here as a real `Button` (kind
+ * "button", type "tertiary") with the same `data-alert-dismiss-trigger`
+ * attribute upstream sets via `create_attribute()` — behaviour hook read
+ * by `src/civictheme/js/behaviours/alert.js` (already vendored).
+ */
+import Button from '@civictheme/atoms/Button.astro';
+import Icon from '@civictheme/base/Icon.astro';
+
+interface Props {
+  theme?: 'light' | 'dark';
+  type?: 'information' | 'error' | 'warning' | 'success' | string;
+  id?: string;
+  title?: string;
+  description?: string;
+  class?: string;
+  [key: string]: unknown;
+}
+
+const ICONS: Record<string, string> = {
+  information: 'information-mark',
+  warning: 'exclamation-mark-2',
+  error: 'exclamation-mark-1',
+  success: 'megaphone',
+};
+
+const {
+  theme: themeProp = 'light',
+  type: typeProp,
+  id,
+  title,
+  description,
+  class: className = '',
+  ...rest
+} = Astro.props;
+
+const theme = (['light', 'dark'] as const).includes(themeProp as 'light') ? themeProp : 'light';
+const type = (['information', 'error', 'warning', 'success'] as const).includes(typeProp as 'information')
+  ? typeProp!
+  : 'information';
+
+const classes = ['ct-alert', `ct-theme-${theme}`, `ct-alert--${type}`, className].filter(Boolean).join(' ');
+const icon = ICONS[type];
+---
+
+{
+  description && (
+    <div
+      class={classes}
+      data-alert-id={id ?? ''}
+      data-alert-type={type}
+      data-component-name="ct-alert"
+      role="alert"
+      {...rest}
+    >
+      <div class="container">
+        <div class="row">
+          <div class="ct-alert__title col-xxs-12 col-m-4 col-l-3">
+            {icon && (
+              <Fragment>
+                <span class="ct-alert__icon">
+                  <Icon symbol={icon} size="regular" />
+                </span>{' '}
+              </Fragment>
+            )}
+            <Fragment set:html={title} />
+          </div>{' '}
+          <div class="ct-alert__summary col-xxs-12 col-m-8 col-l-9">
+            <Fragment set:html={description} />{' '}
+            <Button
+              kind="button"
+              theme={theme}
+              type="tertiary"
+              class="ct-alert__dismiss-button"
+              text=""
+              icon="close"
+              size="regular"
+              id={`dismiss-alert-${id ?? ''}`}
+              data-alert-dismiss-trigger=""
+              title={`close ${type} alert`}
+            />
+          </div>
+        </div>
+      </div>
+    </div>
+  )
+}
