@@ -116,6 +116,25 @@ function syncEmbeddedTheme(value: string, theme: string): string {
 }
 
 /**
+ * Strips `href="…"` from any `<a>` carrying `ct-link--disabled` inside a
+ * pre-rendered HTML-string prop (a11y pass, Task 18 follow-up): upstream's
+ * captured `List` stories embed a raw `pagination` HTML blob (`List.astro`'s
+ * `pagination` prop, `set:html`) whose disabled Prev link still carries
+ * `href="http://example.com"` — `pagination.twig` always prints
+ * `items.previous.href` regardless of `is_disabled` (see PORTING.md), and
+ * this story's own fixture supplies one even on page 1. A disabled link
+ * that is still a working link is not "inactive" for the WCAG 1.4.3
+ * exemption `tests/e2e/a11y.spec.ts` relies on for `.ct-link--disabled`, so
+ * this is fixed here rather than left for that exemption to (wrongly)
+ * cover it. Only touches `<a>` tags that already carry the disabled class —
+ * every other link's `href` is untouched.
+ */
+function stripDisabledLinkHref(value: string): string {
+  if (!value.includes('ct-link--disabled')) return value;
+  return value.replace(/(<a\b[^>]*\bct-link--disabled\b[^>]*?)\s+href="[^"]*"/g, '$1');
+}
+
+/**
  * Rewrites an embedded `MobileNavigationTrigger`'s hardcoded
  * `data-flyout-target=".ct-mobile-navigation"` (a class selector matching
  * ANY `.ct-mobile-navigation` panel on the page — see this file's header
@@ -204,7 +223,10 @@ export function argsToProps(
 ): Record<string, unknown> {
   const convert = (value: unknown): unknown => {
     if (typeof value === 'string') {
-      return suffixIdsInHtml(syncEmbeddedTheme(isolateFlyoutTarget(rewriteDemoPath(value), suffix), theme), suffix);
+      return suffixIdsInHtml(
+        stripDisabledLinkHref(syncEmbeddedTheme(isolateFlyoutTarget(rewriteDemoPath(value), suffix), theme)),
+        suffix
+      );
     }
     if (Array.isArray(value)) return value.map(convert);
     if (value && typeof value === 'object') return argsToProps(value as Record<string, unknown>, suffix, theme);

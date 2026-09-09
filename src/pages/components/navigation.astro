@@ -41,6 +41,39 @@ const tableOfContentsStories = storiesFor('02-molecules/table-of-contents');
 const skipLinkStories = storiesFor('03-organisms/skip-link');
 const logoStories = storiesFor('02-molecules/logo');
 
+/**
+ * a11y pass (Task 18 follow-up): `pagination.twig`/`Pagination.astro` print
+ * `items.previous.href`/`items.next.href` unconditionally — `is_disabled`
+ * is a SEPARATE computation from `current`/`total_pages` — and upstream's
+ * own `Pagination` story fixture supplies a `previous.href` even though
+ * `current: 1` makes Prev disabled (see PORTING.md: `Link` /
+ * `.ct-link--disabled`). A disabled link that still carries a working
+ * `href` isn't "inactive" for the WCAG 1.4.3 exemption
+ * `tests/e2e/a11y.spec.ts` relies on, so this demo-only fix mirrors
+ * `Pagination.astro`'s own disabled computation to null out the href a
+ * real backend would never have generated for a non-existent page.
+ */
+function withRealisticPaginationHrefs(props: Record<string, unknown>): Record<string, unknown> {
+  const items = props.items as
+    | { first?: { href?: string }; previous?: { href?: string }; next?: { href?: string }; last?: { href?: string } }
+    | undefined;
+  if (!items) return props;
+  const current = Number(props.current);
+  const totalPages = Number(props.totalPages);
+  const isFirstPrevDisabled = !(current - 1);
+  const isNextLastDisabled = !(current < totalPages);
+  const nextItems = { ...items };
+  if (isFirstPrevDisabled) {
+    if (nextItems.first) nextItems.first = { ...nextItems.first, href: undefined };
+    if (nextItems.previous) nextItems.previous = { ...nextItems.previous, href: undefined };
+  }
+  if (isNextLastDisabled) {
+    if (nextItems.next) nextItems.next = { ...nextItems.next, href: undefined };
+    if (nextItems.last) nextItems.last = { ...nextItems.last, href: undefined };
+  }
+  return { ...props, items: nextItems };
+}
+
 const mobileMenuItems = [
   { title: 'Item one', url: '#' },
   { title: 'Item two', url: '#', below: [{ title: 'Sub item', url: '#' }] },
@@ -167,7 +200,7 @@ const mobileNavTargetSelector = '#components-mobile-nav-demo';
   <h2 class="ct-basic-content">Pagination</h2>
   {
     paginationStories.map((fixture) => {
-      const props = propsFor(fixture);
+      const props = withRealisticPaginationHrefs(propsFor(fixture));
       return (
         <ComponentDemoBlock
           heading={fixture.name}

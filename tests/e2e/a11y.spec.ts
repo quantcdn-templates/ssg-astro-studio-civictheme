@@ -1,3 +1,4 @@
+import fs from 'node:fs';
 import { test, expect } from '@playwright/test';
 import AxeBuilder from '@axe-core/playwright';
 
@@ -6,7 +7,12 @@ import AxeBuilder from '@axe-core/playwright';
  * `/components/<family>` demo page.
  *
  * Zero serious/critical `wcag2a`/`wcag2aa` violations is the exit criterion.
- * Moderate/minor violations are reported in `PORTING.md`, not enforced here.
+ * Moderate/minor violations are collected across every page and written to
+ * `test-results/a11y-moderate-minor.json` (also attached to the last test's
+ * report) so the "currently zero" claim is a checked artefact, not prose:
+ * the final test asserts the total equals `DOCUMENTED_MODERATE_MINOR_COUNT`,
+ * which must match the row count of PORTING.md's "Accessibility (Task 18)"
+ * moderate/minor table.
  *
  * A violation that originates in vendored (upstream) CivicTheme markup is
  * NOT fixed inside `src/civictheme/components/**` (markup-fidelity rule) —
@@ -58,7 +64,9 @@ const listingAndDetailPages = [
   '/publications/annual-report-2025',
 ];
 
-const otherPages = ['/search', '/404.html'];
+// `/accessibility` is a built public route (`src/pages/accessibility.astro` /
+// `dist/accessibility.html`), same as the other reference pages above.
+const otherPages = ['/accessibility', '/search', '/404.html'];
 
 const pages = [...referencePages, ...componentPages, ...listingAndDetailPages, ...otherPages];
 
@@ -70,12 +78,19 @@ const pages = [...referencePages, ...componentPages, ...listingAndDetailPages, .
  * component, so it is recorded in PORTING.md instead and excluded here
  * rather than left as a permanently-failing assertion:
  *
- * - `.ct-link--disabled`: CivicTheme's disabled pagination Prev/Next link
+ * - `.ct-link--disabled`: this is `Link.astro`'s class for ANY link
+ *   rendered with `isDisabled` (`Link.astro:68`, `isDisabled &&
+ *   'ct-link--disabled'`), not just `Pagination`'s prev/next — Pagination
+ *   is simply the only current call site that passes `isDisabled`. Its
  *   colour is a WCAG 1.4.3 "inactive user interface component" — the
  *   success criterion explicitly exempts inactive-control text from the
  *   contrast-minimum requirement, an exemption axe's `color-contrast` rule
  *   cannot itself apply to a CSS-classed (not `disabled`-attribute)
- *   inactive link.
+ *   inactive link. The exemption only holds if the link is GENUINELY
+ *   inactive, so every per-page test below also asserts every
+ *   `.ct-link--disabled` element has no `href` and is not focusable — a
+ *   defective disabled link (still clickable/tabbable) must fail the run
+ *   rather than hide behind this exclusion.
  * - `.ct-popover__link`: `Popover.astro`/`popover.twig` render the trigger
  *   as a plain `<a>` with no `href` (so no implicit interactive role), and
  *   `collapsible.js` sets `aria-expanded` on it regardless — axe
@@ -95,20 +110,24 @@ const pages = [...referencePages, ...componentPages, ...listingAndDetailPages, .
  *   icon-only `@atoms/button` include with no `title`/label param at all —
  *   there is no prop path (component or demo) to give it an accessible
  *   name. Axe `button-name`.
- * - `.ct-tabs__panels`: `tabs.twig` prints `panel.content` (documented as
- *   plain `[string]`) directly, with no theme-scoped text colour on
- *   `.ct-tabs__panels__panel` — unlike `.ct-basic-content`'s
- *   `ct-content-theme($theme)`, `tabs.scss` never themes panel text.
- *   `molecules-tabs--tabs`'s own upstream fixture (`Panel content`, no
- *   markup) reproduces this on a `theme: dark` story, so it isn't this
- *   project's page authoring at fault. Axe `color-contrast`.
+ * - `.ct-tabs__panels__panel`: narrowed from the whole `.ct-tabs__panels`
+ *   container to the exact violating node axe reports (target
+ *   `#panel-1-Tabs-dark`, class `ct-tabs__panels__panel`, the individual
+ *   panel `<div>` — the parent `.ct-tabs__panels` has no other content of
+ *   its own to scan). `tabs.twig` prints `panel.content` (documented as
+ *   plain `[string]`) directly, with no theme-scoped text colour on this
+ *   element — unlike `.ct-basic-content`'s `ct-content-theme($theme)`,
+ *   `tabs.scss` never themes panel text. `molecules-tabs--tabs`'s own
+ *   upstream fixture (`Panel content`, no markup) reproduces this on a
+ *   `theme: dark` story, so it isn't this project's page authoring at
+ *   fault. Axe `color-contrast`.
  */
 const EXCLUDE_ALWAYS = [
   '.ct-link--disabled',
   '.ct-popover__link',
   '.ct-tabs__links',
   '.ct-tooltip__close-button',
-  '.ct-tabs__panels',
+  '.ct-tabs__panels__panel',
 ];
 
 /**
@@ -125,6 +144,14 @@ const EXTRA_EXCLUDES: Record<string, string[]> = {
   '/components/base': ['.ct-video-player__wrapper iframe'],
 };
 
+/** Row count of PORTING.md's "Accessibility (Task 18)" moderate/minor table. */
+const DOCUMENTED_MODERATE_MINOR_COUNT = 0;
+
+type ModerateMinorEntry = { id: string; impact: string | null | undefined; nodes: number; help: string };
+const moderateMinorByPage: Record<string, ModerateMinorEntry[]> = {};
+
+test.describe.configure({ mode: 'serial' });
+
 for (const path of pages) {
   test(`no serious/critical axe violations on ${path}`, async ({ page }) => {
     await page.goto(path);
@@ -133,6 +160,11 @@ for (const path of pages) {
       builder = builder.exclude(selector);
     }
     const results = await builder.analyze();
+
+    moderateMinorByPage[path] = results.violations
+      .filter((v) => v.impact === 'moderate' || v.impact === 'minor')
+      .map((v) => ({ id: v.id, impact: v.impact, nodes: v.nodes.length, help: v.help }));
+
     const bad = results.violations.filter((v) => v.impact === 'serious' || v.impact === 'critical');
     expect(
       bad,
@@ -142,5 +174,37 @@ for (const path of pages) {
         2
       )
     ).toEqual([]);
+
+    // Guard for the `.ct-link--disabled` exclusion above: the WCAG 1.4.3
+    // exemption only covers a GENUINELY inactive control. Every disabled
+    // link must have no `href` and must not be reachable by keyboard.
+    const disabledLinks = page.locator('.ct-link--disabled');
+    const disabledCount = await disabledLinks.count();
+    for (let i = 0; i < disabledCount; i += 1) {
+      const link = disabledLinks.nth(i);
+      await expect(link, `.ct-link--disabled must not carry an href (${path})`).not.toHaveAttribute('href');
+      // `.tabIndex` alone isn't reliable here — Chromium's IDL getter
+      // reports 0 for a bare `<a>` even without an `href` (it does NOT
+      // mean the element is in the Tab order). Check real focusability
+      // instead: an anchor with no `href`/`tabindex` cannot receive focus.
+      const becameFocused = await link.evaluate((el) => {
+        const previouslyFocused = document.activeElement as HTMLElement | null;
+        (el as HTMLElement).focus();
+        const focused = document.activeElement === el;
+        previouslyFocused?.focus();
+        return focused;
+      });
+      expect(becameFocused, `.ct-link--disabled must not be keyboard-focusable (${path})`).toBe(false);
+    }
   });
 }
+
+test('moderate/minor axe violations match PORTING.md', async ({}, testInfo) => {
+  const report = JSON.stringify(moderateMinorByPage, null, 2);
+  fs.mkdirSync('test-results', { recursive: true });
+  fs.writeFileSync('test-results/a11y-moderate-minor.json', report);
+  await testInfo.attach('a11y-moderate-minor.json', { body: report, contentType: 'application/json' });
+
+  const total = Object.values(moderateMinorByPage).reduce((sum, entries) => sum + entries.length, 0);
+  expect(total, report).toBe(DOCUMENTED_MODERATE_MINOR_COUNT);
+});
