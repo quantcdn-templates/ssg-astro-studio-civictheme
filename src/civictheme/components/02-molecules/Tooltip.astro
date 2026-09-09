@@ -1,46 +1,60 @@
 ---
-import Button from '@civictheme/atoms/Button.astro';
+/**
+ * CivicTheme Tooltip component.
+ *
+ * Props:
+ * - theme: Theme variation (light or dark).
+ * - position: Tooltip position ('auto', 'auto-start', 'auto-end', 'top',
+ *   'top-start', 'top-end', 'bottom', 'bottom-start', 'bottom-end',
+ *   'right', 'right-start', 'right-end', 'left', 'left-start', 'left-end').
+ * - icon: Symbol to use in the button. Defaults to 'information-mark'.
+ * - iconSize: Icon size. Defaults to 'large'.
+ * - title / content: Documented as Slots upstream, but every upstream
+ *   test passes plain string props — ported as `string` props, `content`
+ *   rendered with `set:html` per this project's autoescape convention
+ *   (`title` is used only as a plain attribute value, matching upstream's
+ *   `aria-label`/`title` attribute usage — not printed as markup).
+ * - class: Additional CSS classes.
+ * - ...rest: Additional HTML attributes, spread onto the root element.
+ */
 import Icon from '@civictheme/base/Icon.astro';
+import Button from '@civictheme/atoms/Button.astro';
 
 interface Props {
   theme?: 'light' | 'dark';
   position?: string;
   icon?: string;
   iconSize?: string;
+  title?: string;
+  content?: string;
   class?: string;
   [key: string]: unknown;
 }
-const { theme = 'light', position, icon, iconSize, class: className = '', ...rest } = Astro.props;
+
+const { theme = 'light', position, icon, iconSize, title, content, class: className = '', ...rest } = Astro.props;
+
+const classes = ['ct-tooltip', `ct-theme-${theme}`, className].filter(Boolean).join(' ');
 ---
-<!-- TWIG:
-{% set theme_class = 'ct-theme-%s'|format(theme|default('light')) %}
-{% set modifier_class = '%s %s'|format(theme_class, modifier_class|default('')) %}
 
-{% if content %}
-  <div class="ct-tooltip {{ modifier_class -}}" data-component-name="tooltip" {% if attributes is defined and attributes is not null %}{{- attributes -}}{% endif %}>
-    <button class="ct-tooltip__button" {% if title %}aria-label="{{ title }}" title="{{ title }}"{% endif %} data-tooltip-button data-tooltip-position="{{ position }}">
-      {%- include '@base/icon/icon.twig' with {
-        symbol: icon|default('information-mark'),
-        size: icon_size|default('large'),
-      } only -%}
-    </button>
-
-    <div class="ct-tooltip__description" data-tooltip-content>
-      <div class="ct-tooltip__description__inner">
-        {{- content -}}
+{
+  content && (
+    <div class={classes} data-component-name="tooltip" {...rest}>
+      <button
+        class="ct-tooltip__button"
+        aria-label={title || undefined}
+        title={title || undefined}
+        data-tooltip-button
+        data-tooltip-position={position ?? ''}
+      >
+        <Icon symbol={icon || 'information-mark'} size={iconSize || 'large'} />
+      </button>{' '}
+      <div class="ct-tooltip__description" data-tooltip-content>
+        <div class="ct-tooltip__description__inner" set:html={content} />{' '}
+        <div data-tooltip-close>
+          <Button type="tertiary" kind="button" icon="cancel" size="regular" class="ct-tooltip__close-button" />
+        </div>{' '}
+        <div class="ct-tooltip__arrow" data-tooltip-arrow />
       </div>
-      <div data-tooltip-close>
-        {%- include '@atoms/button/button.twig' with {
-          type: 'tertiary',
-          kind: 'button',
-          icon: 'cancel',
-          size: 'regular',
-          modifier_class: 'ct-tooltip__close-button',
-        } only -%}
-      </div>
-
-      <div class="ct-tooltip__arrow" data-tooltip-arrow></div>
     </div>
-  </div>
-{% endif %}
--->
+  )
+}
