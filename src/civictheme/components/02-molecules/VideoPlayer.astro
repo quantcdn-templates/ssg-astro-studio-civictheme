@@ -2,6 +2,11 @@
 /**
  * CivicTheme Video Player component.
  *
+ * Note: `video-player.twig:49-55` includes `@atoms/video` with `only` and
+ * does NOT forward `theme`, so the inner `<video>` always carries
+ * `ct-theme-light`, even inside a dark video player. Exposed by the
+ * `molecules-video-player--sources` story in the dark theme.
+ *
  * Props:
  * - theme: Theme variation (light or dark).
  * - title: Button title (also used as the iframe's `title` attribute for
@@ -105,7 +110,7 @@ const hasTranscriptBlock = hasTranscriptLinkObject || hasTranscriptContent;
     <div class={classes}>
       <div class="ct-video-player__wrapper">
         {hasSources ? (
-          <Video theme={theme} sources={sources} poster={poster} width={width} height={height} hasControls />
+          <Video sources={sources} poster={poster} width={width} height={height} hasControls />
         ) : hasEmbedded ? (
           <Iframe
             url={embeddedSource}
@@ -151,12 +156,12 @@ const hasTranscriptBlock = hasTranscriptLinkObject || hasTranscriptContent;
                   type="tertiary"
                   text={`<span class="ct-video-player__transcript-trigger-expand">${
                     transcriptExpandText || 'Show transcript'
-                  }</span><span class="ct-video-player__transcript-trigger-collapse">${
+                  }</span> <span class="ct-video-player__transcript-trigger-collapse">${
                     transcriptCollapseText || 'Hide transcript'
                   }</span>`}
                   data-collapsible-trigger=""
                   class="ct-video-player__transcript-toggle"
-                />
+                />{' '}
                 <div class="ct-video-player__transcript-panel" data-collapsible-panel>
                   <div class="ct-video-player__transcript-panel-inner">
                     <BasicContent theme={theme} content={transcriptContent ?? undefined} />
