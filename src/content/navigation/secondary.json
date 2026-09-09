@@ -1,0 +1,6 @@
+{
+  "items": [
+    { "label": "Subscribe", "url": "/subscribe" },
+    { "label": "Search", "url": "/search" }
+  ]
+}

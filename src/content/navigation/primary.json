@@ -1,0 +1,11 @@
+{
+  "items": [
+    { "label": "Home", "url": "/" },
+    { "label": "For individuals", "url": "/for-individuals" },
+    { "label": "For businesses", "url": "/for-businesses" },
+    { "label": "For government", "url": "/for-government" },
+    { "label": "About us", "url": "/about-us" },
+    { "label": "News and events", "url": "/news" },
+    { "label": "Contact us", "url": "/contact-us" }
+  ]
+}

@@ -1,0 +1,13 @@
+{
+  "name": "Your organisation",
+  "tagline": "Your organisation's tagline",
+  "logoLight": "/civictheme/logos/logo_primary_light_desktop.png",
+  "logoDark": "/civictheme/logos/logo_primary_dark_desktop.png",
+  "footerText": "Your organisation acknowledges the support of the community it serves.",
+  "acknowledgement": "Your organisation acknowledges the Traditional Custodians of the land on which we operate.",
+  "social": [
+    { "platform": "facebook", "url": "https://facebook.com/example" },
+    { "platform": "twitter", "url": "https://twitter.com/example" }
+  ],
+  "theme": "light"
+}

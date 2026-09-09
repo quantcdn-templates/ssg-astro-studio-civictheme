@@ -1,0 +1,8 @@
+{
+  "items": [
+    { "label": "About us", "url": "/about-us" },
+    { "label": "Contact us", "url": "/contact-us" },
+    { "label": "Privacy", "url": "/privacy" },
+    { "label": "Accessibility", "url": "/accessibility" }
+  ]
+}

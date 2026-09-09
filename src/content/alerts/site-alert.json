@@ -1,0 +1,9 @@
+{
+  "title": "Planned website maintenance",
+  "message": "This website will be briefly unavailable overnight on Sunday for scheduled maintenance.",
+  "type": "information",
+  "startDate": "2026-09-01",
+  "endDate": "2026-12-31",
+  "dismissible": true,
+  "active": true
+}
