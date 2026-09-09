@@ -247,10 +247,12 @@ Connect this project to Quant Studio in the dashboard to get:
 - AI content generation
 - Branch environments for drafts and review
 
-Live editing of `variables.base.scss`/`variables.components.scss` in the Studio preview needs
-quant-runtime ≥ `34591bf` (Sass support) and the portal's `.scss` file-type allowlist change
-(portal commit `5a6c3eeb`) — without both, the Studio project can still be created and edited,
-but a saved SCSS change won't recompile the live preview.
+This template needs quant-runtime ≥ `90a9e63` in Studio: Sass support (`34591bf`) for live
+editing of `variables.base.scss`/`variables.components.scss`, plus tsconfig `paths` aliases,
+`import.meta.glob` with `{ eager: true }`, and the MDX `<Content components={…} />` map
+(`ec31906`…`90a9e63`). The portal also needs its `.scss` file-type allowlist change (portal
+commit `5a6c3eeb`). Without these, the Studio project can still be created and edited, but the
+preview shows `[object Object]` for aliased components and bare MDX component tags fail.
 
 ## Deploying to QuantCDN
 

@@ -1,6 +1,6 @@
 # Studio gate — `ssg-astro-studio-civictheme` (2026-09-09)
 
-**Status: PARTIAL.** The template renders, styles, hot-recompiles and builds inside
+**Status: PARTIAL — superseded by `2026-09-10-studio-gate.md` (PASS) after the quant-runtime fixes.** The template renders, styles, hot-recompiles and builds inside
 Quant Studio, but only after two scratch-only workarounds. Two runtime defects and
 two runtime limitations block an unmodified checkout. None of them are fixed here:
 all four are quant-runtime / portal follow-ups.
