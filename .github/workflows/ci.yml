@@ -17,6 +17,14 @@ jobs:
           node-version: '22'
       - name: Install dependencies
         run: npm install
+      # The snapshot-parity oracle reads the Jest snapshots of the pinned
+      # CivicTheme UI Kit checkout (git-ignored; see NOTICE.md and README).
+      - name: Fetch pinned CivicTheme UI Kit
+        run: |
+          git init -q .upstream/uikit
+          git -C .upstream/uikit remote add origin https://github.com/civictheme/uikit.git
+          git -C .upstream/uikit fetch -q --depth 1 origin fe4291907b1ea15cfc0ea5d9ca47d31964a5b91a
+          git -C .upstream/uikit checkout -q FETCH_HEAD
       - name: Type check and format check
         run: npm run check
       - name: Unit and parity tests
