@@ -17,6 +17,22 @@
  *   per this project's autoescape convention (`title`/`submitText`/
  *   `resetText` are passed straight through to `Button`/plain text, since
  *   that is how upstream uses them too).
+ * - `contentTop`/`contentBottom`/`title` also now have a same-named Astro
+ *   slot that TAKES PRECEDENCE over the string prop when present (Task
+ *   14c); their wrapper `{% if %}` gates widen to
+ *   `Boolean(prop) || Astro.slots.has('prop')`. `formHiddenFields` also
+ *   gets a slot the same way (it is HTML-bearing, rendered bare with
+ *   `set:html`, no wrapper of its own to widen).
+ * - `submitText`/`resetText` are NOT slotted (Task 14c): each is fed
+ *   straight into `Button`'s (or the replicated submit button's) `text`
+ *   prop, a plain string sink — same "sink can't carry what's needed"
+ *   case as `Tag.content`/`Button.text` elsewhere. `formAttributes` is
+ *   NOT slotted: it is consumed as a Drupal Attribute object spread onto
+ *   the `<form>` element (and its mere presence decides whether a `<form>`
+ *   wraps the row at all) — an attribute bag, not markup. `items` is NOT
+ *   slotted: it is structured per-item data (`text`/`isSelected`/`name`)
+ *   that drives live `Chip` children, not a single HTML-bearing value —
+ *   a slot has no analogous "array of items" semantics.
  * - class: Additional CSS classes.
  * - ...rest: Additional HTML attributes, spread onto the root element.
  *
@@ -105,6 +121,15 @@ const submitClasses = [
 ]
   .filter(Boolean)
   .join(' ');
+
+const hasContentTopSlot = Astro.slots.has('contentTop');
+const hasContentBottomSlot = Astro.slots.has('contentBottom');
+const hasTitleSlot = Astro.slots.has('title');
+const hasFormHiddenFieldsSlot = Astro.slots.has('formHiddenFields');
+const hasContentTop = Boolean(contentTop) || hasContentTopSlot;
+const hasContentBottom = Boolean(contentBottom) || hasContentBottomSlot;
+const hasTitle = Boolean(title) || hasTitleSlot;
+const hasFormHiddenFields = Boolean(formHiddenFields) || hasFormHiddenFieldsSlot;
 ---
 
 {
@@ -113,14 +138,23 @@ const submitClasses = [
       <div class="container">
         <div class="row">
           <div class="col-xxs-12">
-            {contentTop && (
+            {hasContentTop && (
               <Fragment>
-                <div class="ct-single-filter__content-top" set:html={contentTop} />{' '}
+                <div class="ct-single-filter__content-top">
+                  {hasContentTopSlot ? <slot name="contentTop" /> : <Fragment set:html={contentTop} />}
+                </div>{' '}
               </Fragment>
             )}
             {withForm ? (
               <form {...formWrapperProps}>
-                {title && <div class="ct-single-filter__title">{title}</div>}{' '}
+                {hasTitle &&
+                  (hasTitleSlot ? (
+                    <div class="ct-single-filter__title">
+                      <slot name="title" />
+                    </div>
+                  ) : (
+                    title && <div class="ct-single-filter__title">{title}</div>
+                  ))}{' '}
                 <div class="ct-single-filter__wrapper">
                   <div class="ct-single-filter__items">
                     <ul class="ct-item-list ct-item-list--horizontal ct-item-list--small ct-single-filter__list">
@@ -172,11 +206,23 @@ const submitClasses = [
                     )}
                   </div>
                 </div>
-                {formHiddenFields && <Fragment set:html={formHiddenFields} />}
+                {hasFormHiddenFields &&
+                  (hasFormHiddenFieldsSlot ? (
+                    <slot name="formHiddenFields" />
+                  ) : (
+                    <Fragment set:html={formHiddenFields} />
+                  ))}
               </form>
             ) : (
               <Fragment>
-                {title && <div class="ct-single-filter__title">{title}</div>}{' '}
+                {hasTitle &&
+                  (hasTitleSlot ? (
+                    <div class="ct-single-filter__title">
+                      <slot name="title" />
+                    </div>
+                  ) : (
+                    title && <div class="ct-single-filter__title">{title}</div>
+                  ))}{' '}
                 <div class="ct-single-filter__wrapper">
                   <div class="ct-single-filter__items">
                     <ul class="ct-item-list ct-item-list--horizontal ct-item-list--small ct-single-filter__list">
@@ -228,13 +274,20 @@ const submitClasses = [
                     )}
                   </div>
                 </div>
-                {formHiddenFields && <Fragment set:html={formHiddenFields} />}
+                {hasFormHiddenFields &&
+                  (hasFormHiddenFieldsSlot ? (
+                    <slot name="formHiddenFields" />
+                  ) : (
+                    <Fragment set:html={formHiddenFields} />
+                  ))}
               </Fragment>
             )}
-            {contentBottom && (
+            {hasContentBottom && (
               <Fragment>
                 {' '}
-                <div class="ct-single-filter__content-bottom" set:html={contentBottom} />
+                <div class="ct-single-filter__content-bottom">
+                  {hasContentBottomSlot ? <slot name="contentBottom" /> : <Fragment set:html={contentBottom} />}
+                </div>
               </Fragment>
             )}
           </div>

@@ -13,7 +13,12 @@
  * - imageOver / contentTop / contentMiddle / summary / contentBottom:
  *   Documented as Slots upstream, but every upstream test passes plain
  *   string props — ported as `string` props, ALL rendered with `set:html`
- *   per this project's autoescape convention (see PORTING.md).
+ *   per this project's autoescape convention (see PORTING.md). Each also
+ *   now has a same-named Astro slot that TAKES PRECEDENCE over the string
+ *   prop when present (Task 14c); every wrapper `{% if %}` gate widens to
+ *   `Boolean(prop) || Astro.slots.has('prop')`. `summary` routes the
+ *   string-prop branch through `Paragraph`, so a slot bypasses that
+ *   wrapper and renders the caller's markup directly.
  * - class: Additional CSS classes.
  * - ...rest: Additional HTML attributes, spread onto the root element.
  */
@@ -89,6 +94,17 @@ const titleLabel = withFile && filename ? `${title}. ${filenamePrefix} ${filenam
 // on an object/array checks its element count, so `file: {}` (no keys) is
 // "empty" and must not render, unlike a plain JS truthiness check on `{}`.
 const hasFile = Boolean(file && Object.keys(file).length > 0);
+
+const hasImageOverSlot = Astro.slots.has('imageOver');
+const hasContentTopSlot = Astro.slots.has('contentTop');
+const hasContentMiddleSlot = Astro.slots.has('contentMiddle');
+const hasSummarySlot = Astro.slots.has('summary');
+const hasContentBottomSlot = Astro.slots.has('contentBottom');
+const hasImageOver = Boolean(imageOver) || hasImageOverSlot;
+const hasContentTop = Boolean(contentTop) || hasContentTopSlot;
+const hasContentMiddle = Boolean(contentMiddle) || hasContentMiddleSlot;
+const hasSummary = Boolean(summary) || hasSummarySlot;
+const hasContentBottom = Boolean(contentBottom) || hasContentBottomSlot;
 ---
 
 {
@@ -98,19 +114,23 @@ const hasFile = Boolean(file && Object.keys(file).length > 0);
         <Fragment>
           <div class="ct-publication-card__image">
             <Image theme={theme} url={image.url} alt={image.alt} />
-            {imageOver && (
+            {hasImageOver && (
               <Fragment>
                 {' '}
-                <div class="ct-publication-card__image__over" set:html={imageOver} />
+                <div class="ct-publication-card__image__over">
+                  {hasImageOverSlot ? <slot name="imageOver" /> : <Fragment set:html={imageOver} />}
+                </div>
               </Fragment>
             )}
           </div>{' '}
         </Fragment>
       )}
       <div class="ct-publication-card__content">
-        {contentTop && (
+        {hasContentTop && (
           <Fragment>
-            <div class="ct-publication-card__content-top" set:html={contentTop} />{' '}
+            <div class="ct-publication-card__content-top">
+              {hasContentTopSlot ? <slot name="contentTop" /> : <Fragment set:html={contentTop} />}
+            </div>{' '}
           </Fragment>
         )}
         {title && (
@@ -129,14 +149,20 @@ const hasFile = Boolean(file && Object.keys(file).length > 0);
             </div>{' '}
           </Fragment>
         )}
-        {contentMiddle && (
+        {hasContentMiddle && (
           <Fragment>
-            <div class="ct-publication-card__content__middle" set:html={contentMiddle} />{' '}
+            <div class="ct-publication-card__content__middle">
+              {hasContentMiddleSlot ? <slot name="contentMiddle" /> : <Fragment set:html={contentMiddle} />}
+            </div>{' '}
           </Fragment>
         )}
-        {summary && (
+        {hasSummary && (
           <Fragment>
-            <Paragraph theme={theme} content={summary} noMargin class="ct-publication-card__summary" />{' '}
+            {hasSummarySlot ? (
+              <slot name="summary" />
+            ) : (
+              <Paragraph theme={theme} content={summary} noMargin class="ct-publication-card__summary" />
+            )}{' '}
           </Fragment>
         )}
         {filename &&
@@ -147,7 +173,11 @@ const hasFile = Boolean(file && Object.keys(file).length > 0);
           ) : (
             <Link theme={theme} text={filename} url={file?.url} class="ct-publication-card__link" />
           ))}{' '}
-        {contentBottom && <div class="ct-publication-card__content-bottom" set:html={contentBottom} />}
+        {hasContentBottom && (
+          <div class="ct-publication-card__content-bottom">
+            {hasContentBottomSlot ? <slot name="contentBottom" /> : <Fragment set:html={contentBottom} />}
+          </div>
+        )}
       </div>
     </div>
   )

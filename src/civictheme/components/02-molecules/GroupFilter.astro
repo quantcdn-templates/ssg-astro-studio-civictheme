@@ -17,9 +17,11 @@
  * - selectedFilters: Selected filter objects: Array<{ text, url, label }>.
  * - selectedClearLink: A link to clear all selected filters: { type, icon,
  *   iconPlacement, text, url } | null.
- * - contentTop / contentBottom: Documented as Slots upstream, but every
- *   upstream test passes plain string props — ported as `string` props,
- *   rendered with `set:html` per this project's autoescape convention.
+ * - contentTop / contentBottom: Documented as Slots upstream — still typed
+ *   as `string` props rendered with `set:html`, but each also has a
+ *   same-named Astro slot that TAKES PRECEDENCE over the string prop when
+ *   present (Task 14c). Their wrapper `{% if %}` gates widen to
+ *   `Boolean(prop) || Astro.slots.has('prop')`.
  * - class: Additional CSS classes.
  * - ...rest: Additional HTML attributes, spread onto the root element.
  *
@@ -121,6 +123,11 @@ const selectedClearType = selectedClearLink?.type || 'secondary';
 const selectedClearIcon = selectedClearLink?.icon || 'close-outline';
 const selectedClearIconPlacement = selectedClearLink?.iconPlacement || 'after';
 const selectedClearText = selectedClearLink?.text || 'Clear all';
+
+const hasContentTopSlot = Astro.slots.has('contentTop');
+const hasContentBottomSlot = Astro.slots.has('contentBottom');
+const hasContentTop = Boolean(contentTop) || hasContentTopSlot;
+const hasContentBottom = Boolean(contentBottom) || hasContentBottomSlot;
 ---
 
 {
@@ -129,9 +136,11 @@ const selectedClearText = selectedClearLink?.text || 'Clear all';
       <div class="ct-group-filter__filter-controls" data-group-filter-element="">
         <div class="row">
           <div class="col-xxs-12">
-            {contentTop && (
+            {hasContentTop && (
               <Fragment>
-                <div class="ct-group-filter__content-top" set:html={contentTop} />{' '}
+                <div class="ct-group-filter__content-top">
+                  {hasContentTopSlot ? <slot name="contentTop" /> : <Fragment set:html={contentTop} />}
+                </div>{' '}
               </Fragment>
             )}
             {withForm ? (
@@ -230,10 +239,12 @@ const selectedClearText = selectedClearLink?.text || 'Clear all';
                 {formHiddenFields && <Fragment set:html={formHiddenFields} />}
               </Fragment>
             )}
-            {contentBottom && (
+            {hasContentBottom && (
               <Fragment>
                 {' '}
-                <div class="ct-group-filter__content-bottom" set:html={contentBottom} />
+                <div class="ct-group-filter__content-bottom">
+                  {hasContentBottomSlot ? <slot name="contentBottom" /> : <Fragment set:html={contentBottom} />}
+                </div>
               </Fragment>
             )}
           </div>

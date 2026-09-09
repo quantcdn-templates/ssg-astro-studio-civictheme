@@ -16,7 +16,10 @@
  * Slots (documented upstream, but every upstream test passes plain string
  * props — ported as `string` props per this project's autoescape
  * convention, see PORTING.md):
- * - contentTop / contentBottom.
+ * - contentTop / contentBottom. Each also has a same-named Astro slot that
+ *   TAKES PRECEDENCE over the string prop when present (Task 14c); their
+ *   wrapper `{% if %}` gates widen to
+ *   `Boolean(prop) || Astro.slots.has('prop')`.
  */
 import Iframe from '@civictheme/atoms/Iframe.astro';
 import Link from '@civictheme/atoms/Link.astro';
@@ -62,6 +65,11 @@ const classes = [
 ]
   .filter(Boolean)
   .join(' ');
+
+const hasContentTopSlot = Astro.slots.has('contentTop');
+const hasContentBottomSlot = Astro.slots.has('contentBottom');
+const hasContentTop = Boolean(contentTop) || hasContentTopSlot;
+const hasContentBottom = Boolean(contentBottom) || hasContentBottomSlot;
 ---
 
 {
@@ -70,9 +78,11 @@ const classes = [
       <div class="container">
         <div class="row">
           <div class="col-xxs-12">
-            {contentTop && (
+            {hasContentTop && (
               <Fragment>
-                <div class="ct-map__content-top" set:html={contentTop} />{' '}
+                <div class="ct-map__content-top">
+                  {hasContentTopSlot ? <slot name="contentTop" /> : <Fragment set:html={contentTop} />}
+                </div>{' '}
               </Fragment>
             )}
             <div class="ct-map__canvas">
@@ -96,7 +106,11 @@ const classes = [
                 />{' '}
               </Fragment>
             )}
-            {contentBottom && <div class="ct-map__content-bottom" set:html={contentBottom} />}
+            {hasContentBottom && (
+              <div class="ct-map__content-bottom">
+                {hasContentBottomSlot ? <slot name="contentBottom" /> : <Fragment set:html={contentBottom} />}
+              </div>
+            )}
           </div>
         </div>
       </div>

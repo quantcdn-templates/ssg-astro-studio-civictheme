@@ -13,7 +13,16 @@
  *   contentBottom: Documented as Slots upstream, but every upstream test
  *   passes plain string props — ported as `string` props, ALL rendered
  *   with `set:html` per this project's autoescape convention, except
- *   `icon`, which is an icon symbol name, not HTML.
+ *   `icon`, which is an icon symbol name, not HTML. `title`/`summary`/
+ *   `contentTop`/`imageOver`/`contentMiddle`/`contentBottom` also now have
+ *   a same-named Astro slot that TAKES PRECEDENCE over the string prop
+ *   when present (Task 14c); every wrapper `{% if %}` gate (root included,
+ *   via `title`) widens to `Boolean(prop) || Astro.slots.has('prop')`.
+ *   `icon` is NOT slotted (Task 14c): it is a data value fed into a
+ *   sibling `Icon`'s `symbol` prop, not markup — a slot has no analogue
+ *   for "which icon symbol to draw".
+ *   `summary` routes the string-prop branch through `Paragraph`, so a slot
+ *   bypasses that wrapper and renders the caller's markup directly.
  * - class: Additional CSS classes.
  * - ...rest: Additional HTML attributes, spread onto the root element.
  */
@@ -72,28 +81,45 @@ const classes = [
   .join(' ');
 
 const withIconBlock = Boolean(icon) || (withImage && imageAsIcon);
+
+const hasImageOverSlot = Astro.slots.has('imageOver');
+const hasContentTopSlot = Astro.slots.has('contentTop');
+const hasTitleSlot = Astro.slots.has('title');
+const hasContentMiddleSlot = Astro.slots.has('contentMiddle');
+const hasSummarySlot = Astro.slots.has('summary');
+const hasContentBottomSlot = Astro.slots.has('contentBottom');
+const hasImageOver = Boolean(imageOver) || hasImageOverSlot;
+const hasContentTop = Boolean(contentTop) || hasContentTopSlot;
+const hasTitle = Boolean(title) || hasTitleSlot;
+const hasContentMiddle = Boolean(contentMiddle) || hasContentMiddleSlot;
+const hasSummary = Boolean(summary) || hasSummarySlot;
+const hasContentBottom = Boolean(contentBottom) || hasContentBottomSlot;
 ---
 
 {
-  title && (
+  hasTitle && (
     <div class={classes} {...rest}>
       {!imageAsIcon && image?.url && (
         <Fragment>
           <div class="ct-navigation-card__image">
             <Image theme={theme} url={image.url} alt={image.alt} />
-            {imageOver && (
+            {hasImageOver && (
               <Fragment>
                 {' '}
-                <div class="ct-navigation-card__image__over" set:html={imageOver} />
+                <div class="ct-navigation-card__image__over">
+                  {hasImageOverSlot ? <slot name="imageOver" /> : <Fragment set:html={imageOver} />}
+                </div>
               </Fragment>
             )}
           </div>{' '}
         </Fragment>
       )}
       <div class="ct-navigation-card__content">
-        {contentTop && (
+        {hasContentTop && (
           <Fragment>
-            <div class="ct-navigation-card__content-top" set:html={contentTop} />{' '}
+            <div class="ct-navigation-card__content-top">
+              {hasContentTopSlot ? <slot name="contentTop" /> : <Fragment set:html={contentTop} />}
+            </div>{' '}
           </Fragment>
         )}
         {withIconBlock && (
@@ -116,28 +142,38 @@ const withIconBlock = Boolean(icon) || (withImage && imageAsIcon);
               href={link?.url}
               target={link?.isNewWindow ? '_blank' : undefined}
             >
-              <Fragment set:html={title} />
+              {hasTitleSlot ? <slot name="title" /> : <Fragment set:html={title} />}
             </a>
+          ) : hasTitleSlot ? (
+            <slot name="title" />
           ) : (
             <Fragment set:html={title} />
           )}
         </div>
-        {contentMiddle && (
+        {hasContentMiddle && (
           <Fragment>
             {' '}
-            <div class="ct-navigation-card__content-middle" set:html={contentMiddle} />
+            <div class="ct-navigation-card__content-middle">
+              {hasContentMiddleSlot ? <slot name="contentMiddle" /> : <Fragment set:html={contentMiddle} />}
+            </div>
           </Fragment>
         )}
-        {summary && (
+        {hasSummary && (
           <Fragment>
             {' '}
-            <Paragraph theme={theme} content={summary} noMargin class="ct-navigation-card__summary" />
+            {hasSummarySlot ? (
+              <slot name="summary" />
+            ) : (
+              <Paragraph theme={theme} content={summary} noMargin class="ct-navigation-card__summary" />
+            )}
           </Fragment>
         )}
-        {contentBottom && (
+        {hasContentBottom && (
           <Fragment>
             {' '}
-            <div class="ct-navigation-card__content-bottom" set:html={contentBottom} />
+            <div class="ct-navigation-card__content-bottom">
+              {hasContentBottomSlot ? <slot name="contentBottom" /> : <Fragment set:html={contentBottom} />}
+            </div>
           </Fragment>
         )}
         {isCardClickable && ' '}

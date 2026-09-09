@@ -1,6 +1,6 @@
-import { describe } from 'vitest';
+import { describe, it, expect } from 'vitest';
 import PublicationCard from '@civictheme/molecules/PublicationCard.astro';
-import { parityCase, expectAllKeysCovered } from '../harness';
+import { parityCase, expectAllKeysCovered, renderNormalised } from '../harness';
 
 const meta = { layer: '02-molecules', name: 'publication-card' };
 
@@ -64,4 +64,61 @@ describe('PublicationCard', () => {
   });
 
   expectAllKeysCovered(meta, [REQUIRED_KEY, OPTIONAL_KEY, NO_FILE_KEY, EXT_SIZE_KEY, SUMMARY_KEY]);
+
+  // Task 14c: every Slot-documented prop also has an Astro slot that takes
+  // precedence over the string prop.
+  describe('slot vs string-prop parity', () => {
+    const file = { url: 'https://example.com/sample.pdf' };
+
+    it('imageOver: slot renders identically to the string prop', async () => {
+      const viaProp = await renderNormalised(PublicationCard, {
+        file,
+        image: { url: 'https://example.com/image.jpg' },
+        imageOver: 'Over content',
+      });
+      const viaSlot = await renderNormalised(
+        PublicationCard,
+        { file, image: { url: 'https://example.com/image.jpg' } },
+        { imageOver: 'Over content' }
+      );
+      expect(viaSlot).toBe(viaProp);
+    });
+
+    it('contentTop: slot renders identically to the string prop', async () => {
+      const viaProp = await renderNormalised(PublicationCard, { file, contentTop: 'Top content' });
+      const viaSlot = await renderNormalised(PublicationCard, { file }, { contentTop: 'Top content' });
+      expect(viaSlot).toBe(viaProp);
+    });
+
+    it('contentMiddle: slot renders identically to the string prop', async () => {
+      const viaProp = await renderNormalised(PublicationCard, { file, contentMiddle: 'Middle content' });
+      const viaSlot = await renderNormalised(PublicationCard, { file }, { contentMiddle: 'Middle content' });
+      expect(viaSlot).toBe(viaProp);
+    });
+
+    it('summary: slot renders identically to the string prop', async () => {
+      const viaProp = await renderNormalised(PublicationCard, { file, summary: 'A summary.' });
+      const viaSlot = await renderNormalised(
+        PublicationCard,
+        { file },
+        {
+          summary:
+            '<div class="ct-paragraph ct-paragraph--no-margin ct-paragraph--regular ct-publication-card__summary ct-theme-light">A summary.</div>',
+        }
+      );
+      expect(viaSlot).toBe(viaProp);
+    });
+
+    it('contentBottom: slot renders identically to the string prop', async () => {
+      const viaProp = await renderNormalised(PublicationCard, { file, contentBottom: 'Bottom content' });
+      const viaSlot = await renderNormalised(PublicationCard, { file }, { contentBottom: 'Bottom content' });
+      expect(viaSlot).toBe(viaProp);
+    });
+
+    it('a slot alone (no string prop) still opens its wrapper markup', async () => {
+      const html = await renderNormalised(PublicationCard, { file }, { contentTop: 'Live Top' });
+      expect(html).toContain('ct-publication-card__content-top');
+      expect(html).toContain('Live Top');
+    });
+  });
 });

@@ -1,6 +1,6 @@
-import { describe } from 'vitest';
+import { describe, it, expect } from 'vitest';
 import Map from '@civictheme/molecules/Map.astro';
-import { parityCase, expectAllKeysCovered } from '../harness';
+import { parityCase, expectAllKeysCovered, renderNormalised } from '../harness';
 
 const meta = { layer: '02-molecules', name: 'map' };
 
@@ -38,4 +38,28 @@ describe('Map', () => {
   });
 
   expectAllKeysCovered(meta, [REQUIRED_KEY, OPTIONAL_KEY, NO_URL_KEY, DEFAULT_VIEW_TEXT_KEY]);
+
+  // Task 14c: `contentTop`/`contentBottom` also have Astro slots that take
+  // precedence over the string props.
+  describe('slot vs string-prop parity', () => {
+    const url = 'https://www.example.com/map';
+
+    it('contentTop: slot renders identically to the string prop', async () => {
+      const viaProp = await renderNormalised(Map, { url, contentTop: 'Top content' });
+      const viaSlot = await renderNormalised(Map, { url }, { contentTop: 'Top content' });
+      expect(viaSlot).toBe(viaProp);
+    });
+
+    it('contentBottom: slot renders identically to the string prop', async () => {
+      const viaProp = await renderNormalised(Map, { url, contentBottom: 'Bottom content' });
+      const viaSlot = await renderNormalised(Map, { url }, { contentBottom: 'Bottom content' });
+      expect(viaSlot).toBe(viaProp);
+    });
+
+    it('a slot alone (no string prop) still opens its wrapper markup', async () => {
+      const html = await renderNormalised(Map, { url }, { contentTop: 'Live Top' });
+      expect(html).toContain('ct-map__content-top');
+      expect(html).toContain('Live Top');
+    });
+  });
 });

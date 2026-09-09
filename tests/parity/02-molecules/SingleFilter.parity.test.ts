@@ -58,4 +58,48 @@ describe('SingleFilter', () => {
     expect(items[0][1]).toContain('ct-chip');
     expect(items[1][1]).toBe('');
   });
+
+  // Task 14c: `contentTop`/`contentBottom`/`title`/`formHiddenFields` also
+  // have Astro slots that take precedence over the string props.
+  describe('slot vs string-prop parity', () => {
+    const items = [{ text: 'Filter 1' }];
+
+    it('contentTop: slot renders identically to the string prop', async () => {
+      const viaProp = await renderNormalised(SingleFilter, { items, contentTop: 'Top content' });
+      const viaSlot = await renderNormalised(SingleFilter, { items }, { contentTop: 'Top content' });
+      expect(viaSlot).toBe(viaProp);
+    });
+
+    it('contentBottom: slot renders identically to the string prop', async () => {
+      const viaProp = await renderNormalised(SingleFilter, { items, contentBottom: 'Bottom content' });
+      const viaSlot = await renderNormalised(SingleFilter, { items }, { contentBottom: 'Bottom content' });
+      expect(viaSlot).toBe(viaProp);
+    });
+
+    it('title: slot renders identically to the string prop', async () => {
+      const viaProp = await renderNormalised(SingleFilter, { items, title: 'Custom title' });
+      const viaSlot = await renderNormalised(SingleFilter, { items }, { title: 'Custom title' });
+      expect(viaSlot).toBe(viaProp);
+    });
+
+    it('formHiddenFields: slot renders identically to the string prop', async () => {
+      const viaProp = await renderNormalised(SingleFilter, {
+        items,
+        formAttributes: { id: 'f' },
+        formHiddenFields: '<input type="hidden" name="h" value="v" />',
+      });
+      const viaSlot = await renderNormalised(
+        SingleFilter,
+        { items, formAttributes: { id: 'f' } },
+        { formHiddenFields: '<input type="hidden" name="h" value="v" />' }
+      );
+      expect(viaSlot).toBe(viaProp);
+    });
+
+    it('a slot alone (no string prop) still opens its wrapper markup', async () => {
+      const html = await renderNormalised(SingleFilter, { items }, { contentTop: 'Live Top' });
+      expect(html).toContain('ct-single-filter__content-top');
+      expect(html).toContain('Live Top');
+    });
+  });
 });

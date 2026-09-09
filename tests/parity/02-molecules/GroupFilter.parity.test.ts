@@ -1,6 +1,6 @@
-import { describe } from 'vitest';
+import { describe, it, expect } from 'vitest';
 import GroupFilter from '@civictheme/molecules/GroupFilter.astro';
-import { parityCase, expectAllKeysCovered } from '../harness';
+import { parityCase, expectAllKeysCovered, renderNormalised } from '../harness';
 
 const meta = { layer: '02-molecules', name: 'group-filter' };
 
@@ -55,4 +55,34 @@ describe('GroupFilter', () => {
   });
 
   expectAllKeysCovered(meta, [DEFAULT_KEY, CUSTOM_TITLE_KEY, CONTENT_KEY, FORM_KEY, ATTRS_KEY, EMPTY_KEY]);
+
+  // Task 14c: `contentTop`/`contentBottom` also have Astro slots that take
+  // precedence over the string props.
+  describe('slot vs string-prop parity', () => {
+    it('contentTop: slot renders identically to the string prop', async () => {
+      const viaProp = await renderNormalised(GroupFilter, { filters, groupId: '42', contentTop: 'Top Content' });
+      const viaSlot = await renderNormalised(GroupFilter, { filters, groupId: '42' }, { contentTop: 'Top Content' });
+      expect(viaSlot).toBe(viaProp);
+    });
+
+    it('contentBottom: slot renders identically to the string prop', async () => {
+      const viaProp = await renderNormalised(GroupFilter, {
+        filters,
+        groupId: '42',
+        contentBottom: 'Bottom Content',
+      });
+      const viaSlot = await renderNormalised(
+        GroupFilter,
+        { filters, groupId: '42' },
+        { contentBottom: 'Bottom Content' }
+      );
+      expect(viaSlot).toBe(viaProp);
+    });
+
+    it('a slot alone (no string prop) still opens its wrapper markup', async () => {
+      const html = await renderNormalised(GroupFilter, { filters, groupId: '42' }, { contentTop: 'Live Top' });
+      expect(html).toContain('ct-group-filter__content-top');
+      expect(html).toContain('Live Top');
+    });
+  });
 });
