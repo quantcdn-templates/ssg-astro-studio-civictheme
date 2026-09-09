@@ -1,0 +1,123 @@
+---
+/**
+ * CivicTheme Slider component.
+ *
+ * Props:
+ * - theme: Theme variation (light or dark).
+ * - previousLabel: Text for the previous button.
+ * - nextLabel: Text for the next button.
+ * - verticalSpacing: Slider vertical spacing (top, bottom, or both).
+ * - withBackground: Whether to display with a background.
+ * - slides: Slides HTML content (rendered with `set:html`; typically a
+ *   sequence of ported `<Slide>` markup, pre-rendered by the caller).
+ * - class: Additional CSS classes.
+ * - ...rest: Additional HTML attributes, spread onto the root element.
+ *
+ * Slots (rendered with `set:html`, per this project's autoescape-off
+ * convention — html-bearing string props):
+ * - contentTop: Top content.
+ * - title: Slider title.
+ * - contentBottom: Bottom content.
+ *
+ * Note: the progress-indicator `<Tag>`'s content is the literal string
+ * `'Slide 1'` regardless of slide count — `slider.js`'s vendored behaviour
+ * updates it at runtime (`data-slider-progress`); this is not a bug, it
+ * mirrors `slider.twig`'s own hardcoded `content: 'Slide 1'`.
+ */
+import Heading from '@civictheme/atoms/Heading.astro';
+import Button from '@civictheme/atoms/Button.astro';
+import Tag from '@civictheme/atoms/Tag.astro';
+
+interface Props {
+  theme?: 'light' | 'dark';
+  previousLabel?: string;
+  nextLabel?: string;
+  verticalSpacing?: 'top' | 'bottom' | 'both' | string;
+  withBackground?: boolean;
+  slides?: string;
+  contentTop?: string;
+  title?: string;
+  contentBottom?: string;
+  class?: string;
+  [key: string]: unknown;
+}
+
+const {
+  theme = 'light',
+  previousLabel,
+  nextLabel,
+  verticalSpacing,
+  withBackground,
+  slides,
+  contentTop,
+  title,
+  contentBottom,
+  class: className = '',
+  ...rest
+} = Astro.props;
+
+const themeClass = `ct-theme-${theme}`;
+const withBackgroundClass = withBackground ? 'ct-slider--with-background' : '';
+const verticalSpacingClass = ['top', 'bottom', 'both'].includes(verticalSpacing ?? '')
+  ? `ct-vertical-spacing-inset--${verticalSpacing}`
+  : '';
+const classes = `ct-slider ${themeClass} ${withBackgroundClass} ${verticalSpacingClass} ${className}`;
+---
+
+{
+  slides && (
+    <div role="region" aria-label={title || 'Slider'} aria-roledescription="carousel" class={classes} {...rest}>
+      <div class="container">
+        <div class="row">
+          <div class="col-xxs-12">
+            {contentTop && (
+              <Fragment>
+                <div class="ct-slider__content__top" set:html={contentTop} />{' '}
+              </Fragment>
+            )}
+            <div class="ct-slider__container" data-slider="">
+              {title && (
+                <Fragment>
+                  <Heading theme={theme} content={title} level={2} class="ct-slider__title" />{' '}
+                </Fragment>
+              )}
+              <div class="ct-slider__slides" data-slider-panel="">
+                <div class="ct-slider__slides__inner" data-slider-rail="" set:html={slides} />
+              </div>{' '}
+              <div class="ct-slider__controls">
+                <div class="ct-slider__controls__inner">
+                  <Button
+                    theme={theme}
+                    text={previousLabel || 'Previous'}
+                    type="secondary"
+                    icon="left-arrow"
+                    iconPlacement="before"
+                    class="ct-slider__controls__previous"
+                    data-slider-previous=""
+                  />{' '}
+                  <Button
+                    theme={theme}
+                    text={nextLabel || 'Next'}
+                    type="secondary"
+                    icon="right-arrow-2"
+                    iconPlacement="after"
+                    class="ct-slider__controls__next"
+                    data-slider-next=""
+                  />
+                </div>{' '}
+                <Tag
+                  theme={theme}
+                  content="Slide 1"
+                  class="ct-slider__controls__progress-indicator"
+                  aria-live="polite"
+                  data-slider-progress=""
+                />
+              </div>
+            </div>{' '}
+            {contentBottom && <div class="ct-slider__content__bottom" set:html={contentBottom} />}
+          </div>
+        </div>
+      </div>
+    </div>
+  )
+}

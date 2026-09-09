@@ -1,0 +1,216 @@
+---
+/**
+ * CivicTheme Slider Slide component.
+ *
+ * Props:
+ * - theme: Theme variation (light or dark).
+ * - imagePosition: Image position (left or right).
+ * - image: Slide image object: { url, alt }.
+ * - tags: Tags array (see `TagList.astro`).
+ * - dateIso / date / dateEndIso / dateEnd: Date area content.
+ * - links: Link objects array: { text, url, isNewWindow, isExternal }.
+ * - headingLevel: Heading level for the slide title (default 3).
+ * - class: Additional CSS classes.
+ * - ...rest: Additional HTML attributes, spread onto the root element.
+ *
+ * Slots (rendered with `set:html`, per this project's autoescape-off
+ * convention — html-bearing string props):
+ * - contentTop: Top content area.
+ * - title: Slide title.
+ * - content: Content text.
+ * - contentBottom: Bottom slide content.
+ *
+ * Note: `slide.twig:56`'s `image is not empty` is Twig's `empty` test on an
+ * OBJECT (property-count check), not `.url` truthiness specifically — same
+ * semantics as the Banner/Promo review fixes (see PORTING.md): an object
+ * with any key at all counts as non-empty, even with no `url`. `Image`'s
+ * own `url` gate still governs whether an `<img>` actually renders inside
+ * the opened column.
+ *
+ * Note: `links_block`'s `@base/item-list/item-list.twig` include (`size:
+ * 'small'`, no `direction`/`modifier_class` beyond `ct-slide__links`) is
+ * inlined directly with real `Button` children rather than routed through
+ * `ItemList.astro` — same "single string items target" limitation as
+ * Attachment/Breadcrumb/Callout/EventCard/Field (see PORTING.md).
+ *
+ * Note: `date_block`'s `date_content` (a `{% set %}...{% endset %}` capture
+ * of `@base/datetime/datetime.twig`, fed into `Tag`'s HTML-bearing `content`
+ * prop) is replicated directly — mirrors `Datetime.astro`'s own markup —
+ * rather than routed through the Container API, for the same reason
+ * documented on `EventCard.astro`: `Tag`'s `content` is a string prop, not
+ * a JSX slot.
+ *
+ * None of `image`, `tags`, `date`/`dateEnd`, `links`, `contentTop`,
+ * `contentBottom` is exercised by any upstream snapshot (`slide.test.js`
+ * only varies `headingLevel`) — each is a direct, careful translation of
+ * `slide.twig`, verified here by direct assertions rather than a pinned
+ * fixture.
+ */
+import Image from '@civictheme/atoms/Image.astro';
+import Heading from '@civictheme/atoms/Heading.astro';
+import Paragraph from '@civictheme/atoms/Paragraph.astro';
+import Tag from '@civictheme/atoms/Tag.astro';
+import Button from '@civictheme/atoms/Button.astro';
+import TagList from '@civictheme/molecules/TagList.astro';
+
+interface SlideImage {
+  url?: string;
+  alt?: string;
+}
+
+interface SlideLink {
+  text?: string;
+  url?: string;
+  isNewWindow?: boolean;
+  isExternal?: boolean;
+}
+
+interface Props {
+  theme?: 'light' | 'dark';
+  imagePosition?: 'left' | 'right' | string;
+  image?: SlideImage;
+  tags?: Array<string | { content?: string; url?: string; isNewWindow?: boolean }>;
+  dateIso?: string | null;
+  date?: string;
+  dateEndIso?: string | null;
+  dateEnd?: string;
+  links?: SlideLink[];
+  headingLevel?: number;
+  contentTop?: string;
+  title?: string;
+  content?: string;
+  contentBottom?: string;
+  class?: string;
+  [key: string]: unknown;
+}
+
+const {
+  theme = 'light',
+  imagePosition,
+  image,
+  tags,
+  dateIso,
+  date,
+  dateEndIso,
+  dateEnd,
+  links,
+  headingLevel,
+  contentTop,
+  title,
+  content,
+  contentBottom,
+  class: className = '',
+  ...rest
+} = Astro.props;
+
+const themeClass = `ct-theme-${theme}`;
+const classes = `ct-slide ${themeClass} ${className}`;
+
+// `image is not empty` (Twig's `empty` test on an object): true for ANY
+// object with at least one key, not specifically `.url`.
+const hasImage = Object.keys(image ?? {}).length > 0;
+const imageColClass = `col-xxs-12 col-m-5 first ${imagePosition === 'right' ? 'col-m-offset-1 last-m' : 'first-m'}`;
+
+const tagList = tags ?? [];
+const linkList = links ?? [];
+const level = headingLevel || 3;
+
+const escapeAttr = (v: string) => v.replace(/&/g, '&amp;').replace(/"/g, '&quot;');
+const stripTags = (s: string) => s.replace(/<[^>]*>/g, '');
+function dateContentMarkup(): string {
+  if (!date) return '';
+  let html = `<span class="ct-datetime"><time class="ct-timestamp__start" datetime="${escapeAttr(stripTags(dateIso ?? date))}">${date}</time>`;
+  if (dateEnd) {
+    html += ` — <time class="ct-timestamp__end" datetime="${escapeAttr(stripTags(dateEndIso ?? dateEnd))}">${dateEnd}</time>`;
+  }
+  html += '</span>';
+  return html;
+}
+---
+
+<div class={classes} role="group" aria-roledescription="slide" data-slider-slide="" {...rest}>
+  <div class="row ct-slide__row">
+    {
+      hasImage && (
+        <Fragment>
+          <div class={imageColClass}>
+            <div class="ct-slide__image">
+              <Image theme={theme} url={image?.url} alt={image?.alt} />
+            </div>
+          </div>{' '}
+        </Fragment>
+      )
+    }
+    <div class="col-xxs-12 col-m-5 col-m-offset-1 ct-flex-align-self-center">
+      <div class="ct-slide__inner">
+        {
+          contentTop && (
+            <Fragment>
+              <div class="ct-slide__content-top" set:html={contentTop} />{' '}
+            </Fragment>
+          )
+        }
+        {
+          tagList.length > 0 && (
+            <Fragment>
+              <TagList theme={theme} tags={tagList} class="ct-slide__tags" />{' '}
+            </Fragment>
+          )
+        }
+        {
+          title && (
+            <Fragment>
+              <Heading theme={theme} content={title} level={level} class="ct-slide__title" data-toc-exclude="" />{' '}
+            </Fragment>
+          )
+        }
+        {
+          date && (
+            <Fragment>
+              <div class="ct-slide__date">
+                <Tag
+                  theme={theme}
+                  type={dateEnd ? 'secondary' : 'tertiary'}
+                  content={dateContentMarkup()}
+                  icon={dateEnd ? 'calendar-2' : null}
+                  iconPlacement="before"
+                />
+              </div>{' '}
+            </Fragment>
+          )
+        }
+        {
+          content && (
+            <Fragment>
+              <Paragraph theme={theme} content={content} class="ct-slide__content" />{' '}
+            </Fragment>
+          )
+        }
+        {
+          linkList.length > 0 && (
+            <ul class="ct-item-list ct-item-list--horizontal ct-item-list--small ct-slide__links">
+              {linkList.map((link, i) => (
+                <Fragment>
+                  {i > 0 && ' '}
+                  <li class="ct-item-list__item">
+                    <Button
+                      theme={theme}
+                      kind="link"
+                      type={i === 0 ? 'primary' : 'secondary'}
+                      text={link.text}
+                      url={link.url}
+                      isExternal={link.isExternal}
+                      isNewWindow={link.isNewWindow}
+                      class="ct-slide__links__link"
+                    />
+                  </li>
+                </Fragment>
+              ))}
+            </ul>
+          )
+        }
+        {contentBottom && <div class="ct-slide__content-bottom" set:html={contentBottom} />}
+      </div>
+    </div>
+  </div>
+</div>
