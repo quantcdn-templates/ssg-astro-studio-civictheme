@@ -100,14 +100,22 @@ const hasFields = Boolean(fields) || hasFieldsSlot;
   <div class="ct-fieldset__wrapper">
     {
       description && (descriptionDisplay === 'before' || descriptionDisplay === 'invisible') && (
-        <Paragraph
-          theme={theme}
-          content={description}
-          class={`ct-fieldset__description ${descriptionDisplay === 'invisible' ? 'ct-fieldset__description--invisible ct-visually-hidden' : 'ct-fieldset__description--before'}`}
-        />
+        <Fragment>
+          <Paragraph
+            theme={theme}
+            content={description}
+            class={`ct-fieldset__description ${descriptionDisplay === 'invisible' ? 'ct-fieldset__description--invisible ct-visually-hidden' : 'ct-fieldset__description--before'}`}
+          />{' '}
+        </Fragment>
       )
     }
-    {message && <FieldMessage theme={theme} type={messageType} content={message} class="ct-fieldset__message" />}
+    {
+      message && (
+        <Fragment>
+          <FieldMessage theme={theme} type={messageType} content={message} class="ct-fieldset__message" />{' '}
+        </Fragment>
+      )
+    }
     {
       prefix && (
         <Fragment>
@@ -116,16 +124,25 @@ const hasFields = Boolean(fields) || hasFieldsSlot;
       )
     }
     {
-      hasFields &&
-        (hasFieldsSlot ? (
-          <div class="ct-fieldset__fields">
-            <slot name="fields" />
-          </div>
-        ) : (
-          <div class="ct-fieldset__fields" set:html={fields} />
-        ))
+      hasFields && (
+        <Fragment>
+          {hasFieldsSlot ? (
+            <div class="ct-fieldset__fields">
+              <slot name="fields" />
+            </div>
+          ) : (
+            <div class="ct-fieldset__fields" set:html={fields} />
+          )}{' '}
+        </Fragment>
+      )
     }
-    {suffix && <div class="ct-fieldset__suffix" set:html={suffix} />}
+    {
+      suffix && (
+        <Fragment>
+          <div class="ct-fieldset__suffix" set:html={suffix} />{' '}
+        </Fragment>
+      )
+    }
     {
       description && descriptionDisplay === 'after' && (
         <Paragraph
