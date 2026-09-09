@@ -23,6 +23,11 @@
  * - sidebarTopRight: Top right sidebar content.
  * - sidebarBottomLeft: Bottom left sidebar content.
  * - sidebarBottomRight: Bottom right sidebar content.
+ *
+ * Every slot also has a same-named `string` prop (`content` feeds the
+ * default slot), rendered with `set:html`; the slot TAKES PRECEDENCE when
+ * present. Upstream's `layout.stories.js` passes all seven as plain HTML
+ * strings, which is the shape a Drupal `layout.twig` caller uses too.
  */
 interface Props {
   hideSidebarLeft?: boolean;
@@ -34,6 +39,13 @@ interface Props {
   sidebarTopRightAttributes?: Record<string, unknown>;
   sidebarBottomLeftAttributes?: Record<string, unknown>;
   sidebarBottomRightAttributes?: Record<string, unknown>;
+  content?: string;
+  contentTop?: string;
+  contentBottom?: string;
+  sidebarTopLeft?: string;
+  sidebarTopRight?: string;
+  sidebarBottomLeft?: string;
+  sidebarBottomRight?: string;
   class?: string;
   [key: string]: unknown;
 }
@@ -48,15 +60,32 @@ const {
   sidebarTopRightAttributes = {},
   sidebarBottomLeftAttributes = {},
   sidebarBottomRightAttributes = {},
+  content,
+  contentTop,
+  contentBottom,
+  sidebarTopLeft,
+  sidebarTopRight,
+  sidebarBottomLeft,
+  sidebarBottomRight,
   class: modifierClass = '',
   ...rest
 } = Astro.props;
 
-const hasContent = Astro.slots.has('default');
-const hasSidebarTopLeft = Astro.slots.has('sidebarTopLeft');
-const hasSidebarTopRight = Astro.slots.has('sidebarTopRight');
-const hasSidebarBottomLeft = Astro.slots.has('sidebarBottomLeft');
-const hasSidebarBottomRight = Astro.slots.has('sidebarBottomRight');
+const hasContentSlot = Astro.slots.has('default');
+const hasContentTopSlot = Astro.slots.has('contentTop');
+const hasContentBottomSlot = Astro.slots.has('contentBottom');
+const hasSidebarTopLeftSlot = Astro.slots.has('sidebarTopLeft');
+const hasSidebarTopRightSlot = Astro.slots.has('sidebarTopRight');
+const hasSidebarBottomLeftSlot = Astro.slots.has('sidebarBottomLeft');
+const hasSidebarBottomRightSlot = Astro.slots.has('sidebarBottomRight');
+
+const hasContent = hasContentSlot || Boolean(content);
+const hasContentTop = hasContentTopSlot || Boolean(contentTop);
+const hasContentBottom = hasContentBottomSlot || Boolean(contentBottom);
+const hasSidebarTopLeft = hasSidebarTopLeftSlot || Boolean(sidebarTopLeft);
+const hasSidebarTopRight = hasSidebarTopRightSlot || Boolean(sidebarTopRight);
+const hasSidebarBottomLeft = hasSidebarBottomLeftSlot || Boolean(sidebarBottomLeft);
+const hasSidebarBottomRight = hasSidebarBottomRightSlot || Boolean(sidebarBottomRight);
 
 const hasSidebarLeft = (hasSidebarTopLeft || hasSidebarBottomLeft) && !hideSidebarLeft;
 const hasSidebarRight = (hasSidebarTopRight || hasSidebarBottomRight) && !hideSidebarRight;
@@ -92,20 +121,17 @@ const classes = [
 {
   hasContent && (
     <div class={`ct-layout ${classes}`} {...rest}>
-      {Astro.slots.has('contentTop') && (
-        <Fragment>
-          <slot name="contentTop" />{' '}
-        </Fragment>
-      )}
+      {hasContentTop && (hasContentTopSlot ? <slot name="contentTop" /> : <Fragment set:html={contentTop} />)}
+      {hasContentTop && ' '}
       <div class={`ct-layout__inner ${isContainedClass}`}>
         <section class="ct-layout__main" {...contentAttributes}>
-          <slot />
+          {hasContentSlot ? <slot /> : <Fragment set:html={content} />}
         </section>
         {hasSidebarTopLeft && hasSidebarLeft && (
           <Fragment>
             {' '}
             <aside class="ct-layout__sidebar_top_left" {...sidebarTopLeftAttributes}>
-              <slot name="sidebarTopLeft" />
+              {hasSidebarTopLeftSlot ? <slot name="sidebarTopLeft" /> : <Fragment set:html={sidebarTopLeft} />}
             </aside>
           </Fragment>
         )}
@@ -113,7 +139,7 @@ const classes = [
           <Fragment>
             {' '}
             <aside class="ct-layout__sidebar_top_right" {...sidebarTopRightAttributes}>
-              <slot name="sidebarTopRight" />
+              {hasSidebarTopRightSlot ? <slot name="sidebarTopRight" /> : <Fragment set:html={sidebarTopRight} />}
             </aside>
           </Fragment>
         )}
@@ -121,7 +147,7 @@ const classes = [
           <Fragment>
             {' '}
             <aside class="ct-layout__sidebar_bottom_left" {...sidebarBottomLeftAttributes}>
-              <slot name="sidebarBottomLeft" />
+              {hasSidebarBottomLeftSlot ? <slot name="sidebarBottomLeft" /> : <Fragment set:html={sidebarBottomLeft} />}
             </aside>
           </Fragment>
         )}
@@ -129,15 +155,19 @@ const classes = [
           <Fragment>
             {' '}
             <aside class="ct-layout__sidebar_bottom_right" {...sidebarBottomRightAttributes}>
-              <slot name="sidebarBottomRight" />
+              {hasSidebarBottomRightSlot ? (
+                <slot name="sidebarBottomRight" />
+              ) : (
+                <Fragment set:html={sidebarBottomRight} />
+              )}
             </aside>
           </Fragment>
         )}
       </div>
-      {Astro.slots.has('contentBottom') && (
+      {hasContentBottom && (
         <Fragment>
           {' '}
-          <slot name="contentBottom" />
+          {hasContentBottomSlot ? <slot name="contentBottom" /> : <Fragment set:html={contentBottom} />}
         </Fragment>
       )}
     </div>
