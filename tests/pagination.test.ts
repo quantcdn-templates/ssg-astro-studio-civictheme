@@ -88,14 +88,31 @@ describe('paginationItems', () => {
     expect(items.pages['2']).toEqual({ href: '/events/page/2' });
   });
 
-  it('clamps previous on the first page and next on the last page', () => {
+  it('links next on the first page and previous on the last page normally', () => {
     const first = paginationItems({ currentPage: 1, lastPage: 2 }, '/news');
-    expect(first.previous).toEqual({ href: '/news' });
     expect(first.next).toEqual({ href: '/news/page/2' });
 
     const last = paginationItems({ currentPage: 2, lastPage: 2 }, '/news');
     expect(last.previous).toEqual({ href: '/news' });
-    expect(last.next).toEqual({ href: '/news/page/2' });
+  });
+
+  it('omits href on the disabled end of the range instead of clamping to the current page', () => {
+    // Page one: previous is disabled, so it must carry no href — Pagination
+    // derives isDisabled from current/lastPage, not from href presence, but
+    // a disabled link with an href fails the a11y guard (tests/e2e/a11y.spec.ts).
+    const first = paginationItems({ currentPage: 1, lastPage: 3 }, '/news');
+    expect(first.previous).toEqual({});
+    expect(first.previous?.href).toBeUndefined();
+
+    // Last page: next is disabled, so it must carry no href.
+    const last = paginationItems({ currentPage: 3, lastPage: 3 }, '/news');
+    expect(last.next).toEqual({});
+    expect(last.next?.href).toBeUndefined();
+
+    // A single-page listing is disabled on both ends simultaneously.
+    const only = paginationItems({ currentPage: 1, lastPage: 1 }, '/news');
+    expect(only.previous).toEqual({});
+    expect(only.next).toEqual({});
   });
 
   it('always supplies first and last targets — Pagination disables, never omits, them', () => {
@@ -106,6 +123,8 @@ describe('paginationItems', () => {
 
   it('never produces a bare numeric segment under the collection path', () => {
     const items = paginationItems({ currentPage: 2, lastPage: 4 }, '/events');
+    expect(items.previous?.href).toBeDefined();
+    expect(items.next?.href).toBeDefined();
     const hrefs = [items.first, items.previous, items.next, items.last]
       .map((target) => target?.href)
       .concat(Object.values(items.pages).map((target) => target.href));

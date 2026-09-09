@@ -47,10 +47,23 @@ export interface PaginationItems {
  * The CivicTheme `Pagination` molecule's `items` object for one Astro page.
  *
  * `Pagination` disables — rather than omits — the first/previous and
- * next/last links at the ends of the range, so every target is always
- * present; it derives the disabled state from `current` and `totalPages`.
+ * next/last links at the ends of the range; it derives the disabled state
+ * from `current` and `totalPages`, not from whether an `href` is present.
  * Page hrefs are built from `base` through `pageHref`, so they match the
  * route's own `/<collection>/page/N` URLs.
+ *
+ * `previous`/`next` omit `href` when they are the disabled end of the
+ * range (page one has no previous; the last page has no next), instead of
+ * clamping to the current page. Upstream `link.twig` renders `href` even
+ * on a disabled link when one is passed in — `Link.astro` stays faithful
+ * to that (markup-fidelity rule) — so the fix belongs here, at the
+ * application call site that builds the `items` object, not in the
+ * vendored component. Omitting `href` keeps every `.ct-link--disabled`
+ * element genuinely inert: no `href` means no destination and no
+ * keyboard focus, which is what the WCAG 1.4.3 "inactive control"
+ * contrast exemption requires (see `tests/e2e/a11y.spec.ts`'s
+ * `.ct-link--disabled` guard). `first`/`last` are unaffected — they stay
+ * always-present per the addendum, only `previous`/`next` change.
  */
 export function paginationItems(page: Pick<Page, 'currentPage' | 'lastPage'>, base: string): PaginationItems {
   const href = (pageNumber: number) => pageHref(base, pageNumber);
@@ -58,11 +71,13 @@ export function paginationItems(page: Pick<Page, 'currentPage' | 'lastPage'>, ba
   for (let pageNumber = 1; pageNumber <= page.lastPage; pageNumber += 1) {
     pages[String(pageNumber)] = { href: href(pageNumber) };
   }
+  const isFirst = page.currentPage <= 1;
+  const isLast = page.currentPage >= page.lastPage;
   return {
     first: { href: href(1) },
-    previous: { href: href(Math.max(1, page.currentPage - 1)) },
+    previous: isFirst ? {} : { href: href(page.currentPage - 1) },
     pages,
-    next: { href: href(Math.min(page.lastPage, page.currentPage + 1)) },
+    next: isLast ? {} : { href: href(page.currentPage + 1) },
     last: { href: href(page.lastPage) },
   };
 }
