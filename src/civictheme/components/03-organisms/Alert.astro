@@ -12,6 +12,10 @@
  *   now has a same-named Astro slot that TAKES PRECEDENCE over the string
  *   prop when present (Task 14c); the root render gate widens to
  *   `Boolean(description) || Astro.slots.has('description')`.
+ * - dismissible: Whether the close button renders (default true). NOT an
+ *   upstream prop — `alert.twig` always renders the dismiss button — added
+ *   so a non-dismissible site alert can be authored (see PORTING.md). The
+ *   default keeps the upstream markup byte-identical, so parity is unchanged.
  * - class: Additional CSS classes.
  * - ...rest: Additional HTML attributes, spread onto the root element.
  *
@@ -29,6 +33,7 @@ interface Props {
   id?: string;
   title?: string;
   description?: string;
+  dismissible?: boolean;
   class?: string;
   [key: string]: unknown;
 }
@@ -46,6 +51,7 @@ const {
   id,
   title,
   description,
+  dismissible = true,
   class: className = '',
   ...rest
 } = Astro.props;
@@ -86,19 +92,22 @@ const hasDescription = Boolean(description) || hasDescriptionSlot;
             {hasTitleSlot ? <slot name="title" /> : <Fragment set:html={title} />}
           </div>{' '}
           <div class="ct-alert__summary col-xxs-12 col-m-8 col-l-9">
-            {hasDescriptionSlot ? <slot name="description" /> : <Fragment set:html={description} />}{' '}
-            <Button
-              kind="button"
-              theme={theme}
-              type="tertiary"
-              class="ct-alert__dismiss-button"
-              text=""
-              icon="close"
-              size="regular"
-              id={`dismiss-alert-${id ?? ''}`}
-              data-alert-dismiss-trigger=""
-              title={`close ${type} alert`}
-            />
+            {hasDescriptionSlot ? <slot name="description" /> : <Fragment set:html={description} />}
+            {dismissible && ' '}
+            {dismissible && (
+              <Button
+                kind="button"
+                theme={theme}
+                type="tertiary"
+                class="ct-alert__dismiss-button"
+                text=""
+                icon="close"
+                size="regular"
+                id={`dismiss-alert-${id ?? ''}`}
+                data-alert-dismiss-trigger=""
+                title={`close ${type} alert`}
+              />
+            )}
           </div>
         </div>
       </div>

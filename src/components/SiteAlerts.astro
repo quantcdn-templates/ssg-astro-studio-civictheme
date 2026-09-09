@@ -4,6 +4,13 @@
  * CivicTheme `Alert`. `Alert`'s `title`/`description` are string props
  * rendered with `set:html`; the JSON `message` field is plain text, so it is
  * passed through unchanged.
+ *
+ * The alerts are wrapped in the `[data-component-name="ct-alerts"]` container
+ * that `src/civictheme/js/behaviours/alert.js` initialises on (alert.js:266)
+ * and that its `dismiss()` removes the alert from (alert.js:230). No
+ * `data-alert-endpoint` is set, so the behaviour makes no request: these
+ * alerts are rendered at build time. The dismiss listener itself comes from
+ * the shim in `src/civictheme/js/civictheme.js` — see the note there.
  */
 import Alert from '@civictheme/organisms/Alert.astro';
 import { activeAlerts } from '@/lib/content';
@@ -17,13 +24,18 @@ const alerts = await activeAlerts();
 ---
 
 {
-  alerts.map((alert) => (
-    <Alert
-      theme={theme}
-      id={alert.id}
-      type={alert.data.type}
-      title={alert.data.title}
-      description={alert.data.message}
-    />
-  ))
+  alerts.length > 0 && (
+    <div data-component-name="ct-alerts">
+      {alerts.map((alert) => (
+        <Alert
+          theme={theme}
+          id={alert.id}
+          type={alert.data.type}
+          title={alert.data.title}
+          description={alert.data.message}
+          dismissible={alert.data.dismissible}
+        />
+      ))}
+    </div>
+  )
 }

@@ -38,6 +38,20 @@ import { test, expect } from '@playwright/test';
  *   `.ct-scrollspy-scrolled` to `[data-scrollspy]` (scrollspy.js:27-28) — since that is
  *   the only actual scroll-driven class toggle anywhere on this page.
  */
+test.describe('CivicTheme site alerts', () => {
+  // `SiteAlerts.astro` wraps the build-time alerts in the
+  // `[data-component-name="ct-alerts"]` container `alert.js` expects, and the
+  // shim in `src/civictheme/js/civictheme.js` attaches the dismiss listener
+  // that `alert.js` itself only attaches to fetched alerts (alert.js:212).
+  test('site alert dismisses on click', async ({ page }) => {
+    await page.goto('/');
+    const alert = page.locator('[data-component-name="ct-alerts"] [data-component-name="ct-alert"]').first();
+    await expect(alert).toBeVisible();
+    await alert.locator('[data-alert-dismiss-trigger]').click();
+    await expect(alert).toHaveCount(0);
+  });
+});
+
 test.describe('CivicTheme behaviours', () => {
   test.beforeEach(async ({ page }) => {
     await page.goto('/components/behaviours');
