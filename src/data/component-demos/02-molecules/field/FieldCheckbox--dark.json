@@ -18,7 +18,7 @@
     "description": "Description content sample.",
     "message": {
       "content": "Message conte nt sample.",
-      "attributes": "id=\"field_id_820--error-message\""
+      "attributes": "id=\"field_id_633--error-message\""
     },
     "is_required": true,
     "required_text": "",
@@ -26,16 +26,16 @@
     "is_disabled": false,
     "orientation": "vertical",
     "is_inline": false,
-    "name": "option_group_486",
+    "name": "option_group_610",
     "value": "",
     "placeholder": "Field placeholder",
-    "id": "field_id_820",
+    "id": "field_id_633",
     "control": [
       {
         "label": "Control item 1",
-        "name": "option_group_486",
+        "name": "option_group_610",
         "value": "",
-        "id": "option_group_486_control_item_1",
+        "id": "option_group_610_control_item_1",
         "is_required": true,
         "is_invalid": false,
         "is_disabled": false,
@@ -44,9 +44,9 @@
       },
       {
         "label": "Control item 2",
-        "name": "option_group_486",
+        "name": "option_group_610",
         "value": "",
-        "id": "option_group_486_control_item_2",
+        "id": "option_group_610_control_item_2",
         "is_required": true,
         "is_invalid": false,
         "is_disabled": false,
@@ -55,9 +55,9 @@
       },
       {
         "label": "Control item 3",
-        "name": "option_group_486",
+        "name": "option_group_610",
         "value": "",
-        "id": "option_group_486_control_item_3",
+        "id": "option_group_610_control_item_3",
         "is_required": true,
         "is_invalid": false,
         "is_disabled": false,
