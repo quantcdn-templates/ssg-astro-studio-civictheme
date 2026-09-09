@@ -1,8 +1,8 @@
 {
   "name": "Your organisation",
   "tagline": "Your organisation's tagline",
-  "logoLight": "/civictheme/logos/logo_primary_light_desktop.png",
-  "logoDark": "/civictheme/logos/logo_primary_dark_desktop.png",
+  "logoLight": "/images/logo-light.svg",
+  "logoDark": "/images/logo-dark.svg",
   "footerText": "Your organisation acknowledges the support of the community it serves.",
   "acknowledgement": "Your organisation acknowledges the Traditional Custodians of the land on which we operate.",
   "social": [

@@ -2,15 +2,15 @@
   "items": [
     {
       "label": "For individuals",
-      "url": "/for-individuals"
+      "url": "/individuals"
     },
     {
       "label": "For businesses",
-      "url": "/for-businesses"
+      "url": "/businesses"
     },
     {
       "label": "For government",
-      "url": "/for-government"
+      "url": "/government"
     },
     {
       "label": "About us",
@@ -18,7 +18,7 @@
     },
     {
       "label": "News and events",
-      "url": "/news"
+      "url": "/news-and-events"
     },
     {
       "label": "Contact us",

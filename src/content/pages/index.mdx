@@ -1,6 +1,6 @@
 ---
-title: Your organisation
-summary: "Your organisation's tagline — a government-grade design system that is accessible, inclusive and consistent."
+title: Your organisation's tagline
+summary: 'A short, one-sentence vision or mission statement works well here.'
 theme: light
 bannerType: large
 bannerImage: /civictheme/backgrounds/civictheme_background_2.png
@@ -12,8 +12,37 @@ draft: false
 order: 0
 ---
 
-Placeholder home page content. Task 16 replaces this with the ported CivicTheme demo copy.
+A short, one-sentence vision or mission statement works well here.
 
-<ListingAuto collection="news" title="Latest news" limit={3} />
+<Button text="Learn about our mission" url="/about-us" type="primary" kind="link" />
 
-<ListingAuto collection="events" title="Upcoming events" limit={3} />
+<Grid templateColumnCount={4}>
+  <div class="col-xxs-12 col-m-3">
+    <PromoCard
+      title="For individuals"
+      summary="Services and information for residents."
+      link={{ url: '/individuals' }}
+    />
+  </div>
+  <div class="col-xxs-12 col-m-3">
+    <PromoCard
+      title="For businesses"
+      summary="Services and information for local businesses."
+      link={{ url: '/businesses' }}
+    />
+  </div>
+  <div class="col-xxs-12 col-m-3">
+    <PromoCard
+      title="For government"
+      summary="Information for other government agencies and partners."
+      link={{ url: '/government' }}
+    />
+  </div>
+  <div class="col-xxs-12 col-m-3">
+    <PromoCard
+      title="News and events"
+      summary="The latest updates and upcoming events from Your organisation."
+      link={{ url: '/news-and-events' }}
+    />
+  </div>
+</Grid>

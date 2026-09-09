@@ -1,0 +1,44 @@
+---
+title: Subscribe
+summary: 'Subscribe to updates from Your organisation.'
+theme: light
+bannerType: default
+bannerImage: /civictheme/backgrounds/civictheme_background_1.png
+bannerTheme: dark
+showBreadcrumb: true
+showLastUpdated: false
+topics: []
+draft: false
+order: 0
+---
+
+## Stay up to date
+
+Subscribe to receive news, event notices and publication updates from
+Your organisation by email.
+
+<Webform>
+  <Fragment slot="referencedWebform">
+    <form action="#" method="post" class="ct-webform__form">
+      <div class="ct-field ct-field--text">
+        <label class="ct-field__label" for="subscribe-name">
+          Name
+        </label>
+        <input class="ct-field__widget ct-input" type="text" id="subscribe-name" name="name" required />
+      </div>
+      <div class="ct-field ct-field--email">
+        <label class="ct-field__label" for="subscribe-email">
+          Email
+        </label>
+        <input class="ct-field__widget ct-input" type="email" id="subscribe-email" name="email" required />
+      </div>
+      <div class="ct-field ct-field--textarea">
+        <label class="ct-field__label" for="subscribe-message">
+          What are you interested in?
+        </label>
+        <textarea class="ct-field__widget ct-textarea" id="subscribe-message" name="message" rows="4"></textarea>
+      </div>
+      <Button text="Subscribe" kind="submit" type="primary" />
+    </form>
+  </Fragment>
+</Webform>
