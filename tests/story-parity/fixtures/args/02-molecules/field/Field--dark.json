@@ -18,7 +18,7 @@
     "description": "Description content sample.",
     "message": {
       "content": "Message conte nt sample.",
-      "attributes": "id=\"field_id_822--error-message\""
+      "attributes": "id=\"field_id_261--error-message\""
     },
     "is_required": false,
     "required_text": "",
@@ -26,10 +26,10 @@
     "is_disabled": false,
     "orientation": "vertical",
     "is_inline": false,
-    "name": "option_group_187",
+    "name": "option_group_735",
     "value": "",
     "placeholder": "Field placeholder",
-    "id": "field_id_822",
+    "id": "field_id_261",
     "control": null,
     "options": null,
     "attributes": null,

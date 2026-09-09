@@ -32,7 +32,10 @@
         "is_new_window": false,
         "is_external": false,
         "modifier_class": "",
-        "attributes": {}
+        "attributes": {
+          "id": "panel-1-tab",
+          "data-tabs-tab": ""
+        }
       },
       {
         "text": "Link text 2",
@@ -40,7 +43,10 @@
         "is_new_window": false,
         "is_external": false,
         "modifier_class": "",
-        "attributes": {}
+        "attributes": {
+          "id": "panel-2-tab",
+          "data-tabs-tab": ""
+        }
       }
     ],
     "vertical_spacing": "none",

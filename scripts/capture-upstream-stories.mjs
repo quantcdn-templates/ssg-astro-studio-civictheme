@@ -136,6 +136,12 @@ function writeFile(file, contents) {
   fs.writeFileSync(file, contents);
 }
 
+/**
+ * One pass over every story to learn what the capture loop needs BEFORE it
+ * navigates: whether the story declares `render:`, its Storybook `layout`
+ * and background globals, and its `theme` arg. The args themselves are NOT
+ * read here — see `capture()`.
+ */
 async function extractStoryData(page, storyIds) {
   return page.evaluate(async (ids) => {
     const store = window.__STORYBOOK_PREVIEW__.storyStore;
@@ -143,7 +149,7 @@ async function extractStoryData(page, storyIds) {
     for (const id of ids) {
       const story = await store.loadStory({ storyId: id });
       out[id] = {
-        args: JSON.parse(JSON.stringify(story.initialArgs ?? {})),
+        theme: story.initialArgs?.theme ?? null,
         hasRender: Object.prototype.hasOwnProperty.call(story.moduleExport || {}, 'render'),
         layout: story.parameters?.layout ?? null,
         background: (story.storyGlobals ?? story.globals)?.backgrounds?.value ?? null,
@@ -195,7 +201,7 @@ async function prepareForScreenshot(page, selectors, pixel) {
  * - PNG comes from the mounted, fully-initialised story, because the visual
  *   comparison in the Astro template runs the same behaviours in the browser.
  */
-async function capture(page, baseUrl, story, fixtureName, args, argsOverride, skipPng) {
+async function capture(page, baseUrl, story, fixtureName, themeOverride, argsOverride, skipPng) {
   const query = argsOverride ? `&args=${encodeURIComponent(argsOverride)}` : '';
   await page.goto(`${baseUrl}/iframe.html?id=${story.storyId}&viewMode=story${query}`, {
     waitUntil: 'load',
@@ -210,9 +216,38 @@ async function capture(page, baseUrl, story, fixtureName, args, argsOverride, sk
   );
   await page.waitForTimeout(500);
 
-  const html = await page.evaluate(
-    async ({ storyId, storyArgs }) => {
+  // The args are read from the SAME page load that renders the HTML. Several
+  // `*.stories.data.js` modules generate ids with `random()` at module scope,
+  // so every navigation produces a fresh set — reading the args once up front
+  // and rendering later would pair an args fixture with HTML containing
+  // different ids.
+  //
+  // The render uses the story's OWN `initialArgs`, not the serialised copy
+  // written to the args fixture: a `DrupalAttribute` arg must reach the Twig
+  // template as the live class instance it is, or the markup it contributes
+  // (e.g. Tabs' `id="panel-1-tab"`) is lost from the fixture.
+  const { html, args } = await page.evaluate(
+    async ({ storyId, theme }) => {
+      // A story arg may be a CLASS INSTANCE, not a plain object: upstream's
+      // `tabs.stories.js` and `grid.stories.js` build `attributes` with
+      // `new DrupalAttribute([...])`, which extends `Map`. `JSON.stringify`
+      // serialises a Map as `{}`, silently dropping every attribute it holds,
+      // so Map entries are unwrapped into a plain `{ name: value }` object.
+      // `DrupalAttribute` is the only class instance upstream's stories are
+      // known to pass; anything else falls through the plain-object branch.
+      const toPlain = (value) => {
+        if (value instanceof Map) {
+          return Object.fromEntries([...value.entries()].map(([key, item]) => [String(key), toPlain(item)]));
+        }
+        if (Array.isArray(value)) return value.map(toPlain);
+        if (value && typeof value === 'object') {
+          return Object.fromEntries(Object.entries(value).map(([key, item]) => [key, toPlain(item)]));
+        }
+        return value;
+      };
+
       const loaded = await window.__STORYBOOK_PREVIEW__.storyStore.loadStory({ storyId });
+      const storyArgs = theme ? { ...loaded.initialArgs, theme } : loaded.initialArgs;
       const context = {
         ...loaded,
         id: storyId,
@@ -226,15 +261,15 @@ async function capture(page, baseUrl, story, fixtureName, args, argsOverride, sk
       };
       const result = loaded.undecoratedStoryFn(context);
       if (typeof result !== 'string') throw new Error(`${storyId} did not render to a string`);
-      return result;
+      return { html: result, args: toPlain(storyArgs) };
     },
-    { storyId: story.storyId, storyArgs: args }
+    { storyId: story.storyId, theme: themeOverride }
   );
 
   const dir = path.join(story.layer, story.component);
   writeFile(path.join(FIXTURES, 'html', dir, `${fixtureName}.html`), html);
 
-  if (skipPng) return;
+  if (skipPng) return args;
   await prepareForScreenshot(page, MASK_SELECTORS, PIXEL);
   await page.waitForTimeout(SETTLE_MS);
   await page.locator('#storybook-root').screenshot({
@@ -242,6 +277,55 @@ async function capture(page, baseUrl, story, fixtureName, args, argsOverride, sk
     animations: 'disabled',
     scale: 'css',
   });
+  return args;
+}
+
+/**
+ * Fraction of a story's fixture HTML that arrived PRE-RENDERED in its args.
+ *
+ * Upstream's `*.stories.data.js` files build args by calling other Twig
+ * templates, so a story such as `organisms-list--list` feeds its component a
+ * ready-made block of child markup. A parity pass on such a story proves the
+ * WRAPPER matches, not the children. Measured as (bytes of every HTML-bearing
+ * string arg, at any depth) / (bytes of the fixture HTML).
+ */
+function passthroughRatio(args, htmlFile) {
+  let bytes = 0;
+  const walk = (value) => {
+    if (typeof value === 'string') {
+      if (value.includes('<')) bytes += value.length;
+      return;
+    }
+    if (Array.isArray(value)) value.forEach(walk);
+    else if (value && typeof value === 'object') Object.values(value).forEach(walk);
+  };
+  walk(args);
+  const html = fs.readFileSync(htmlFile, 'utf8').replace(/\s+/g, ' ').trim();
+  return html.length === 0 ? 0 : Math.min(1, bytes / html.length);
+}
+
+/** Astro components under `src/civictheme/components` that no captured story covers. */
+function componentsWithoutFixtures(captured) {
+  const covered = new Set(
+    captured.map(({ component }) => {
+      const name = component.split('/')[1];
+      return name
+        .split('-')
+        .map((part) => part.charAt(0).toUpperCase() + part.slice(1))
+        .join('');
+    })
+  );
+  const root = path.join(REPO, 'src/civictheme/components');
+  const names = fs
+    .readdirSync(root, { withFileTypes: true })
+    .filter((entry) => entry.isDirectory())
+    .flatMap((layer) =>
+      fs
+        .readdirSync(path.join(root, layer.name))
+        .filter((file) => file.endsWith('.astro'))
+        .map((file) => `${layer.name}/${file.replace(/\.astro$/, '')}`)
+    );
+  return names.filter((name) => !covered.has(name.split('/')[1])).sort();
 }
 
 async function main() {
@@ -282,7 +366,7 @@ async function main() {
     // A story gets an extra dark capture only when its own theme is light and
     // no sibling story of the same title already renders in the dark theme.
     const darkTitles = new Set(
-      stories.filter((story) => data[story.storyId].args.theme === 'dark').map((story) => story.title)
+      stories.filter((story) => data[story.storyId].theme === 'dark').map((story) => story.title)
     );
 
     fs.rmSync(path.join(FIXTURES, 'args'), { recursive: true, force: true });
@@ -291,16 +375,25 @@ async function main() {
 
     let light = 0;
     let dark = 0;
+    const captured = [];
     for (const story of stories) {
       const entry = data[story.storyId];
-      const variants = [{ suffix: '', theme: entry.args.theme, override: null }];
-      if (entry.args.theme === 'light' && !darkTitles.has(story.title)) {
+      const variants = [{ suffix: '', theme: entry.theme, override: null }];
+      if (entry.theme === 'light' && !darkTitles.has(story.title)) {
         variants.push({ suffix: '--dark', theme: 'dark', override: 'theme:dark' });
       }
 
       for (const variant of variants) {
         const fixtureName = `${story.exportName}${variant.suffix}`;
-        const args = variant.override ? { ...entry.args, theme: 'dark' } : entry.args;
+        const args = await capture(
+          page,
+          baseUrl,
+          story,
+          fixtureName,
+          variant.override ? 'dark' : null,
+          variant.override,
+          skipPng
+        );
         writeFile(
           path.join(FIXTURES, 'args', story.layer, story.component, `${fixtureName}.json`),
           `${JSON.stringify(
@@ -321,12 +414,23 @@ async function main() {
             2
           )}\n`
         );
-        await capture(page, baseUrl, story, fixtureName, args, variant.override, skipPng);
+        captured.push({ component: `${story.layer}/${story.component}`, fixtureName, args });
         if (variant.suffix) dark += 1;
         else light += 1;
         console.log(`captured ${story.layer}/${story.component}/${fixtureName}`);
       }
     }
+
+    const wrapperOnly = captured
+      .map((item) => ({
+        fixtureName: `${item.component}/${item.fixtureName}`,
+        ratio: passthroughRatio(item.args, path.join(FIXTURES, 'html', item.component, `${item.fixtureName}.html`)),
+      }))
+      .filter((item) => item.ratio > 0.5)
+      .sort((a, b) => b.ratio - a.ratio);
+
+    // UTC, so the recorded date does not depend on the capturing machine's zone.
+    const captureDate = new Date().toISOString().slice(0, 10);
 
     writeFile(
       path.join(FIXTURES, 'SOURCE.md'),
@@ -336,12 +440,18 @@ async function main() {
         'Generated by `node scripts/capture-upstream-stories.mjs`. Do not edit by hand.',
         '',
         `- Upstream: https://github.com/civictheme/uikit \`packages/twig\`, commit \`${commit}\``,
-        `- Captured: ${new Date().toISOString().slice(0, 10)}`,
+        `- Captured: ${captureDate}`,
         `- Storybook: \`npm run build-storybook --workspace=packages/twig\` (static build), served over HTTP`,
         '- Args: read at runtime from the Storybook preview store',
         '  (`window.__STORYBOOK_PREVIEW__.storyStore.loadStory({ storyId }).initialArgs`).',
         '  This gives the exact args the story rendered with, including nested HTML',
         '  strings that `*.stories.data.js` produces by calling other Twig templates.',
+        '- Class-instance args are serialised to plain objects before being written:',
+        '  a `Map` (which is what `@civictheme/drupal-attribute` extends) becomes',
+        '  `{ name: value }`, because `JSON.stringify` would flatten it to `{}` and lose',
+        '  every attribute. Verified only for `DrupalAttribute`, the one class upstream',
+        '  stories are known to pass (`tabs.stories.js`, `grid.stories.js`). The HTML',
+        '  fixture is still rendered from the ORIGINAL, unserialised args.',
         '',
         `- Stories in Storybook index: ${allStories.length}`,
         `- Captured stories (as upstream defines them): ${light}`,
@@ -351,6 +461,25 @@ async function main() {
         '## Skipped stories',
         '',
         ...skipped.map((item) => `- \`${item.storyId}\` — ${item.reason}`),
+        '',
+        '## Ported components with no story fixture',
+        '',
+        'These have an Astro component but no story in this fixture set, so the story',
+        'suite proves nothing about them. Their `tests/parity/` snapshot cases still do.',
+        '',
+        ...componentsWithoutFixtures(captured).map((name) => `- \`${name}\``),
+        '',
+        '## Wrapper-only stories',
+        '',
+        'For these, more than half the fixture HTML arrives PRE-RENDERED in the args:',
+        "upstream's `*.stories.data.js` calls other Twig templates and passes the",
+        'resulting markup in as a string prop. A pass here proves the wrapper markup',
+        'matches, not the children — the children are covered by their own stories and',
+        'by the 697 `tests/parity/` snapshot cases.',
+        '',
+        ...(wrapperOnly.length
+          ? wrapperOnly.map((item) => `- \`${item.fixtureName}\` — ${Math.round(item.ratio * 100)}% passthrough`)
+          : ['- (none)']),
         '',
         '## Capture options',
         '',

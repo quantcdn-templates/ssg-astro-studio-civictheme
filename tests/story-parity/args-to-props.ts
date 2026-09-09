@@ -11,6 +11,11 @@ function camelCase(key: string): string {
  * STRING (e.g. `id="field_id_822--error-message"`, the shape a Drupal
  * `Attribute` object prints as) into the prop object shared-reference R2
  * asks for: `attributes` → rest props spread onto the element.
+ *
+ * Limitation: only DOUBLE-quoted values and bare attributes are recognised.
+ * A single-quoted value (`id='x'`) would be read as the bare attributes
+ * `id`, `'x'`. Every captured story uses double quotes (Drupal's `Attribute`
+ * always prints them); widen this if that stops being true.
  */
 function parseAttributeString(value: string): Record<string, string> {
   const props: Record<string, string> = {};

@@ -1,92 +1,89 @@
 [
   {
     "story": "00-base/icon/Icon",
-    "reason": "The story passes `assets_dir: '@civictheme/../assets'`. Upstream's icon.twig reads the SVG from that directory at render time with `source()`; the Astro port resolves symbols through the generated `icons.ts` map instead and has no `assetsDir` prop, so the arg falls into the rest spread and prints as an attribute. The port must not add an `assetsDir` prop: it would be meaningless.",
-    "portingRow": "PORTING.md > Icon > `source(assets_dir ~ '/icons/' ~ symbol ~ '.svg', true)`",
-    "mask": { "pattern": " assetsDir=\"[^\"]*\"" }
+    "reason": "The story passes `assets_dir: '@civictheme/../assets'`. Upstream's icon.twig reads the SVG from that directory at render time with `source()`; the Astro port resolves symbols through the generated `icons.ts` map instead and has no `assetsDir` prop, so the arg falls into the rest spread and prints as an attribute on the root <svg>. Adding an `assetsDir` prop would be meaningless.",
+    "portingRow": "| Icon  ",
+    "mask": { "pattern": " assetsDir=\"@civictheme/\\.\\./assets\"" },
+    "replacements": { "actual": 1, "expected": 0 }
   },
   {
     "story": "01-atoms/iframe/Iframe",
     "reason": "The story's `url` arg already contains the HTML entity `&amp;`. Upstream's Twig renders with autoescape off, so the entity passes through verbatim and the parsed attribute value is `&`. Astro escapes attribute values correctly, so `&amp;` becomes `&amp;amp;` and parses back to `&amp;`. Escaping is the correct behaviour; the pre-encoded story arg is the artefact.",
-    "portingRow": "PORTING.md > (convention) > upstream jest harness sets `options.autoescape = false`",
-    "mask": { "pattern": "&amp;", "replacement": "&" }
+    "portingRow": "| (convention)  ",
+    "mask": { "pattern": "&amp;(?=layer=mapnik\")", "replacement": "&" },
+    "replacements": { "actual": 1, "expected": 0 }
   },
   {
     "story": "01-atoms/iframe/Iframe--dark",
     "reason": "Same as `01-atoms/iframe/Iframe`: the story's `url` arg contains a pre-encoded `&amp;` entity that unescaped Twig output passes through and correct Astro escaping does not.",
-    "portingRow": "PORTING.md > (convention) > upstream jest harness sets `options.autoescape = false`",
-    "mask": { "pattern": "&amp;", "replacement": "&" }
+    "portingRow": "| (convention)  ",
+    "mask": { "pattern": "&amp;(?=layer=mapnik\")", "replacement": "&" },
+    "replacements": { "actual": 1, "expected": 0 }
   },
   {
     "story": "02-molecules/group-filter/GroupFilter",
     "reason": "group-filter.twig:69 builds the collapsible group name as `'ct-group-filter--group-' ~ group_id|default(random(1000, 9999))`. With no `group_id` arg the value is random per render, so the captured fixture and any fresh render can never agree on it. Everything else matches exactly.",
-    "portingRow": "PORTING.md > Story parity > GroupFilter random group id",
-    "mask": { "pattern": "ct-group-filter--group-\\d+" }
+    "portingRow": "| GroupFilter random group id ",
+    "mask": { "pattern": "data-collapsible-group=\"ct-group-filter--group-\\d+\"" },
+    "replacements": { "actual": 2, "expected": 2 }
   },
   {
     "story": "02-molecules/group-filter/GroupFilterDark",
     "reason": "Same random `ct-group-filter--group-<random(1000,9999)>` id as `GroupFilter`; everything else matches exactly.",
-    "portingRow": "PORTING.md > Story parity > GroupFilter random group id",
-    "mask": { "pattern": "ct-group-filter--group-\\d+" }
+    "portingRow": "| GroupFilter random group id ",
+    "mask": { "pattern": "data-collapsible-group=\"ct-group-filter--group-\\d+\"" },
+    "replacements": { "actual": 2, "expected": 2 }
   },
   {
     "story": "02-molecules/group-filter/GroupFilterWithSelectedFilters",
     "reason": "Same random `ct-group-filter--group-<random(1000,9999)>` id as `GroupFilter`; everything else matches exactly.",
-    "portingRow": "PORTING.md > Story parity > GroupFilter random group id",
-    "mask": { "pattern": "ct-group-filter--group-\\d+" }
+    "portingRow": "| GroupFilter random group id ",
+    "mask": { "pattern": "data-collapsible-group=\"ct-group-filter--group-\\d+\"" },
+    "replacements": { "actual": 2, "expected": 2 }
   },
   {
     "story": "02-molecules/group-filter/GroupFilterWithSelectedFiltersDark",
     "reason": "Same random `ct-group-filter--group-<random(1000,9999)>` id as `GroupFilter`; everything else matches exactly.",
-    "portingRow": "PORTING.md > Story parity > GroupFilter random group id",
-    "mask": { "pattern": "ct-group-filter--group-\\d+" }
+    "portingRow": "| GroupFilter random group id ",
+    "mask": { "pattern": "data-collapsible-group=\"ct-group-filter--group-\\d+\"" },
+    "replacements": { "actual": 2, "expected": 2 }
   },
   {
     "story": "02-molecules/service-card/ServiceCard",
     "reason": "The story passes `summary: 'Summary'`, which service-card.twig neither documents in its prop header nor uses anywhere in its body — a stale story arg. Twig silently ignores it; Astro spreads any undeclared prop onto the root element per shared-reference R2, so it prints as `summary=\"Summary\"`.",
-    "portingRow": "PORTING.md > Story parity > ServiceCard stale `summary` story arg",
-    "mask": { "pattern": " summary=\"Summary\"" }
+    "portingRow": "| ServiceCard stale `summary` story arg ",
+    "mask": { "pattern": "(?<=<div class=\"ct-service-card [^\"]*\") summary=\"Summary\"" },
+    "replacements": { "actual": 1, "expected": 0 }
   },
   {
     "story": "02-molecules/service-card/ServiceCard--dark",
     "reason": "Same stale `summary` story arg as `ServiceCard`; service-card.twig never reads it.",
-    "portingRow": "PORTING.md > Story parity > ServiceCard stale `summary` story arg",
-    "mask": { "pattern": " summary=\"Summary\"" }
-  },
-  {
-    "story": "02-molecules/tabs/Tabs",
-    "reason": "tabs.twig:56 adds `data-tabs-tab` to every link with `link_attributes.setAttribute('data-tabs-tab', '')`. Upstream's own Jest snapshot contains that attribute and the Astro port reproduces it, but `create_attribute()` is a no-op stub in the Storybook (browser) build, so the captured story HTML lacks it. The Jest oracle, not the story, is right here.",
-    "portingRow": "PORTING.md > Story parity > Tabs `create_attribute()` is a no-op in the Storybook build",
-    "mask": { "pattern": " data-tabs-tab(?=[ >])" }
-  },
-  {
-    "story": "02-molecules/tabs/Tabs--dark",
-    "reason": "Same `create_attribute()` Storybook-build stub as `Tabs`: the captured story HTML is missing the `data-tabs-tab` attribute that upstream's Jest snapshot has and the port reproduces.",
-    "portingRow": "PORTING.md > Story parity > Tabs `create_attribute()` is a no-op in the Storybook build",
-    "mask": { "pattern": " data-tabs-tab(?=[ >])" }
+    "portingRow": "| ServiceCard stale `summary` story arg ",
+    "mask": { "pattern": "(?<=<div class=\"ct-service-card [^\"]*\") summary=\"Summary\"" },
+    "replacements": { "actual": 1, "expected": 0 }
   },
   {
     "story": "04-templates/page/Page",
     "reason": "`04-templates` is not a ported layer. Shared-reference R1 maps only `00-base`, `01-atoms`, `02-molecules` and `03-organisms` to Astro folders; page.twig is a Drupal page template whose Astro equivalent is the site's own layout.",
-    "portingRow": "PORTING.md > Story parity > `04-templates/page` is out of scope",
+    "portingRow": "| `04-templates/page` is out of scope ",
     "noComponent": true
   },
   {
     "story": "04-templates/page/PageDark",
     "reason": "`04-templates` is not a ported layer (shared-reference R1).",
-    "portingRow": "PORTING.md > Story parity > `04-templates/page` is out of scope",
+    "portingRow": "| `04-templates/page` is out of scope ",
     "noComponent": true
   },
   {
     "story": "04-templates/page/PageFullWidth",
     "reason": "`04-templates` is not a ported layer (shared-reference R1).",
-    "portingRow": "PORTING.md > Story parity > `04-templates/page` is out of scope",
+    "portingRow": "| `04-templates/page` is out of scope ",
     "noComponent": true
   },
   {
     "story": "04-templates/page/PageSidebar",
     "reason": "`04-templates` is not a ported layer (shared-reference R1).",
-    "portingRow": "PORTING.md > Story parity > `04-templates/page` is out of scope",
+    "portingRow": "| `04-templates/page` is out of scope ",
     "noComponent": true
   }
 ]

@@ -152,6 +152,18 @@ upstream Storybook stories (`tests/story-parity/`, oracle in
 | GroupFilter                           | `molecules-list-group-filter--group-filter-with-selected-filters`                | Missing whitespace before `ct-group-filter__selected-filter-controls`, after `ct-group-filter__selected-title`, and before `ct-group-filter__selected-clear`.                                                                         |
 | Menu (and SideNavigation through it)  | `organisms-navigation-side-navigation--side-navigation`                          | Drupal menu data uses `below: false` for a leaf, not an absent or empty array. `(item.below ?? []).some(...)` threw on it; `childrenOf()` now coerces.                                                                                |
 
+### Whitespace is asymmetrically checked
+
+`normaliseHtml` trims only the LEADING and TRAILING whitespace of each
+element's children. A missing whitespace text node BETWEEN two middle siblings
+therefore fails the comparison (most of the fixes above are exactly that), but
+a missing one at an element's first or last edge does not. The visual suite
+does not cover it either, since a single collapsed space rarely moves a pixel.
+When adding a separator, note that Prettier rewrites
+`<Fragment>…{' '}</Fragment>` into a literal trailing space that the Astro
+compiler then drops — use a separate `{condition && ' '}` expression instead
+(as `Layout` and `GroupFilter` do), and re-run the suite after `npm run check`.
+
 ### Accepted differences
 
 Every entry in `tests/story-parity/accepted-differences.json` cites one of
@@ -159,12 +171,18 @@ these rows. Each also carries a `mask`, so the test asserts the difference is
 EXACTLY the one described and nothing more (except the `04-templates` rows,
 where no component exists to render).
 
-| Row                                                         | Detail                                                                                                                                                                                                                                                             |
-| ----------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| GroupFilter random group id                                 | `group-filter.twig:69` builds the collapsible group name from `group_id\|default(random(1000, 9999))`. With no `group_id` arg the id is random per render, so a captured fixture and a fresh render can never agree on it. Masked as `ct-group-filter--group-\d+`. |
-| ServiceCard stale `summary` story arg                       | `service-card.stories.js` passes `summary`, which `service-card.twig` neither documents nor reads. Twig ignores an unknown arg; Astro spreads an undeclared prop onto the root element (shared-reference R2), so it prints as an attribute.                        |
-| Tabs `create_attribute()` is a no-op in the Storybook build | `tabs.twig:56` adds `data-tabs-tab` via `link_attributes.setAttribute(...)`. Upstream's own Jest snapshot HAS the attribute and the port reproduces it, but the captured Storybook HTML lacks it — the Jest oracle is right, the story render is the artefact.     |
-| `04-templates/page` is out of scope                         | Shared-reference R1 maps only `00-base`, `01-atoms`, `02-molecules` and `03-organisms` to Astro folders. `page.twig` is a Drupal page template; its Astro equivalent is the site's own layout.                                                                     |
+| Row                                   | Detail                                                                                                                                                                                                                                                             |
+| ------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| GroupFilter random group id           | `group-filter.twig:69` builds the collapsible group name from `group_id\|default(random(1000, 9999))`. With no `group_id` arg the id is random per render, so a captured fixture and a fresh render can never agree on it. Masked as `ct-group-filter--group-\d+`. |
+| ServiceCard stale `summary` story arg | `service-card.stories.js` passes `summary`, which `service-card.twig` neither documents nor reads. Twig ignores an unknown arg; Astro spreads an undeclared prop onto the root element (shared-reference R2), so it prints as an attribute.                        |
+| `04-templates/page` is out of scope   | Shared-reference R1 maps only `00-base`, `01-atoms`, `02-molecules` and `03-organisms` to Astro folders. `page.twig` is a Drupal page template; its Astro equivalent is the site's own layout.                                                                     |
+
+One earlier "accepted difference" turned out not to be one: the Tabs stories'
+`data-tabs-tab` was missing from the captured HTML because
+`tabs.stories.js:61` passes `attributes: new DrupalAttribute([...])` and the
+capture serialised that `Map` subclass to `{}`. The capture script now unwraps
+`Map` args before writing them (see `fixtures/SOURCE.md`), and both Tabs
+stories match exactly.
 
 Two existing rows are also cited: **Icon** (`assets_dir` has no Astro prop —
 symbols resolve through the generated `icons.ts` map, so the story's
