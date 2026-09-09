@@ -1,6 +1,6 @@
-import { describe } from 'vitest';
+import { describe, it, expect } from 'vitest';
 import Accordion from '@civictheme/molecules/Accordion.astro';
-import { parityCase, expectAllKeysCovered } from '../harness';
+import { parityCase, expectAllKeysCovered, renderNormalised } from '../harness';
 
 const meta = { layer: '02-molecules', name: 'accordion' };
 
@@ -53,4 +53,28 @@ describe('Accordion', () => {
   });
 
   expectAllKeysCovered(meta, [REQUIRED_KEY, OPTIONAL_KEY, EMPTY_KEY, EXPAND_ALL_KEY, INDIVIDUAL_KEY]);
+
+  // Task 14c: `contentTop`/`contentBottom` also have Astro slots that take
+  // precedence over the string props.
+  describe('slot vs string-prop parity', () => {
+    const panels = [{ title: 'Panel 1', content: 'Content 1' }];
+
+    it('contentTop: slot renders identically to the string prop', async () => {
+      const viaProp = await renderNormalised(Accordion, { panels, contentTop: 'Top content' });
+      const viaSlot = await renderNormalised(Accordion, { panels }, { contentTop: 'Top content' });
+      expect(viaSlot).toBe(viaProp);
+    });
+
+    it('contentBottom: slot renders identically to the string prop', async () => {
+      const viaProp = await renderNormalised(Accordion, { panels, contentBottom: 'Bottom content' });
+      const viaSlot = await renderNormalised(Accordion, { panels }, { contentBottom: 'Bottom content' });
+      expect(viaSlot).toBe(viaProp);
+    });
+
+    it('a slot alone (no string prop) still opens its wrapper markup', async () => {
+      const html = await renderNormalised(Accordion, { panels }, { contentTop: 'Live Top' });
+      expect(html).toContain('ct-accordion__content-top');
+      expect(html).toContain('Live Top');
+    });
+  });
 });

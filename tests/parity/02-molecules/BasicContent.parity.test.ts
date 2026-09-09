@@ -1,6 +1,6 @@
-import { describe } from 'vitest';
+import { describe, it, expect } from 'vitest';
 import BasicContent from '@civictheme/molecules/BasicContent.astro';
-import { parityCase, expectAllKeysCovered } from '../harness';
+import { parityCase, expectAllKeysCovered, renderNormalised } from '../harness';
 
 const meta = { layer: '02-molecules', name: 'basic-content' };
 
@@ -34,4 +34,33 @@ describe('BasicContent', () => {
   });
 
   expectAllKeysCovered(meta, [REQUIRED_KEY, OPTIONAL_KEY, UNCONTAINED_KEY, EMPTY_KEY]);
+
+  // Task 14c: `content` also has an Astro slot that takes precedence over
+  // the string prop, both contained and uncontained.
+  describe('slot vs string-prop parity', () => {
+    it('content: slot renders identically to the string prop (contained)', async () => {
+      const viaProp = await renderNormalised(BasicContent, { content: 'This is basic content.' });
+      const viaSlot = await renderNormalised(BasicContent, {}, { content: 'This is basic content.' });
+      expect(viaSlot).toBe(viaProp);
+    });
+
+    it('content: slot renders identically to the string prop (uncontained)', async () => {
+      const viaProp = await renderNormalised(BasicContent, {
+        content: 'This content is not contained.',
+        isContained: false,
+      });
+      const viaSlot = await renderNormalised(
+        BasicContent,
+        { isContained: false },
+        { content: 'This content is not contained.' }
+      );
+      expect(viaSlot).toBe(viaProp);
+    });
+
+    it('a slot alone (no string prop) still renders the component', async () => {
+      const html = await renderNormalised(BasicContent, {}, { content: 'Live content' });
+      expect(html).toContain('ct-basic-content');
+      expect(html).toContain('Live content');
+    });
+  });
 });

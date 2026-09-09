@@ -68,6 +68,20 @@ describe('Fieldset', () => {
     ATTRS_KEY,
   ]);
 
+  // Task 14c: `fields` also has an Astro slot that takes precedence over
+  // the string prop.
+  it('fields: slot renders identically to the string prop', async () => {
+    const viaProp = await renderNormalised(Fieldset, { fields: '<div class="test-field">Test Field</div>' });
+    const viaSlot = await renderNormalised(Fieldset, {}, { fields: '<div class="test-field">Test Field</div>' });
+    expect(viaSlot).toBe(viaProp);
+  });
+
+  it('fields: a slot alone (no string prop) still opens its wrapper markup', async () => {
+    const html = await renderNormalised(Fieldset, {}, { fields: 'Live Field' });
+    expect(html).toContain('ct-fieldset__fields');
+    expect(html).toContain('Live Field');
+  });
+
   // fieldset.twig: `{% set _message_type = message_type|default('error') %}`
   // — no upstream snapshot passes `message` without `message_type`, so this
   // asserts the resolved default directly rather than via parityCase.

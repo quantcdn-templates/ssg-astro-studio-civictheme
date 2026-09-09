@@ -1,6 +1,6 @@
-import { describe } from 'vitest';
+import { describe, it, expect } from 'vitest';
 import Attachment from '@civictheme/molecules/Attachment.astro';
-import { parityCase, expectAllKeysCovered } from '../harness';
+import { parityCase, expectAllKeysCovered, renderNormalised } from '../harness';
 
 const meta = { layer: '02-molecules', name: 'attachment' };
 
@@ -72,4 +72,26 @@ describe('Attachment', () => {
   });
 
   expectAllKeysCovered(meta, [REQUIRED_KEY, OPTIONAL_KEY, EMPTY_KEY, MULTI_KEY]);
+
+  // Task 14c: `contentTop`/`contentBottom` also have Astro slots that take
+  // precedence over the string props.
+  describe('slot vs string-prop parity', () => {
+    it('contentTop: slot renders identically to the string prop', async () => {
+      const viaProp = await renderNormalised(Attachment, { files: files2, contentTop: 'Top content' });
+      const viaSlot = await renderNormalised(Attachment, { files: files2 }, { contentTop: 'Top content' });
+      expect(viaSlot).toBe(viaProp);
+    });
+
+    it('contentBottom: slot renders identically to the string prop', async () => {
+      const viaProp = await renderNormalised(Attachment, { files: files2, contentBottom: 'Bottom content' });
+      const viaSlot = await renderNormalised(Attachment, { files: files2 }, { contentBottom: 'Bottom content' });
+      expect(viaSlot).toBe(viaProp);
+    });
+
+    it('a slot alone (no string prop) still opens its wrapper markup', async () => {
+      const html = await renderNormalised(Attachment, { files: files2 }, { contentTop: 'Live Top' });
+      expect(html).toContain('ct-attachment__content-top');
+      expect(html).toContain('Live Top');
+    });
+  });
 });

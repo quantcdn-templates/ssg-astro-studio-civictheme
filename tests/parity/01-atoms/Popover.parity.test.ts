@@ -1,6 +1,6 @@
-import { describe } from 'vitest';
+import { describe, it, expect } from 'vitest';
 import Popover from '@civictheme/atoms/Popover.astro';
-import { parityCase, expectAllKeysCovered } from '../harness';
+import { parityCase, expectAllKeysCovered, renderNormalised } from '../harness';
 
 const meta = { layer: '01-atoms', name: 'popover' };
 
@@ -34,4 +34,55 @@ describe('Popover', () => {
   });
 
   expectAllKeysCovered(meta, [REQUIRED_KEY, OPTIONAL_KEY, EMPTY_KEY]);
+
+  // Task 14c: `content`/`contentTop`/`contentBottom` also have Astro slots
+  // that take precedence over the string props.
+  describe('slot vs string-prop parity', () => {
+    it('content: slot renders identically to the string prop', async () => {
+      const viaProp = await renderNormalised(Popover, {
+        trigger: { text: 'Sample Trigger' },
+        content: '<span>Sample content</span>',
+      });
+      const viaSlot = await renderNormalised(
+        Popover,
+        { trigger: { text: 'Sample Trigger' } },
+        { content: '<span>Sample content</span>' }
+      );
+      expect(viaSlot).toBe(viaProp);
+    });
+
+    it('contentTop: slot renders identically to the string prop', async () => {
+      const viaProp = await renderNormalised(Popover, {
+        trigger: { text: 'Sample Trigger' },
+        content: 'Sample content',
+        contentTop: 'Top content',
+      });
+      const viaSlot = await renderNormalised(
+        Popover,
+        { trigger: { text: 'Sample Trigger' }, content: 'Sample content' },
+        { contentTop: 'Top content' }
+      );
+      expect(viaSlot).toBe(viaProp);
+    });
+
+    it('contentBottom: slot renders identically to the string prop', async () => {
+      const viaProp = await renderNormalised(Popover, {
+        trigger: { text: 'Sample Trigger' },
+        content: 'Sample content',
+        contentBottom: 'Bottom content',
+      });
+      const viaSlot = await renderNormalised(
+        Popover,
+        { trigger: { text: 'Sample Trigger' }, content: 'Sample content' },
+        { contentBottom: 'Bottom content' }
+      );
+      expect(viaSlot).toBe(viaProp);
+    });
+
+    it('a content slot alone (no string prop) still renders the popover', async () => {
+      const html = await renderNormalised(Popover, { trigger: { text: 'Sample Trigger' } }, { content: 'Live' });
+      expect(html).toContain('ct-popover__content__inner');
+      expect(html).toContain('Live');
+    });
+  });
 });

@@ -6,9 +6,12 @@
  * - theme: Theme variation (light or dark).
  * - verticalSpacing: Vertical spacing position (top, bottom, both).
  * - title / content / contentTop / contentBottom: Documented as Slots
- *   upstream, but every upstream test passes plain string props — ported as
- *   `string` props (title rendered as plain text via Heading, the rest via
- *   `set:html`), matching Fieldset's `fields` precedent.
+ *   upstream — still typed as `string` props (title/content rendered via
+ *   `Heading`/`Paragraph`, the rest via `set:html`), but each also has a
+ *   same-named Astro slot that TAKES PRECEDENCE over the string prop when
+ *   present (Task 14c). The shared `(title || content)` wrapper gate
+ *   widens to include `hasTitleSlot || hasContentSlot`; `contentTop`/
+ *   `contentBottom` gates widen the same way.
  * - links: Callout links: { text, url, isNewWindow, isExternal }.
  * - class: Additional CSS classes.
  * - ...rest: Additional HTML attributes, spread onto the root element.
@@ -55,6 +58,15 @@ const verticalSpacingClass = (['top', 'bottom', 'both'] as const).includes(verti
 const classes = ['ct-callout', `ct-theme-${theme}`, verticalSpacingClass, className].filter(Boolean).join(' ');
 
 const linkList = links ?? [];
+
+const hasTitleSlot = Astro.slots.has('title');
+const hasContentSlot = Astro.slots.has('content');
+const hasContentTopSlot = Astro.slots.has('contentTop');
+const hasContentBottomSlot = Astro.slots.has('contentBottom');
+const hasTitle = Boolean(title) || hasTitleSlot;
+const hasContent = Boolean(content) || hasContentSlot;
+const hasContentTop = Boolean(contentTop) || hasContentTopSlot;
+const hasContentBottom = Boolean(contentBottom) || hasContentBottomSlot;
 ---
 
 <div class={classes} {...rest}>
@@ -63,19 +75,31 @@ const linkList = links ?? [];
       <div class="col-xxs-12">
         <div class="ct-callout__wrapper">
           {
-            contentTop && (
+            hasContentTop && (
               <Fragment>
-                <div class="ct-callout__content-top" set:html={contentTop} />{' '}
+                <div class="ct-callout__content-top">
+                  {hasContentTopSlot ? <slot name="contentTop" /> : <Fragment set:html={contentTop} />}
+                </div>{' '}
               </Fragment>
             )
           }
           {
-            (title || content) && (
+            (hasTitle || hasContent) && (
               <Fragment>
                 <div class="ct-callout__inner">
-                  {title && <Heading content={title} level={4} theme={theme} class="ct-callout__title" />}
-                  {title && content && ' '}
-                  {content && <Paragraph theme={theme} content={content} noMargin class="ct-callout__content" />}
+                  {hasTitle &&
+                    (hasTitleSlot ? (
+                      <slot name="title" />
+                    ) : (
+                      title && <Heading content={title} level={4} theme={theme} class="ct-callout__title" />
+                    ))}
+                  {hasTitle && hasContent && ' '}
+                  {hasContent &&
+                    (hasContentSlot ? (
+                      <slot name="content" />
+                    ) : (
+                      content && <Paragraph theme={theme} content={content} noMargin class="ct-callout__content" />
+                    ))}
                 </div>{' '}
               </Fragment>
             )
@@ -103,10 +127,12 @@ const linkList = links ?? [];
             )
           }
           {
-            contentBottom && (
+            hasContentBottom && (
               <Fragment>
                 {' '}
-                <div class="ct-callout__content-bottom" set:html={contentBottom} />
+                <div class="ct-callout__content-bottom">
+                  {hasContentBottomSlot ? <slot name="contentBottom" /> : <Fragment set:html={contentBottom} />}
+                </div>
               </Fragment>
             )
           }

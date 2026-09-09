@@ -13,7 +13,10 @@
  *   HTML-bearing even though the twig body prints it with a plain
  *   `{{ caption }}` (no `|raw`) — the upstream jest harness runs with
  *   Twig's `autoescape` globally disabled, so that plain print is raw HTML
- *   in every pinned `.snap` fixture already.
+ *   in every pinned `.snap` fixture already. Also has a same-named Astro
+ *   slot that TAKES PRECEDENCE over the string prop when present (Task
+ *   14c); its wrapper gate widens to
+ *   `Boolean(caption) || Astro.slots.has('caption')`.
  * - class: Additional CSS classes.
  * - ...rest: Additional HTML attributes, spread onto the root <figure>.
  */
@@ -34,17 +37,20 @@ interface Props {
 const { theme = 'light', url, alt, width, height, caption, class: className = '', ...rest } = Astro.props;
 
 const classes = ['ct-figure', `ct-theme-${theme}`, className].filter(Boolean).join(' ');
+
+const hasCaptionSlot = Astro.slots.has('caption');
+const hasCaption = Boolean(caption) || hasCaptionSlot;
 ---
 
 {
   url && (
     <figure class={classes} {...rest}>
       <Image theme={theme} url={url} alt={alt} width={width} height={height} class="ct-figure__image" />
-      {caption && (
+      {hasCaption && (
         <Fragment>
           {' '}
           <figcaption class="ct-figure__caption">
-            <Icon symbol="image" /> <Fragment set:html={caption} />
+            <Icon symbol="image" /> {hasCaptionSlot ? <slot name="caption" /> : <Fragment set:html={caption} />}
           </figcaption>
         </Fragment>
       )}

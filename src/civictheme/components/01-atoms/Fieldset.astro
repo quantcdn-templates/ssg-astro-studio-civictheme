@@ -13,10 +13,12 @@
  * - requiredText: Text to display within the legend when required.
  * - prefix: Content to add before the fields (HTML-bearing).
  * - suffix: Content to add after the fields (HTML-bearing).
- * - fields: Fields content (HTML-bearing). Documented as a Slot upstream,
- *   but the twig body treats it as a plain variable (passed as a string
- *   prop in every upstream test) — ported as a `string` prop rendered with
- *   `set:html`, matching Paragraph's precedent. See PORTING.md.
+ * - fields: Fields content (HTML-bearing). Documented as a Slot upstream —
+ *   still typed as a `string` prop rendered with `set:html`, but also has
+ *   a same-named Astro slot that TAKES PRECEDENCE over the string prop
+ *   when present (Task 14c), so a real composed Astro tree can be passed
+ *   instead of a pre-rendered HTML string. The wrapper's `{% if %}` gate
+ *   is widened to `Boolean(fields) || Astro.slots.has('fields')`.
  * - class: Additional CSS classes.
  * - ...rest: Additional HTML attributes, spread onto the root <fieldset>.
  *
@@ -74,6 +76,9 @@ const messageType = (['error', 'information', 'warning', 'success'] as const).in
 
 const themeClass = `ct-theme-${theme}`;
 const classes = ['ct-fieldset', themeClass, isRequired && 'ct-fieldset--required', className].filter(Boolean).join(' ');
+
+const hasFieldsSlot = Astro.slots.has('fields');
+const hasFields = Boolean(fields) || hasFieldsSlot;
 ---
 
 <fieldset class={classes} {...rest}>
@@ -110,7 +115,16 @@ const classes = ['ct-fieldset', themeClass, isRequired && 'ct-fieldset--required
         </Fragment>
       )
     }
-    {fields && <div class="ct-fieldset__fields" set:html={fields} />}
+    {
+      hasFields &&
+        (hasFieldsSlot ? (
+          <div class="ct-fieldset__fields">
+            <slot name="fields" />
+          </div>
+        ) : (
+          <div class="ct-fieldset__fields" set:html={fields} />
+        ))
+    }
     {suffix && <div class="ct-fieldset__suffix" set:html={suffix} />}
     {
       description && descriptionDisplay === 'after' && (

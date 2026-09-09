@@ -1,6 +1,6 @@
-import { describe } from 'vitest';
+import { describe, it, expect } from 'vitest';
 import Callout from '@civictheme/molecules/Callout.astro';
-import { parityCase, expectAllKeysCovered } from '../harness';
+import { parityCase, expectAllKeysCovered, renderNormalised } from '../harness';
 
 const meta = { layer: '02-molecules', name: 'callout' };
 
@@ -37,4 +37,49 @@ describe('Callout', () => {
   });
 
   expectAllKeysCovered(meta, [REQUIRED_KEY, OPTIONAL_KEY, MULTI_KEY]);
+
+  // Task 14c: `title`/`content`/`contentTop`/`contentBottom` also have
+  // Astro slots that take precedence over the string props.
+  describe('slot vs string-prop parity', () => {
+    it('title: slot renders identically to the string prop', async () => {
+      const viaProp = await renderNormalised(Callout, { title: 'Callout Title' });
+      const viaSlot = await renderNormalised(
+        Callout,
+        {},
+        { title: '<h4 class="ct-heading ct-callout__title ct-theme-light">Callout Title</h4>' }
+      );
+      expect(viaSlot).toBe(viaProp);
+    });
+
+    it('content: slot renders identically to the string prop', async () => {
+      const viaProp = await renderNormalised(Callout, { content: 'Sample content' });
+      const viaSlot = await renderNormalised(
+        Callout,
+        {},
+        {
+          content:
+            '<div class="ct-callout__content ct-paragraph ct-paragraph--no-margin ct-paragraph--regular ct-theme-light">Sample content</div>',
+        }
+      );
+      expect(viaSlot).toBe(viaProp);
+    });
+
+    it('contentTop: slot renders identically to the string prop', async () => {
+      const viaProp = await renderNormalised(Callout, { content: 'x', contentTop: 'Top content' });
+      const viaSlot = await renderNormalised(Callout, { content: 'x' }, { contentTop: 'Top content' });
+      expect(viaSlot).toBe(viaProp);
+    });
+
+    it('contentBottom: slot renders identically to the string prop', async () => {
+      const viaProp = await renderNormalised(Callout, { content: 'x', contentBottom: 'Bottom content' });
+      const viaSlot = await renderNormalised(Callout, { content: 'x' }, { contentBottom: 'Bottom content' });
+      expect(viaSlot).toBe(viaProp);
+    });
+
+    it('a slot alone (no string prop) still opens its wrapper markup', async () => {
+      const html = await renderNormalised(Callout, {}, { content: 'Live content' });
+      expect(html).toContain('ct-callout__inner');
+      expect(html).toContain('Live content');
+    });
+  });
 });

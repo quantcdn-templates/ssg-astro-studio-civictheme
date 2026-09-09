@@ -9,9 +9,11 @@
  *   boolean `false` counts as contained).
  * - verticalSpacing: Vertical spacing position (top, bottom, both).
  * - withBackground: Whether to display with a background.
- * - content: HTML content. Documented as a Slot upstream, but every
- *   upstream test passes it as a plain string prop — ported as a `string`
- *   prop rendered with `set:html`, matching Fieldset's `fields` precedent.
+ * - content: HTML content. Documented as a Slot upstream — still typed as
+ *   a `string` prop rendered with `set:html`, but also has a same-named
+ *   Astro slot that TAKES PRECEDENCE over the string prop when present
+ *   (Task 14c). The root render gate widens to
+ *   `Boolean(content) || Astro.slots.has('content')`.
  * - class: Additional CSS classes.
  * - ...rest: Additional HTML attributes, spread onto the root element.
  */
@@ -50,17 +52,22 @@ const classes = [
 ]
   .filter(Boolean)
   .join(' ');
+
+const hasContentSlot = Astro.slots.has('content');
+const hasContent = Boolean(content) || hasContentSlot;
 ---
 
 {
-  content && (
+  hasContent && (
     <div class={classes} {...rest}>
       {isContainedResolved ? (
         <div class="container">
           <div class="row">
-            <div class="col-xxs-12" set:html={content} />
+            <div class="col-xxs-12">{hasContentSlot ? <slot name="content" /> : <Fragment set:html={content} />}</div>
           </div>
         </div>
+      ) : hasContentSlot ? (
+        <slot name="content" />
       ) : (
         <Fragment set:html={content} />
       )}
