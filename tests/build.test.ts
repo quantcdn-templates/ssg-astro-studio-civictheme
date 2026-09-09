@@ -92,8 +92,17 @@ describe('astro build', () => {
       expect(existsSync(join(root, page))).toBe(true);
     }
   });
-  it('renders the callout component on the government demo page', () => {
-    const government = readFileSync(join(root, 'dist/government.html'), 'utf8');
-    expect(government).toContain('ct-callout');
+  it('renders the subject card and callout components on the home demo page', () => {
+    const index = readFileSync(join(root, 'dist/index.html'), 'utf8');
+    expect(index).toContain('ct-subject-card');
+    expect(index).toContain('ct-callout');
+  });
+  it('renders the promo card component on the individuals demo page', () => {
+    const individuals = readFileSync(join(root, 'dist/individuals.html'), 'utf8');
+    expect(individuals).toContain('ct-promo-card');
+  });
+  it('renders the navigation card component on the CivicTheme in 60 seconds demo page', () => {
+    const series = readFileSync(join(root, 'dist/civictheme-60-second-series.html'), 'utf8');
+    expect(series).toContain('ct-navigation-card');
   });
 });

@@ -12,37 +12,27 @@ draft: false
 order: 0
 ---
 
-A short, one-sentence vision or mission statement works well here.
+<ListingAuto collection="news" title="Latest news" limit={3} />
 
-<Button text="Learn about our mission" url="/about-us" type="primary" kind="link" />
+<ListingAuto collection="events" title="Upcoming events" limit={3} />
 
 <Grid templateColumnCount={4}>
   <div class="col-xxs-12 col-m-3">
-    <PromoCard
-      title="For individuals"
-      summary="Services and information for residents."
-      link={{ url: '/individuals' }}
-    />
+    <SubjectCard title="For individuals" link={{ url: '/individuals' }} />
   </div>
   <div class="col-xxs-12 col-m-3">
-    <PromoCard
-      title="For businesses"
-      summary="Services and information for local businesses."
-      link={{ url: '/businesses' }}
-    />
+    <SubjectCard title="For businesses" link={{ url: '/businesses' }} />
   </div>
   <div class="col-xxs-12 col-m-3">
-    <PromoCard
-      title="For government"
-      summary="Information for other government agencies and partners."
-      link={{ url: '/government' }}
-    />
+    <SubjectCard title="For government" link={{ url: '/government' }} />
   </div>
   <div class="col-xxs-12 col-m-3">
-    <PromoCard
-      title="News and events"
-      summary="The latest updates and upcoming events from Your organisation."
-      link={{ url: '/news-and-events' }}
-    />
+    <SubjectCard title="Home" link={{ url: '/' }} />
   </div>
 </Grid>
+
+<Callout
+  title="Learn more about us"
+  content="Find out who we are, what we do, and how Your organisation serves the community."
+  links={[{ text: 'About us', url: '/about-us' }]}
+/>
