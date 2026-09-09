@@ -157,7 +157,7 @@ shows up as failing parity cases, naming exactly which component(s) changed.
 
 ```bash
 npm test          # vitest: unit tests, parity (697 cases), story parity, and the build test
-npm run test:e2e  # Playwright: accessibility (axe) across every reference/component/listing page
+npm run test:e2e  # Playwright: behaviour smoke tests + accessibility (axe) across every page
 ```
 
 The ported components are checked against the pinned CivicTheme UI Kit by two independent
@@ -193,14 +193,24 @@ oracles:
    Sans from Google Fonts) and takes a few minutes.
 
 Accessibility is checked with axe-core across every reference page, every `/components/<family>`
-page, and the paginated listing/detail pages — 42 assertions, zero serious/critical violations.
+page, and the paginated listing/detail pages — 38 assertions (37 pages plus one summary
+assertion), zero serious/critical violations. Every page assertion also checks the route
+returns HTTP 200, so a missing page cannot pass as a clean scan.
 A handful of selectors are excluded with a documented reason (vendored markup gaps that the
 markup-fidelity rule forbids fixing inside the component) — see the comment block at the top of
 `tests/e2e/a11y.spec.ts`.
 
-CI's `test` job runs `npm test`, which includes the build test (`astro build` against the real
-demo content, several minutes) as part of the same vitest run — a CI failure there means the
-production build itself is broken, not just a unit assertion.
+CI's `build` job runs `npm run check` (`astro check` plus `prettier --check`), then `npm test`,
+which includes the build test (`astro build` against the real demo content, several minutes) as
+part of the same vitest run — a CI failure there means the production build itself is broken,
+not just a unit assertion. After the build it installs Chromium and runs `npm run test:e2e`
+(the accessibility and behaviour suites) against `astro preview` of that build. The whole job
+takes roughly 10-15 minutes, most of it the two builds.
+
+The repository clone is about 27 MB. The story-parity fixtures (`tests/story-parity/fixtures/`,
+captured upstream HTML and screenshots) and the demo images under `public/` are committed
+deliberately: both oracles, and the demo site, must run from a plain clone with no upstream
+CivicTheme checkout and no asset download step.
 
 ## Behaviours
 
@@ -215,13 +225,17 @@ initialisers, added guards) that would be needed to make view transitions safe.
 
 ## Known limitations
 
-| Component                     | Limitation                                                                                                                                                                                                                                                                                                                                                                                                        |
-| ----------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `Table`                       | Drupal's `{ attributes, cols }` row/footer shape is not supported — only the two legacy footer shapes and plain-string rows/cells are ported (no upstream snapshot exercises the Drupal shape).                                                                                                                                                                                                                   |
-| `Slider`                      | The root `aria-label` always reads the `title` prop (falling back to `'Slider'`); a `title` passed only as a slot does not reach it.                                                                                                                                                                                                                                                                              |
-| `Alert`                       | The dismiss button renders and is styled, but nothing in this template wraps rendered alerts in an element carrying `data-component-name="ct-alerts"`, which is what `alert.js`'s dismiss-listener setup queries for — upstream's own `alert.twig` doesn't render that wrapper either; it's Drupal/demo glue outside the component. `SiteAlerts.astro` doesn't add one, so the dismiss button is currently inert. |
-| Search                        | `/search` is a static placeholder: it ships the CivicTheme search form markup with `action="/search"` and no backend, since the template ships no search index.                                                                                                                                                                                                                                                   |
-| `ListingAuto` / `ListingGrid` | Do not pass a `verticalSpacing` prop through to the underlying `List`, even though `List` supports one.                                                                                                                                                                                                                                                                                                           |
+| Component                     | Limitation                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                |
+| ----------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `Table`                       | Drupal's `{ attributes, cols }` row/footer shape is not supported — only the two legacy footer shapes and plain-string rows/cells are ported (no upstream snapshot exercises the Drupal shape).                                                                                                                                                                                                                                                                                                                                           |
+| `Slider`                      | The root `aria-label` always reads the `title` prop (falling back to `'Slider'`); a `title` passed only as a slot does not reach it.                                                                                                                                                                                                                                                                                                                                                                                                      |
+| `Alert`                       | Alerts are rendered at build time, so there is no `data-alert-endpoint` and no polling: `SiteAlerts.astro` supplies the `data-component-name="ct-alerts"` wrapper `alert.js` initialises on, and the dismiss listener comes from the shim in `src/civictheme/js/civictheme.js` (`alert.js` attaches its own only to fetched alerts). A dismissal is remembered in the `ct-alert-hide` cookie exactly as upstream does, and re-applied on the next page load — so a dismissed alert can flash briefly before the module script removes it. |
+| Search                        | `/search` is a static placeholder: it ships the CivicTheme search form markup with `action="/search"` and no backend, since the template ships no search index.                                                                                                                                                                                                                                                                                                                                                                           |
+| `ListingAuto` / `ListingGrid` | Do not pass a `verticalSpacing` prop through to the underlying `List`, even though `List` supports one.                                                                                                                                                                                                                                                                                                                                                                                                                                   |
+| Demo forms                    | The contact and subscribe forms are static demos: `method="get"` with `action="#"`, no backend. Point them at a form handler before using them.                                                                                                                                                                                                                                                                                                                                                                                           |
+| Favicon                       | `public/favicon.svg` is a plain placeholder mark, not a real organisation logo — replace it (and the referenced logos in `src/content/settings/`) for a production site.                                                                                                                                                                                                                                                                                                                                                                  |
+| Community Engagement          | `/community-engagement` is built and reachable by URL but deliberately absent from the primary menu, matching the Drupal demo site's own menu structure.                                                                                                                                                                                                                                                                                                                                                                                  |
+| `demo7.jpg`                   | The cards and lists reference pages (`/components/cards`, `/components/lists`) request `/civictheme/demo/images/demo7.jpg`, which 404s: the upstream twig package's demo fixtures reference that image but do not ship it. The affected cards render without their image.                                                                                                                                                                                                                                                                 |
 
 ## Editing with Quant Studio
 
