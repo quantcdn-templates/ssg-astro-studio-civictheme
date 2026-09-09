@@ -1,0 +1,217 @@
+---
+/**
+ * CivicTheme Banner component.
+ *
+ * Props:
+ * - theme: Theme variation (light or dark).
+ * - isDecorative: Whether to show as decorative.
+ * - backgroundImageBlendMode: Background image blending type. Defaults to
+ *   'normal'.
+ * - breadcrumb: Breadcrumb navigation: { links, activeIsLink }.
+ * - featuredImage / backgroundImage: { url, alt }.
+ * - contentTop1 / contentTop2 / contentTop3 / siteSection / title /
+ *   contentMiddle / content / contentBelow / contentBottom: Documented as
+ *   Slots upstream, but every upstream test passes plain string props —
+ *   ported as `string` props, rendered with `set:html` per this project's
+ *   autoescape convention.
+ * - class: Additional CSS classes.
+ * - ...rest: Additional HTML attributes, spread onto the root element.
+ *
+ * Note: `title_block`/`content_middle_block`/`content_block`/
+ * `breadcrumb_block` all widen from `col-xxs-12` to `col-xxs-12 col-m-6`
+ * whenever `featured_image` is present (making room for the image beside
+ * them) — reproduced as `hasFeaturedImage ? '... col-m-6' : '...'` at each
+ * of those four sites independently, matching the Twig's four separate
+ * `{% if featured_image is not empty %}` guards.
+ */
+import Breadcrumb from '@civictheme/molecules/Breadcrumb.astro';
+import Heading from '@civictheme/atoms/Heading.astro';
+import Image from '@civictheme/atoms/Image.astro';
+
+interface Props {
+  theme?: 'light' | 'dark';
+  isDecorative?: boolean;
+  backgroundImageBlendMode?: string;
+  breadcrumb?: { links?: Array<{ text?: string; url?: string }>; activeIsLink?: boolean };
+  featuredImage?: { url?: string; alt?: string };
+  backgroundImage?: { url?: string; alt?: string };
+  contentTop1?: string;
+  contentTop2?: string;
+  contentTop3?: string;
+  siteSection?: string;
+  title?: string;
+  contentMiddle?: string;
+  content?: string;
+  contentBelow?: string;
+  contentBottom?: string;
+  class?: string;
+  [key: string]: unknown;
+}
+
+const {
+  theme = 'light',
+  isDecorative,
+  backgroundImageBlendMode,
+  breadcrumb,
+  featuredImage,
+  backgroundImage,
+  contentTop1,
+  contentTop2,
+  contentTop3,
+  siteSection,
+  title,
+  contentMiddle,
+  content,
+  contentBelow,
+  contentBottom,
+  class: className = '',
+  ...rest
+} = Astro.props;
+
+const classes = ['ct-banner', `ct-theme-${theme}`, isDecorative && 'ct-banner--decorative', className]
+  .filter(Boolean)
+  .join(' ');
+
+const hasBreadcrumb = Boolean(breadcrumb && breadcrumb.links && breadcrumb.links.length > 0);
+const hasFeaturedImage = Boolean(featuredImage?.url);
+const hasBackgroundImageUrl = Boolean(backgroundImage?.url);
+const hasBackgroundImageAlt = Boolean(backgroundImage?.alt);
+
+const shouldRender = Boolean(
+  contentTop1 ||
+  contentTop2 ||
+  contentTop3 ||
+  siteSection ||
+  title ||
+  contentMiddle ||
+  content ||
+  contentBelow ||
+  contentBottom
+);
+
+const innerClasses = ['ct-banner__inner', backgroundImageBlendMode && `ct-background--${backgroundImageBlendMode}`]
+  .filter(Boolean)
+  .join(' ');
+const contentColClass = hasFeaturedImage ? 'col-xxs-12 col-m-6' : 'col-xxs-12';
+---
+
+{
+  shouldRender && (
+    <div class={classes} {...rest}>
+      <div class="ct-banner__wrapper">
+        <div
+          class={innerClasses}
+          style={hasBackgroundImageUrl ? `background-image: url('${backgroundImage?.url}');` : undefined}
+        >
+          {hasBackgroundImageAlt && (
+            <Fragment>
+              <span role="img" aria-label={backgroundImage?.alt}>
+                {' '}
+              </span>{' '}
+            </Fragment>
+          )}
+          <div class="container">
+            {contentTop1 && (
+              <Fragment>
+                <div class="row">
+                  <div class="col-xxs-12">
+                    <div class="ct-banner__content-top" set:html={contentTop1} />
+                  </div>
+                </div>{' '}
+              </Fragment>
+            )}
+            {(hasBreadcrumb || contentTop2) && (
+              <Fragment>
+                <div class="row">
+                  {hasBreadcrumb && (
+                    <div class={hasFeaturedImage ? 'col-xxs-12 col-m-6' : 'col-xxs-12'}>
+                      <Breadcrumb
+                        theme={theme}
+                        links={breadcrumb?.links}
+                        activeIsLink={breadcrumb?.activeIsLink}
+                        class="ct-banner__breadcrumb"
+                      />
+                    </div>
+                  )}{' '}
+                  {contentTop2 && (
+                    <div class="col-xxs-12 col-m-6">
+                      <div class="ct-banner__content-top2" set:html={contentTop2} />
+                    </div>
+                  )}
+                </div>{' '}
+              </Fragment>
+            )}
+            {contentTop3 && (
+              <Fragment>
+                <div class="row">
+                  <div class="col-xxs-12">
+                    <div class="ct-banner__content-top3" set:html={contentTop3} />
+                  </div>
+                </div>{' '}
+              </Fragment>
+            )}
+            {siteSection && (
+              <Fragment>
+                <div class="row">
+                  <div class="col-xxs-12">
+                    <Heading theme={theme} content={siteSection} level={5} class="ct-banner__site-section" />
+                  </div>
+                </div>{' '}
+              </Fragment>
+            )}
+            {title && (
+              <Fragment>
+                <div class="row">
+                  <div class={contentColClass}>
+                    <Heading theme={theme} content={title} level={1} class="ct-banner__title" />
+                  </div>
+                </div>{' '}
+              </Fragment>
+            )}
+            {contentMiddle && (
+              <Fragment>
+                <div class="row">
+                  <div class={contentColClass}>
+                    <div class="ct-banner__content-middle" set:html={contentMiddle} />
+                  </div>
+                </div>{' '}
+              </Fragment>
+            )}
+            {content && (
+              <div class="row">
+                <div class={contentColClass}>
+                  <div class="ct-banner__content" set:html={content} />
+                </div>
+              </div>
+            )}
+          </div>
+        </div>{' '}
+        {hasFeaturedImage && (
+          <div class="ct-banner__featured-image__wrapper">
+            <Image theme={theme} url={featuredImage?.url} alt={featuredImage?.alt} class="ct-banner__featured-image" />
+          </div>
+        )}
+      </div>{' '}
+      {contentBelow && (
+        <Fragment>
+          <div class="container">
+            <div class="row">
+              <div class="col-xxs-12">
+                <div class="ct-banner__content-below" set:html={contentBelow} />
+              </div>
+            </div>
+          </div>{' '}
+        </Fragment>
+      )}
+      {contentBottom && (
+        <div class="container">
+          <div class="row">
+            <div class="col-xxs-12">
+              <div class="ct-banner__content-bottom" set:html={contentBottom} />
+            </div>
+          </div>
+        </div>
+      )}
+    </div>
+  )
+}
