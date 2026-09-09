@@ -24,4 +24,14 @@ describe('astro build', () => {
   it('emits index.html', () => {
     expect(existsSync(join(root, 'dist/index.html'))).toBe(true);
   });
+  it('emits the events, news and publications listing pages', () => {
+    expect(existsSync(join(root, 'dist/events.html'))).toBe(true);
+    expect(existsSync(join(root, 'dist/news.html'))).toBe(true);
+    expect(existsSync(join(root, 'dist/publications.html'))).toBe(true);
+  });
+  it('excludes draft news articles from the news listing', () => {
+    const news = readFileSync(join(root, 'dist/news.html'), 'utf8');
+    expect(news).not.toContain('Draft Heritage Strategy Under Internal Review');
+    expect(news).toContain('Annual Budget for 2026 Adopted');
+  });
 });

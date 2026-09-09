@@ -1,0 +1,24 @@
+---
+/**
+ * Auto-populated listing: fetches published entries of one card collection
+ * via `listPublished` and renders them with `ListingGrid` (see that
+ * component's header comment for why `List`/`Grid` aren't used directly).
+ */
+import ListingGrid from './ListingGrid.astro';
+import { listPublished, type CardCollection, type ListSort } from '../lib/content';
+
+interface Props {
+  collection: CardCollection;
+  topics?: string[];
+  limit?: number;
+  sort?: ListSort;
+  title?: string;
+  theme?: 'light' | 'dark';
+  columns?: 2 | 3 | 4;
+}
+
+const { collection, topics, limit, sort = 'date-desc', title, theme = 'light', columns = 3 } = Astro.props;
+const entries = await listPublished(collection, { topics, limit, sort });
+---
+
+<ListingGrid collection={collection} entries={entries} title={title} theme={theme} columns={columns} />

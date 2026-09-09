@@ -1,0 +1,174 @@
+---
+/**
+ * Shared card-grid renderer used by `ListingAuto` and `ManualList`.
+ *
+ * See `ListingAuto.astro`'s header comment: `List`/`Grid` only accept
+ * pre-rendered HTML strings for their row/item content (no `<slot />` in
+ * either template), so this inlines List's header/rows wrapper markup
+ * directly instead, with real card components as live children — the same
+ * approach already used for Attachment/TagList/ItemList in this codebase
+ * (see PORTING.md).
+ *
+ * All per-entry data extraction happens here, in the frontmatter script —
+ * the Astro template's JSX-like expressions can't parse TS type
+ * assertions (`as X`) or generics, so every cast is done before the
+ * template runs, and the template itself only reads a plain, pre-shaped
+ * `CardViewModel`.
+ */
+import type { CollectionEntry } from 'astro:content';
+import Heading from '@civictheme/atoms/Heading.astro';
+import Paragraph from '@civictheme/atoms/Paragraph.astro';
+import EventCard from '@civictheme/molecules/EventCard.astro';
+import PromoCard from '@civictheme/molecules/PromoCard.astro';
+import PublicationCard from '@civictheme/molecules/PublicationCard.astro';
+import NavigationCard from '@civictheme/molecules/NavigationCard.astro';
+import { entryUrl, type CardCollection } from '../lib/content';
+
+interface Props {
+  collection: CardCollection;
+  entries: CollectionEntry<CardCollection>[];
+  title?: string;
+  theme?: 'light' | 'dark';
+  columns?: 2 | 3 | 4;
+}
+
+interface CardViewModel {
+  url: string;
+  title: string;
+  summary: string;
+  image?: { url: string; alt: string };
+  tags: Array<{ content: string }>;
+  date?: string;
+  dateIso?: string;
+  dateEnd?: string;
+  dateEndIso?: string;
+  location?: string;
+  file?: { url: string; ext: string; size?: string };
+}
+
+const { collection, entries, title, theme = 'light', columns = 3 } = Astro.props;
+const colClass = `col-xxs-12 col-m-6 col-l-${Math.floor(12 / columns)}`;
+
+const fmt = (d?: Date) =>
+  d ? d.toLocaleDateString('en-AU', { day: 'numeric', month: 'short', year: 'numeric' }) : undefined;
+
+function toViewModel(entry: CollectionEntry<CardCollection>): CardViewModel {
+  // The four card collections don't share a single data shape, so every
+  // field beyond `title`/`summary`/`image`/`topics` is read defensively.
+  const data = entry.data as Record<string, unknown>;
+  const image = data.image ? { url: data.image as string, alt: '' } : undefined;
+  const topics = (data.topics as string[]) ?? [];
+  const base: CardViewModel = {
+    url: entryUrl(collection, entry.id),
+    title: data.title as string,
+    summary: (data.summary as string) ?? '',
+    image,
+    tags: topics.map((topic) => ({ content: topic })),
+  };
+  if (collection === 'events') {
+    const startDate = data.startDate as Date | undefined;
+    const endDate = data.endDate as Date | undefined;
+    return {
+      ...base,
+      date: fmt(startDate),
+      dateIso: startDate?.toISOString(),
+      dateEnd: fmt(endDate),
+      dateEndIso: endDate?.toISOString(),
+      location: data.location as string | undefined,
+    };
+  }
+  if (collection === 'news') {
+    const date = data.date as Date | undefined;
+    return { ...base, date: fmt(date), dateIso: date?.toISOString() };
+  }
+  if (collection === 'publications') {
+    return {
+      ...base,
+      file: {
+        url: data.fileUrl as string,
+        ext: data.fileFormat as string,
+        size: data.fileSize as string | undefined,
+      },
+    };
+  }
+  return base;
+}
+
+const cards = entries.map(toViewModel);
+---
+
+<div class={`ct-list ct-theme-${theme} ct-listing-grid`}>
+  <div class="ct-list__inner">
+    {
+      title && (
+        <div class="ct-list__header">
+          <div class="container">
+            <div class="row">
+              <div class="col-xxs-12 col-m-9">
+                <Heading content={title} level={2} theme={theme} class="ct-list__title" />
+              </div>
+            </div>
+          </div>
+        </div>
+      )
+    }
+    <div class="container ct-list__rows">
+      <div class="row">
+        {
+          cards.length === 0 ? (
+            <div class="col-xxs-12">
+              <Paragraph theme={theme} content="No results found." noMargin class="ct-list__empty-results__inner" />
+            </div>
+          ) : (
+            cards.map((card, i) => (
+              <>
+                {i > 0 && ' '}
+                <div class={colClass}>
+                  {collection === 'events' && (
+                    <EventCard
+                      theme={theme}
+                      title={card.title}
+                      summary={card.summary}
+                      image={card.image}
+                      date={card.date}
+                      dateIso={card.dateIso}
+                      dateEnd={card.dateEnd}
+                      dateEndIso={card.dateEndIso}
+                      location={card.location}
+                      link={{ url: card.url }}
+                      tags={card.tags}
+                    />
+                  )}
+                  {collection === 'publications' && (
+                    <PublicationCard
+                      theme={theme}
+                      title={card.title}
+                      summary={card.summary}
+                      image={card.image}
+                      file={card.file}
+                    />
+                  )}
+                  {collection === 'pages' && (
+                    <NavigationCard theme={theme} title={card.title} summary={card.summary} link={{ url: card.url }} />
+                  )}
+                  {collection === 'news' && (
+                    <PromoCard
+                      theme={theme}
+                      title={card.title}
+                      summary={card.summary}
+                      image={card.image}
+                      date={card.date}
+                      dateIso={card.dateIso}
+                      link={{ url: card.url }}
+                      tags={card.tags}
+                    />
+                  )}
+                </div>
+              </>
+            ))
+          )
+        }
+      </div>
+    </div>
+  </div>
+</div>

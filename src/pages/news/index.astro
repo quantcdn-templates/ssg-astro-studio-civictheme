@@ -1,0 +1,19 @@
+---
+/**
+ * Minimal listing shell for this task's build assertions. Task 15 rewrites
+ * this onto a real layout.
+ */
+import '@/styles/global.scss';
+import ListingAuto from '@/components/ListingAuto.astro';
+---
+
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>News</title>
+  </head>
+  <body>
+    <ListingAuto collection="news" title="News" />
+  </body>
+</html>
