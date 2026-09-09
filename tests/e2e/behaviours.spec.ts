@@ -44,9 +44,13 @@ test.describe('CivicTheme behaviours', () => {
   });
 
   test('accordion expands a panel', async ({ page }) => {
-    const trigger = page.locator('[data-collapsible-trigger]').first();
+    // Scoped to the accordion: BaseLayout's site header also renders collapsible
+    // elements (drawer navigation, mobile navigation) on every page.
+    const trigger = page.locator('.ct-accordion [data-collapsible-trigger]').first();
     await trigger.click();
-    await expect(page.locator('[data-collapsible]').first()).not.toHaveAttribute('data-collapsible-collapsed');
+    await expect(page.locator('.ct-accordion [data-collapsible]').first()).not.toHaveAttribute(
+      'data-collapsible-collapsed'
+    );
   });
 
   test('tabs switch panels', async ({ page }) => {
@@ -57,6 +61,9 @@ test.describe('CivicTheme behaviours', () => {
 
   test('mobile navigation opens', async ({ page }) => {
     await page.setViewportSize({ width: 400, height: 800 });
+    // The pair under test is the site header's (BaseLayout): the trigger's
+    // `data-flyout-target` is the global selector `.ct-mobile-navigation`, so
+    // only one mobile navigation per page can ever be driven.
     await page.locator('[data-flyout-open-trigger]').first().click();
     await expect(page.locator('[data-flyout]').first()).toHaveAttribute('data-flyout-expanded', 'true');
   });
@@ -71,6 +78,7 @@ test.describe('CivicTheme behaviours', () => {
 
     // scrollspy.js adds ct-scrollspy-scrolled to BackToTop's [data-scrollspy] element
     // once window.scrollY passes its data-scrollspy-offset (400).
+    // BackToTop now comes from BaseLayout, once per page.
     const backToTop = page.locator('[data-scrollspy]').first();
     await expect(backToTop).not.toHaveClass(/ct-scrollspy-scrolled/);
     await page.locator('#section-3').scrollIntoViewIfNeeded();

@@ -1,0 +1,19 @@
+---
+/** One news entry on `DetailLayout`. */
+import { getCollection, render, type CollectionEntry } from 'astro:content';
+import type { GetStaticPaths } from 'astro';
+import DetailLayout from '@/layouts/DetailLayout.astro';
+import { components } from '@/components/MdxComponents';
+
+export const getStaticPaths = (async () => {
+  const entries = await getCollection('news', ({ data }) => !data.draft);
+  return entries.map((entry) => ({ params: { slug: entry.id }, props: { entry } }));
+}) satisfies GetStaticPaths;
+
+const { entry } = Astro.props as { entry: CollectionEntry<'news'> };
+const { Content } = await render(entry);
+---
+
+<DetailLayout collection="news" entry={entry}>
+  <Content components={components} />
+</DetailLayout>

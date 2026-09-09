@@ -1,0 +1,25 @@
+---
+/**
+ * Every published `pages` entry at its folder path. The entry with id `index`
+ * is the home page and is rendered by `src/pages/index.astro` instead, so it
+ * is skipped here.
+ */
+import { getCollection, render, type CollectionEntry } from 'astro:content';
+import type { GetStaticPaths } from 'astro';
+import PageLayout from '@/layouts/PageLayout.astro';
+import { components } from '@/components/MdxComponents';
+
+export const getStaticPaths = (async () => {
+  const pages = await getCollection('pages', ({ data }) => !data.draft);
+  return pages
+    .filter((page) => page.id !== 'index')
+    .map((page) => ({ params: { slug: page.id }, props: { entry: page } }));
+}) satisfies GetStaticPaths;
+
+const { entry } = Astro.props as { entry: CollectionEntry<'pages'> };
+const { Content } = await render(entry);
+---
+
+<PageLayout entry={entry}>
+  <Content components={components} />
+</PageLayout>

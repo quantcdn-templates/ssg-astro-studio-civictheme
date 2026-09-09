@@ -1,19 +1,32 @@
 ---
 /**
- * Minimal listing shell for this task's build assertions. Task 15 rewrites
- * this onto a real layout.
+ * News listing.
+ *
+ * The demo content set holds six or fewer published entries per collection,
+ * so the route renders a single unpaginated page. When a collection grows
+ * past ten entries, rename this file to `[...page].astro` and wrap
+ * `ListingGrid` in Astro's `paginate()` with `pageSize: 10`, adding the
+ * `Pagination` molecule below the grid.
  */
-import '@/styles/global.scss';
+import BaseLayout from '@/layouts/BaseLayout.astro';
+import PageBanner from '@/components/PageBanner.astro';
 import ListingAuto from '@/components/ListingAuto.astro';
+
+const title = 'News';
+const summary = 'Browse all published news from Your organisation.';
 ---
 
-<!doctype html>
-<html lang="en">
-  <head>
-    <meta charset="utf-8" />
-    <title>News</title>
-  </head>
-  <body>
-    <ListingAuto collection="news" title="News" />
-  </body>
-</html>
+<BaseLayout title={title} description={summary} image="/og/news.png">
+  <PageBanner
+    title={title}
+    summary={summary}
+    breadcrumbLinks={[
+      { text: 'Home', url: '/' },
+      { text: title, url: '/news' },
+    ]}
+    backgroundImage="/civictheme/backgrounds/civictheme_background_3.png"
+  />
+  <div class="ct-vertical-spacing-inset--both">
+    <ListingAuto collection="news" />
+  </div>
+</BaseLayout>

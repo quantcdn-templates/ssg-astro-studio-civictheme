@@ -1,9 +1,18 @@
 ---
-import '@/styles/global.scss';
+/**
+ * Home page: the `pages` collection entry with id `index`, on `PageLayout`.
+ * Every other `pages` entry is routed by `[...slug].astro`, which skips this
+ * one to avoid a duplicate route.
+ */
+import { getEntry, render } from 'astro:content';
+import PageLayout from '@/layouts/PageLayout.astro';
+import { components } from '@/components/MdxComponents';
+
+const entry = await getEntry('pages', 'index');
+if (!entry) throw new Error('src/content/pages/index.mdx is missing');
+const { Content } = await render(entry);
 ---
 
-<!doctype html>
-<html lang="en">
-  <head><meta charset="utf-8" /><title>CivicTheme</title></head>
-  <body><h1>CivicTheme for Astro</h1></body>
-</html>
+<PageLayout entry={entry}>
+  <Content components={components} />
+</PageLayout>

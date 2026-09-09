@@ -1,0 +1,33 @@
+---
+/** Not-found page. */
+import BaseLayout from '@/layouts/BaseLayout.astro';
+import PageBanner from '@/components/PageBanner.astro';
+import Callout from '@civictheme/molecules/Callout.astro';
+
+const title = 'Page not found';
+const summary = 'The page you asked for does not exist, or it has moved.';
+---
+
+<BaseLayout title={title} description={summary} image="/og/home.png">
+  <PageBanner
+    title={title}
+    summary={summary}
+    breadcrumbLinks={[{ text: 'Home', url: '/' }]}
+    backgroundImage="/civictheme/backgrounds/civictheme_background_5.png"
+  />
+  <div class="ct-page container ct-vertical-spacing-inset--both">
+    <div class="row">
+      <div class="col-xxs-12 col-m-8">
+        <Callout
+          title="Try one of these instead"
+          content="<p>Check the address for a typo, use the search page, or start again from the home page.</p>"
+          links={[
+            { text: 'Home', url: '/' },
+            { text: 'Search', url: '/search' },
+            { text: 'News', url: '/news' },
+          ]}
+        />
+      </div>
+    </div>
+  </div>
+</BaseLayout>

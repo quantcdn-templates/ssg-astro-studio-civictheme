@@ -1,0 +1,57 @@
+---
+/**
+ * Static search placeholder.
+ *
+ * The template ships no search backend, so this page presents the CivicTheme
+ * search form markup (a `Field` with a text control plus a submit `Button`)
+ * and points the reader at the section listings. A Studio project wires the
+ * form's `action` to its own search service.
+ */
+import BaseLayout from '@/layouts/BaseLayout.astro';
+import PageBanner from '@/components/PageBanner.astro';
+import Field from '@civictheme/molecules/Field.astro';
+import Button from '@civictheme/atoms/Button.astro';
+import Callout from '@civictheme/molecules/Callout.astro';
+
+const title = 'Search';
+const summary = 'Search this site.';
+---
+
+<BaseLayout title={title} description={summary} image="/og/search.png">
+  <PageBanner
+    title={title}
+    summary={summary}
+    breadcrumbLinks={[
+      { text: 'Home', url: '/' },
+      { text: title, url: '/search' },
+    ]}
+    backgroundImage="/civictheme/backgrounds/civictheme_background_4.png"
+  />
+  <div class="ct-page container ct-vertical-spacing-inset--both">
+    <div class="row">
+      <div class="col-xxs-12 col-m-8">
+        <form class="ct-search-form" role="search" action="/search" method="get">
+          <Field
+            type="textfield"
+            title="Search"
+            label="Search"
+            name="q"
+            id="search-query"
+            placeholder="Enter a search term"
+          />
+          <Button kind="button" type="primary" text="Search" />
+        </form>
+        <Callout
+          title="No search backend is configured"
+          content="<p>This template ships the CivicTheme search markup only. Connect the form to your own search service, or browse the news, events and publications listings.</p>"
+          links={[
+            { text: 'News', url: '/news' },
+            { text: 'Events', url: '/events' },
+            { text: 'Publications', url: '/publications' },
+          ]}
+          verticalSpacing="both"
+        />
+      </div>
+    </div>
+  </div>
+</BaseLayout>
