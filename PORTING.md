@@ -131,6 +131,48 @@ One row per component where the Twig → Astro port needed a decision.
 
 | Alert / Campaign / Message / Navigation / MobileNavigation / Slide / Slider / SideNavigation / Promo / Webform | Task 14c: the last layer of Slot-documented organisms — each renders its Slot props as plain HTML-bearing variables via `set:html` (or through a sub-component like `Heading`/`Paragraph`). | Slots added with string fallback, same TAKES-PRECEDENCE/widened-gate convention as the earlier batches. `Alert`: `title`/`description` slotted, root gate widens via `description`. `Campaign`: `contentTop`/`title`/`content`/`contentBottom` slotted (no root gate to widen — the root always renders). `Message`: `title`/`content` slotted, root gate widens to `hasTitle || hasContent`. `Navigation`/`SideNavigation`: `title` slotted (bypasses `Heading`); root item-count gate is unrelated to `title` and stays untouched. `MobileNavigation`: `contentTop`/`contentBottom` slotted. `Slide`: `contentTop`/`title`/`content`/`contentBottom` slotted (no root gate — always renders). `Slider`: `contentTop`/`title`/`contentBottom` slotted; `slides` NOT slotted (a plain "Props:" entry, not documented as a Slot upstream) — root gate stays `slides &&`, unrelated to the three Slots, and `title`'s own root `aria-label={title \|\| 'Slider'}` still reads the raw string prop (independent of the slot), so a slot-only `title` still falls back to `'Slider'` for that one attribute. `Promo`: `contentTop`/`title`/`content`/`contentBottom` slotted (root gate widens via `title`/`content`; `contentTop`/`contentBottom` stay nested inside that same outer gate, matching upstream — a `contentTop` slot alone, with neither `title` nor `content`, still renders nothing). `Webform`: `referencedWebform` slotted, root gate widens. Every existing string-prop parity case is untouched and passes; new tests assert slot-vs-string-prop parity for every slotted prop, plus a "slot alone still opens its wrapper" case per component (adjusted to the real gate structure where a nested slot's wrapper depends on an outer, unrelated gate, e.g. `Promo`). |
 
+## Story parity
+
+Task 15b compares every ported component against the args and markup of the
+upstream Storybook stories (`tests/story-parity/`, oracle in
+`tests/story-parity/fixtures/`, captured by
+`scripts/capture-upstream-stories.mjs`). Run it with `npm run test:story-parity`.
+
+### Fixes the stories exposed
+
+| Component                             | Story                                                                            | Gap                                                                                                                                                                                                                                   |
+| ------------------------------------- | -------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Layout                                | `base-layout--layout` (and its five sidebar variants)                            | Every slot was slot-only, so a story passing `content`/`content_top`/`sidebar_*` as HTML strings rendered nothing at all. Added the string props with the project's TAKES-PRECEDENCE slot convention.                                 |
+| Fieldset                              | `atoms-form-controls-fieldset--fieldset`                                         | No inter-sibling whitespace inside `ct-fieldset__wrapper`: `description`, `message`, `fields` and `suffix` each need the separator that `fieldset.twig`'s blank lines produce.                                                        |
+| Datetime, EventCard, PromoCard, Slide | `molecules-list-event-card--event-card`, `molecules-list-promo-card--promo-card` | `datetime.twig` uses `start_iso\|default(start)`, and Twig's `default` filter falls back on an EMPTY value, not only on an undefined one. The port used `??`, which keeps `''`, so `date_iso: ''` produced `datetime=""`. Now `\|\|`. |
+| VideoPlayer                           | `molecules-video-player--sources` (dark)                                         | `video-player.twig:49-55` includes `@atoms/video` with `only` and does NOT forward `theme`, so the inner `<video>` is always `ct-theme-light`. The port forwarded `theme`.                                                            |
+| VideoPlayer                           | `molecules-video-player--transcript-block`                                       | Missing whitespace between the two transcript-toggle `<span>`s and between the toggle button and `ct-video-player__transcript-panel`.                                                                                                 |
+| TableOfContents                       | `molecules-table-of-contents--table-of-contents`                                 | Missing whitespace between the `<h2>` title and the `<ul>` of links.                                                                                                                                                                  |
+| InlineFilter                          | `molecules-list-inline-filter--inline-filter`                                    | `items`/`items_end` were slot-only (rendered nothing for a string arg), and whitespace was missing after the title and before `ct-inline-filter__actions`.                                                                            |
+| GroupFilter                           | `molecules-list-group-filter--group-filter-with-selected-filters`                | Missing whitespace before `ct-group-filter__selected-filter-controls`, after `ct-group-filter__selected-title`, and before `ct-group-filter__selected-clear`.                                                                         |
+| Menu (and SideNavigation through it)  | `organisms-navigation-side-navigation--side-navigation`                          | Drupal menu data uses `below: false` for a leaf, not an absent or empty array. `(item.below ?? []).some(...)` threw on it; `childrenOf()` now coerces.                                                                                |
+
+### Accepted differences
+
+Every entry in `tests/story-parity/accepted-differences.json` cites one of
+these rows. Each also carries a `mask`, so the test asserts the difference is
+EXACTLY the one described and nothing more (except the `04-templates` rows,
+where no component exists to render).
+
+| Row                                                         | Detail                                                                                                                                                                                                                                                             |
+| ----------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| GroupFilter random group id                                 | `group-filter.twig:69` builds the collapsible group name from `group_id\|default(random(1000, 9999))`. With no `group_id` arg the id is random per render, so a captured fixture and a fresh render can never agree on it. Masked as `ct-group-filter--group-\d+`. |
+| ServiceCard stale `summary` story arg                       | `service-card.stories.js` passes `summary`, which `service-card.twig` neither documents nor reads. Twig ignores an unknown arg; Astro spreads an undeclared prop onto the root element (shared-reference R2), so it prints as an attribute.                        |
+| Tabs `create_attribute()` is a no-op in the Storybook build | `tabs.twig:56` adds `data-tabs-tab` via `link_attributes.setAttribute(...)`. Upstream's own Jest snapshot HAS the attribute and the port reproduces it, but the captured Storybook HTML lacks it — the Jest oracle is right, the story render is the artefact.     |
+| `04-templates/page` is out of scope                         | Shared-reference R1 maps only `00-base`, `01-atoms`, `02-molecules` and `03-organisms` to Astro folders. `page.twig` is a Drupal page template; its Astro equivalent is the site's own layout.                                                                     |
+
+Two existing rows are also cited: **Icon** (`assets_dir` has no Astro prop —
+symbols resolve through the generated `icons.ts` map, so the story's
+`assets_dir` arg falls into the rest spread) and **(convention)**
+(upstream renders with `autoescape = false`, so the `iframe` story's
+pre-encoded `&amp;` in `url` passes through Twig verbatim while Astro
+correctly escapes it).
+
 ## Final parity count
 
 All 77 components ported (00-base: 7, 01-atoms: 22, 02-molecules: 30, 03-organisms: 18). Full parity suite: `npx vitest run tests/parity` — **697 tests passing** across 78 test files (parity `.toBe` snapshot comparisons, including `Slide` via the harness's `meta.dir`, plus direct vitest assertions for upstream-unexercised branches, harness self-tests, and Task 14b/15/14c's slot-vs-string-prop parity tests across every Slot-documented component).
