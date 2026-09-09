@@ -6,7 +6,7 @@
  *   tests/story-parity/fixtures/html/<layer>/<name>/<Export>.html
  *   tests/story-parity/fixtures/png/<layer>/<name>/<Export>.png
  *
- * Usage: node scripts/capture-upstream-stories.mjs [--skip-build] [--uikit <path>]
+ * Usage: node scripts/capture-upstream-stories.mjs [--skip-build] [--skip-png] [--uikit <path>]
  */
 
 import fs from 'node:fs';
@@ -179,7 +179,23 @@ async function prepareForScreenshot(page, selectors, pixel) {
   );
 }
 
-async function capture(page, baseUrl, story, fixtureName, argsOverride) {
+/**
+ * Renders one story twice:
+ *
+ * - HTML comes from the story's OWN render function
+ *   (`story.undecoratedStoryFn`), which returns the raw Twig output string
+ *   without inserting it into the document. This is the template's real
+ *   markup. Reading `#storybook-root.innerHTML` instead would capture the
+ *   DOM *after* CivicTheme's behaviour scripts have run, and those scripts
+ *   mutate it at init (`button.js` adds `data-button="true"`, `chip.js` adds
+ *   `data-chip="true"`, `collapsible.js` rewrites the bare `data-collapsible`
+ *   to `"true"` and adds `aria-expanded`, and `chip.event.stories.js` adds
+ *   `story-processed="1"`). A static Astro render cannot and must not
+ *   reproduce those.
+ * - PNG comes from the mounted, fully-initialised story, because the visual
+ *   comparison in the Astro template runs the same behaviours in the browser.
+ */
+async function capture(page, baseUrl, story, fixtureName, args, argsOverride, skipPng) {
   const query = argsOverride ? `&args=${encodeURIComponent(argsOverride)}` : '';
   await page.goto(`${baseUrl}/iframe.html?id=${story.storyId}&viewMode=story${query}`, {
     waitUntil: 'load',
@@ -194,10 +210,31 @@ async function capture(page, baseUrl, story, fixtureName, argsOverride) {
   );
   await page.waitForTimeout(500);
 
-  const html = await page.evaluate(() => document.querySelector('#storybook-root').innerHTML);
+  const html = await page.evaluate(
+    async ({ storyId, storyArgs }) => {
+      const loaded = await window.__STORYBOOK_PREVIEW__.storyStore.loadStory({ storyId });
+      const context = {
+        ...loaded,
+        id: storyId,
+        args: storyArgs,
+        globals: {},
+        viewMode: 'story',
+        loaded: {},
+        hooks: {},
+        canvasElement: document.createElement('div'),
+        abortSignal: new AbortController().signal,
+      };
+      const result = loaded.undecoratedStoryFn(context);
+      if (typeof result !== 'string') throw new Error(`${storyId} did not render to a string`);
+      return result;
+    },
+    { storyId: story.storyId, storyArgs: args }
+  );
+
   const dir = path.join(story.layer, story.component);
   writeFile(path.join(FIXTURES, 'html', dir, `${fixtureName}.html`), html);
 
+  if (skipPng) return;
   await prepareForScreenshot(page, MASK_SELECTORS, PIXEL);
   await page.waitForTimeout(SETTLE_MS);
   await page.locator('#storybook-root').screenshot({
@@ -208,6 +245,7 @@ async function capture(page, baseUrl, story, fixtureName, argsOverride) {
 }
 
 async function main() {
+  const skipPng = flag('--skip-png');
   if (!flag('--skip-build')) buildUpstream();
   if (!fs.existsSync(path.join(STATIC_DIR, 'index.json'))) {
     throw new Error(`No Storybook build at ${STATIC_DIR}. Run without --skip-build.`);
@@ -249,7 +287,7 @@ async function main() {
 
     fs.rmSync(path.join(FIXTURES, 'args'), { recursive: true, force: true });
     fs.rmSync(path.join(FIXTURES, 'html'), { recursive: true, force: true });
-    fs.rmSync(path.join(FIXTURES, 'png'), { recursive: true, force: true });
+    if (!skipPng) fs.rmSync(path.join(FIXTURES, 'png'), { recursive: true, force: true });
 
     let light = 0;
     let dark = 0;
@@ -283,7 +321,7 @@ async function main() {
             2
           )}\n`
         );
-        await capture(page, baseUrl, story, fixtureName, variant.override);
+        await capture(page, baseUrl, story, fixtureName, args, variant.override, skipPng);
         if (variant.suffix) dark += 1;
         else light += 1;
         console.log(`captured ${story.layer}/${story.component}/${fixtureName}`);
@@ -321,7 +359,8 @@ async function main() {
         '- PNG is an element screenshot of `#storybook-root` (full element height).',
         `- Mirrors \`tools/visual-diff\`: CSS transitions disabled, ${MASK_SELECTORS.join(', ')} hidden,`,
         `  every image replaced with a 1x1 PNG, ${SETTLE_MS} ms settle delay.`,
-        '- HTML is the raw `#storybook-root` innerHTML, unnormalised.',
+        "- HTML is the story render function's own raw output (`story.undecoratedStoryFn`),",
+        "  i.e. the Twig template markup BEFORE CivicTheme's behaviour scripts mutate the DOM.",
         '',
       ].join('\n')
     );
