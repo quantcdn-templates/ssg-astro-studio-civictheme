@@ -152,6 +152,34 @@ upstream Storybook stories (`tests/story-parity/`, oracle in
 | GroupFilter                           | `molecules-list-group-filter--group-filter-with-selected-filters`                | Missing whitespace before `ct-group-filter__selected-filter-controls`, after `ct-group-filter__selected-title`, and before `ct-group-filter__selected-clear`.                                                                         |
 | Menu (and SideNavigation through it)  | `organisms-navigation-side-navigation--side-navigation`                          | Drupal menu data uses `below: false` for a leaf, not an absent or empty array. `(item.below ?? []).some(...)` threw on it; `childrenOf()` now coerces.                                                                                |
 
+### Visual parity
+
+`npm run test:story-parity:visual` builds the site with `PUBLIC_STORY_PARITY=1`
+(which emits the `/story-parity/**` route), then screenshots each page's
+`#story-root` and compares it with the upstream Storybook screenshot using
+`pixelmatch` at a 0.1% tolerance.
+
+To make the two screenshots comparable, our page reproduces Storybook's own
+preview shell — `sb-show-main` plus `sb-main-<layout>`, the rules copied
+verbatim into `tests/story-parity/fixtures/shell/storybook-shell.css`, and the
+story background colour from `.storybook/preview.js` when the story sets one.
+Storybook's shell decides the box `#storybook-root` gets (centred and
+shrink-to-fit for `layout: 'centered'`, 1rem body padding for `'padded'`, full
+width for `'fullscreen'`), so without it every story would differ.
+
+The capture side is normalised in the same spirit as the HTML oracle: the
+`.story-docs` block that `decoratorDocs` injects for `parameters.storyDocs`
+stories (alert, skip-link) is removed, and the
+`.story-container > .story-container__content` wrapper that
+`video-player.stories.js:158` adds as a story-level decorator is unwrapped.
+Both are story furniture, absent from `undecoratedStoryFn`'s output, and
+`skip-link` renders nothing with a box at all, so both sides record a 1x1
+transparent PNG for it.
+
+| Fix                      | Story                    | Gap                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                           |
+| ------------------------ | ------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `src/styles/global.scss` | every text-bearing story | CivicTheme's `_variables.base.scss` emits the Lexend and Public Sans `@import url(...)` rules from the MIDDLE of the stylesheet. A CSS `@import` is only valid before every other statement, so the bundler dropped them and the built site fell back to the generic `sans-serif` — while upstream Storybook loaded both fonts. Every text-bearing story rendered several pixels narrower than its fixture. The two `@import`s are now re-stated at the top of `global.scss`, ahead of the CivicTheme import. This is a real SITE fix, not a test shim: without it the template never loads its own typeface. |
+
 ### Whitespace is asymmetrically checked
 
 `normaliseHtml` trims only the LEADING and TRAILING whitespace of each

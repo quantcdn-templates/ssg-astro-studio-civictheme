@@ -17,7 +17,7 @@
     "vendor": "node scripts/vendor-civictheme.mjs && node scripts/sync-component-demos.mjs",
     "demos:sync": "node scripts/sync-component-demos.mjs",
     "test:story-parity": "vitest run tests/story-parity",
-    "test:story-parity:visual": "PUBLIC_STORY_PARITY=1 astro build && playwright test --config playwright.story-parity.config.ts"
+    "test:story-parity:visual": "PUBLIC_STORY_PARITY=1 astro build --outDir dist-story-parity && playwright test --config playwright.story-parity.config.ts"
   },
   "dependencies": {
     "@astrojs/mdx": "^8.0.0",
@@ -31,6 +31,7 @@
     "@astrojs/check": "^0.9.0",
     "@axe-core/playwright": "^4.10.0",
     "@playwright/test": "^1.50.0",
+    "@types/pngjs": "^6.0.5",
     "linkedom": "^0.18.0",
     "pixelmatch": "^7.2.0",
     "pngjs": "^7.0.0",

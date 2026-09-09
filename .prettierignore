@@ -1,4 +1,5 @@
 dist
+dist-story-parity
 .astro
 src/civictheme/scss
 src/civictheme/js/behaviours

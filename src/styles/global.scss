@@ -1,3 +1,14 @@
+// CivicTheme's font stack. `_variables.base.scss` declares these two URIs and
+// emits them as CSS `@import`s, but it does so from the middle of the
+// stylesheet — and a CSS `@import` is only valid before every other statement,
+// so the bundler drops them and the built site silently falls back to the
+// generic `sans-serif`. Re-stating them HERE, before the CivicTheme import,
+// is what actually gets Lexend and Public Sans onto the page. Exposed by the
+// story-parity visual suite: upstream Storybook loads both fonts, so every
+// text-bearing story rendered several pixels narrower than its fixture.
+@import url('https://fonts.googleapis.com/css2?family=Lexend:wght@400;500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Public+Sans:wght@400;500;600&display=swap');
+
 // Single stylesheet entry. Imported once from the base layout (src/pages/index.astro until BaseLayout lands).
 $ct-assets-directory: '/civictheme/';
 @import '../civictheme/scss/index';

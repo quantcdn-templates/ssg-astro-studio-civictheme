@@ -39,6 +39,8 @@ const SETTLE_MS = 2000;
 /** Mask selectors, copied from .upstream/uikit/tools/visual-diff/config/config.json. */
 const MASK_SELECTORS = ['.ct-iframe', '.ct-map--canvas', '.ct-video-player', '.ct-video', 'video'];
 /** 1x1 PNG used to replace every image, copied from tools/visual-diff/lib/screenshot.mjs. */
+/** 1x1 fully transparent PNG, written for a story whose root has no box. */
+const EMPTY_PNG_BASE64 = 'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAACklEQVR4AWMAAQAABQABNtCI3QAAAABJRU5ErkJggg==';
 const PIXEL =
   'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNkYPhfDwAChwGA60e6kgAAAABJRU5ErkJggg==';
 
@@ -167,6 +169,28 @@ async function prepareForScreenshot(page, selectors, pixel) {
         '*, *::before, *::after { transition: none !important; transition-duration: 0s !important; animation: none !important; }';
       document.head.appendChild(style);
 
+      // `decoratorDocs` (.storybook/preview.js) injects a `.story-docs` block
+      // of prose into `#storybook-root` for the five stories that set
+      // `parameters.storyDocs` (alert, skip-link, and three skipped ones).
+      // It is Storybook documentation, not component markup — and it is
+      // absent from the HTML fixture, which comes from the UNdecorated story
+      // function — so it is removed before the screenshot too.
+      document.querySelectorAll('.story-docs').forEach((element) => element.remove());
+
+      // `video-player.stories.js:158` is the one story file with a STORY-LEVEL
+      // decorator: it wraps the story in
+      // `.story-container > .story-container__content`, whose CSS narrows the
+      // component to 896px. A decorator is part of the story, not the
+      // component, and `undecoratedStoryFn` (which produces the HTML fixture)
+      // never sees it — so it is unwrapped here, keeping both oracles about
+      // the same markup.
+      document.querySelectorAll('#storybook-root .story-container__content').forEach((content) => {
+        const wrapper = content.closest('.story-container');
+        if (wrapper && wrapper.parentElement) {
+          wrapper.replaceWith(...content.childNodes);
+        }
+      });
+
       document.querySelectorAll(maskSelectors.join(', ')).forEach((element) => {
         element.style.visibility = 'hidden';
       });
@@ -272,8 +296,18 @@ async function capture(page, baseUrl, story, fixtureName, themeOverride, argsOve
   if (skipPng) return args;
   await prepareForScreenshot(page, MASK_SELECTORS, PIXEL);
   await page.waitForTimeout(SETTLE_MS);
+
+  const pngFile = path.join(FIXTURES, 'png', dir, `${fixtureName}.png`);
+  const box = await page.locator('#storybook-root').boundingBox();
+  if (!box || box.width < 1 || box.height < 1) {
+    // A story that renders nothing with a box — `skip-link` is entirely
+    // `ct-visually-hidden`. Playwright cannot screenshot a zero-area element,
+    // so both sides record the same 1x1 transparent PNG (see visual.spec.ts).
+    writeFile(pngFile, Buffer.from(EMPTY_PNG_BASE64, 'base64'));
+    return args;
+  }
   await page.locator('#storybook-root').screenshot({
-    path: path.join(FIXTURES, 'png', dir, `${fixtureName}.png`),
+    path: pngFile,
     animations: 'disabled',
     scale: 'css',
   });

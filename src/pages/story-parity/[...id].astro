@@ -1,0 +1,102 @@
+---
+/**
+ * Story-parity render route — a build-time-only page, used ONLY by
+ * `tests/story-parity/visual.spec.ts`.
+ *
+ * It renders one ported CivicTheme component with the exact args its upstream
+ * Storybook story used, inside a shell that reproduces the box Storybook's
+ * iframe gives `#storybook-root`, so a screenshot of `#story-root` can be
+ * compared pixel for pixel with the captured `fixtures/png/**` .
+ *
+ * The route only exists when the site is built with `PUBLIC_STORY_PARITY=1`
+ * (`npm run test:story-parity:visual` does that). Otherwise `getStaticPaths`
+ * returns `[]` BEFORE touching the fixture globs — Vite inlines
+ * `import.meta.env.PUBLIC_STORY_PARITY` as a literal, so the whole branch,
+ * and every module it would pull in, is dead code in a normal build.
+ *
+ * No Node-only import: the fixtures and components are read with
+ * `import.meta.glob`, which is Vite's own primitive.
+ */
+import type { GetStaticPaths } from 'astro';
+import { argsToProps } from '../../../tests/story-parity/args-to-props';
+import '@/styles/global.scss';
+
+interface StoryFixture {
+  storyId: string;
+  component: string;
+  exportName: string;
+  layout: string | null;
+  background: string | null;
+  args: Record<string, unknown>;
+}
+
+/**
+ * Storybook's `backgrounds` palette, from upstream
+ * `.storybook/preview.js:44-58`. A story that sets
+ * `globals.backgrounds.value` is captured on that canvas colour, and an
+ * element screenshot of a component with any transparency picks it up.
+ */
+const BACKGROUNDS: Record<string, string> = {
+  white: '#ffffff',
+  light: '#f2f4f5',
+  dark: '#003f56',
+};
+
+export const getStaticPaths = (async () => {
+  // Astro hoists `getStaticPaths` into its own module, so this cannot read a
+  // frontmatter constant — the check has to live inside the function.
+  if (import.meta.env.PUBLIC_STORY_PARITY !== '1') return [];
+
+  const fixtures = import.meta.glob<StoryFixture>('../../../tests/story-parity/fixtures/args/**/*.json', {
+    eager: true,
+    import: 'default',
+  });
+  const components = import.meta.glob('../../civictheme/components/**/*.astro', { eager: true });
+
+  const pascalCase = (name: string) =>
+    name
+      .split('-')
+      .map((part) => part.charAt(0).toUpperCase() + part.slice(1))
+      .join('');
+
+  return Object.entries(fixtures).flatMap(([file, fixture]) => {
+    const fixtureName = file.replace(/^.*\/fixtures\/args\//, '').replace(/\.json$/, '');
+    const [layer, name] = fixture.component.split('/');
+    const module = components[`../../civictheme/components/${layer}/${pascalCase(name)}.astro`] as
+      { default: unknown } | undefined;
+    // `04-templates/page` has no ported component (shared-reference R1).
+    if (!module) return [];
+    return [{ params: { id: fixtureName }, props: { fixture, Component: module.default } }];
+  });
+}) satisfies GetStaticPaths;
+
+const { fixture, Component } = Astro.props as { fixture: StoryFixture; Component: any };
+
+// Storybook's default when a story sets no `layout` parameter.
+const layout = fixture.layout ?? 'padded';
+const background = fixture.background ? (BACKGROUNDS[fixture.background] ?? null) : null;
+const props = argsToProps(fixture.args);
+---
+
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>{fixture.storyId}</title>
+    <!--
+      Served from `dist/story-parity-shell/`, which the visual spec's global
+      setup copies out of `tests/story-parity/fixtures/shell/` after the build.
+      They are not imported here, so a normal build emits neither.
+    -->
+    <link rel="stylesheet" href="/story-parity-shell/storybook-shell.css" />
+    <link rel="stylesheet" href="/story-parity-shell/civictheme.stories.css" />
+  </head>
+  <body class={`sb-show-main sb-main-${layout}`} style={background ? `background: ${background};` : undefined}>
+    <div id="story-root"><Component {...props} /></div>
+    <script>
+      // The upstream PNGs were taken from the mounted story, AFTER CivicTheme's
+      // behaviour scripts had run (they collapse accordions, position popovers,
+      // and so on). The same scripts must run here or the pixels cannot match.
+      import '@/civictheme/js/civictheme.js';
+    </script>
+  </body>
+</html>

@@ -1,0 +1,42 @@
+/*
+ * Storybook's own preview-layout rules, copied verbatim from the built
+ * `storybook-static` iframe (read out of `document.styleSheets`), with one
+ * change: `#storybook-root` is rewritten to `#story-root`, the id our
+ * `/story-parity/[...id]` route uses.
+ *
+ * The upstream PNG fixtures are ELEMENT screenshots of `#storybook-root`, so
+ * the box these rules give it — centred and shrink-to-fit with 1rem padding
+ * for `layout: 'centered'`, 1rem body padding for `'padded'`, full width for
+ * `'fullscreen'` — decides the captured width and height. Without them our
+ * side would screenshot a different box and every story would differ.
+ *
+ * Storybook's `backgrounds` global has NO effect in the static build (the
+ * body stays transparent even for a story with `backgrounds.value: 'dark'`,
+ * verified against the built iframe), so nothing here paints a background.
+ */
+.sb-show-main.sb-main-centered {
+  margin: 0px;
+  display: flex;
+  align-items: center;
+  min-height: 100vh;
+}
+
+.sb-show-main.sb-main-centered #story-root {
+  box-sizing: border-box;
+  margin: auto;
+  padding: 1rem;
+  max-height: 100%;
+}
+
+.sb-show-main.sb-main-fullscreen {
+  margin: 0px;
+  padding: 0px;
+  display: block;
+}
+
+.sb-show-main.sb-main-padded {
+  margin: 0px;
+  padding: 1rem;
+  display: block;
+  box-sizing: border-box;
+}
