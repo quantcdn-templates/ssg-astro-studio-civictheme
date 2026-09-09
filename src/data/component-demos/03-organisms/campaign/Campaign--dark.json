@@ -1,0 +1,45 @@
+{
+  "storyId": "organisms-campaign--campaign",
+  "title": "Organisms/Campaign",
+  "name": "Campaign",
+  "exportName": "Campaign",
+  "component": "03-organisms/campaign",
+  "importPath": "./components/03-organisms/campaign/campaign.stories.js",
+  "theme": "dark",
+  "layout": "fullscreen",
+  "background": null,
+  "argsOverride": "theme:dark",
+  "args": {
+    "theme": "dark",
+    "title": "Campaign heading which runs across two or three lines",
+    "content": "Quis non in nostrud incididunt voluptate ea enim cillum ex ut reprehenderit proident enim officia velit.",
+    "date": "11 Dec 2024",
+    "image": {
+      "url": "./demo/images/demo4.jpg",
+      "alt": "Image alt text"
+    },
+    "image_position": "left",
+    "tags": [
+      "Tag 1"
+    ],
+    "links": [
+      {
+        "text": "Link 1",
+        "url": "https://example.com/link",
+        "is_new_window": false,
+        "is_external": false
+      },
+      {
+        "text": "Link 2",
+        "url": "https://example.com/link-2",
+        "is_new_window": false,
+        "is_external": false
+      }
+    ],
+    "vertical_spacing": "both",
+    "content_top": "",
+    "content_bottom": "",
+    "attributes": null,
+    "modifier_class": ""
+  }
+}

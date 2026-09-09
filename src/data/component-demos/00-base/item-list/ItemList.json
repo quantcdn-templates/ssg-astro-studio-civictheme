@@ -1,0 +1,24 @@
+{
+  "storyId": "base-item-list--item-list",
+  "title": "Base/Item List",
+  "name": "Item List",
+  "exportName": "ItemList",
+  "component": "00-base/item-list",
+  "importPath": "./components/00-base/item-list/item-list.stories.js",
+  "theme": null,
+  "layout": "centered",
+  "background": null,
+  "argsOverride": null,
+  "args": {
+    "direction": "horizontal",
+    "size": "regular",
+    "no_gap": false,
+    "items": [
+      "<div class=\"story-placeholder\" contenteditable=\"true\">Content placeholder<div>",
+      "<div class=\"story-placeholder\" contenteditable=\"true\">Content placeholder<div>",
+      "<div class=\"story-placeholder\" contenteditable=\"true\">Content placeholder<div>"
+    ],
+    "modifier_class": "",
+    "attributes": null
+  }
+}

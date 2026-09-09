@@ -1,0 +1,42 @@
+{
+  "storyId": "molecules-logo--logo",
+  "title": "Molecules/Logo",
+  "name": "Logo",
+  "exportName": "Logo",
+  "component": "02-molecules/logo",
+  "importPath": "./components/02-molecules/logo/logo.stories.js",
+  "theme": "light",
+  "layout": "centered",
+  "background": null,
+  "argsOverride": null,
+  "args": {
+    "theme": "light",
+    "type": "default",
+    "logos": {
+      "primary": {
+        "mobile": {
+          "url": "assets/logos/logo_primary_light_mobile.png",
+          "alt": "Primary logo mobile alt text"
+        },
+        "desktop": {
+          "url": "assets/logos/logo_primary_light_desktop.png",
+          "alt": "Primary logo desktop alt text"
+        }
+      },
+      "secondary": {
+        "mobile": {
+          "url": "assets/logos/logo_secondary_light_mobile.png",
+          "alt": "Secondary logo mobile alt text"
+        },
+        "desktop": {
+          "url": "assets/logos/logo_secondary_light_desktop.png",
+          "alt": "Secondary logo desktop alt text"
+        }
+      }
+    },
+    "url": "https://example.com",
+    "title": "Logo title",
+    "attributes": null,
+    "modifier_class": ""
+  }
+}

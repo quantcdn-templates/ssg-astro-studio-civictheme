@@ -1,0 +1,18 @@
+{
+  "storyId": "organisms-skip-link--skip-link",
+  "title": "Organisms/Skip Link",
+  "name": "Skip Link",
+  "exportName": "SkipLink",
+  "component": "03-organisms/skip-link",
+  "importPath": "./components/03-organisms/skip-link/skip-link.stories.js",
+  "theme": "light",
+  "layout": "fullscreen",
+  "background": null,
+  "argsOverride": null,
+  "args": {
+    "theme": "light",
+    "text": "Skip to main content",
+    "url": "#main-content",
+    "modifier_class": ""
+  }
+}

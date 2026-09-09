@@ -1,0 +1,39 @@
+{
+  "storyId": "molecules-accordion--accordion",
+  "title": "Molecules/Accordion",
+  "name": "Accordion",
+  "exportName": "Accordion",
+  "component": "02-molecules/accordion",
+  "importPath": "./components/02-molecules/accordion/accordion.stories.js",
+  "theme": "dark",
+  "layout": "padded",
+  "background": null,
+  "argsOverride": "theme:dark",
+  "args": {
+    "theme": "dark",
+    "expand_all": false,
+    "with_background": false,
+    "vertical_spacing": "none",
+    "modifier_class": "",
+    "attributes": null,
+    "panels": [
+      {
+        "title": "Accordion title 1",
+        "content": "Accordion content 1 <a href=\"https://example.com\">Example link</a>",
+        "expanded": false
+      },
+      {
+        "title": "Accordion title 2",
+        "content": "Accordion content 2 <a href=\"https://example.com\">Example link</a>",
+        "expanded": false
+      },
+      {
+        "title": "Accordion title 3",
+        "content": "Accordion content 3 <a href=\"https://example.com\">Example link</a>",
+        "expanded": false
+      }
+    ],
+    "content_top": "",
+    "content_bottom": ""
+  }
+}

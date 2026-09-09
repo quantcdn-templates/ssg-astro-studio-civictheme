@@ -1,0 +1,19 @@
+{
+  "storyId": "atoms-form-controls-field-message--field-message",
+  "title": "Atoms/Form Controls/Field Message",
+  "name": "Field Message",
+  "exportName": "FieldMessage",
+  "component": "01-atoms/field-message",
+  "importPath": "./components/01-atoms/field-message/field-message.stories.js",
+  "theme": "light",
+  "layout": "centered",
+  "background": null,
+  "argsOverride": null,
+  "args": {
+    "theme": "light",
+    "type": "error",
+    "content": "Field message content sample.",
+    "modifier_class": "",
+    "attributes": null
+  }
+}

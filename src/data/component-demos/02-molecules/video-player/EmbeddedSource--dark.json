@@ -1,0 +1,33 @@
+{
+  "storyId": "molecules-video-player--embedded-source",
+  "title": "Molecules/Video Player",
+  "name": "Embedded Source",
+  "exportName": "EmbeddedSource",
+  "component": "02-molecules/video-player",
+  "importPath": "./components/02-molecules/video-player/video-player.stories.js",
+  "theme": "dark",
+  "layout": "centered",
+  "background": null,
+  "argsOverride": "theme:dark",
+  "args": {
+    "theme": "dark",
+    "title": "Test video",
+    "width": "550",
+    "height": "400",
+    "sources": null,
+    "poster": "",
+    "embedded_source": "https://www.youtube.com/embed/C0DPdy98e4c",
+    "raw_source": "",
+    "transcript_link": {
+      "text": "View transcript",
+      "title": "Open transcription in a new window",
+      "url": "https://example.com",
+      "is_new_window": true,
+      "is_external": false,
+      "attributes": null
+    },
+    "vertical_spacing": "none",
+    "attributes": null,
+    "modifier_class": ""
+  }
+}

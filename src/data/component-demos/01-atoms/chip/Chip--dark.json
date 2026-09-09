@@ -1,0 +1,23 @@
+{
+  "storyId": "atoms-chip--chip",
+  "title": "Atoms/Chip",
+  "name": "Chip",
+  "exportName": "Chip",
+  "component": "01-atoms/chip",
+  "importPath": "./components/01-atoms/chip/chip.stories.js",
+  "theme": "dark",
+  "layout": "centered",
+  "background": null,
+  "argsOverride": "theme:dark",
+  "args": {
+    "theme": "dark",
+    "kind": "default",
+    "size": "regular",
+    "content": "Chip label",
+    "url": "https://example.com",
+    "label": "Navigate to Chip: Example",
+    "is_selected": false,
+    "is_multiple": false,
+    "is_dismissible": false
+  }
+}

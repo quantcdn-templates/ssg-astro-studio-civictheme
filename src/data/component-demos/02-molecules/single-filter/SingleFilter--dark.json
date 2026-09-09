@@ -1,0 +1,45 @@
+{
+  "storyId": "molecules-list-single-filter--single-filter",
+  "title": "Molecules/List/Single Filter",
+  "name": "Single Filter",
+  "exportName": "SingleFilter",
+  "component": "02-molecules/single-filter",
+  "importPath": "./components/02-molecules/single-filter/single-filter.stories.js",
+  "theme": "dark",
+  "layout": "padded",
+  "background": null,
+  "argsOverride": "theme:dark",
+  "args": {
+    "theme": "dark",
+    "content_top": "",
+    "title": "Filter results by:",
+    "form_attributes": null,
+    "form_hidden_fields": null,
+    "items": [
+      {
+        "text": "Option A",
+        "name": "option_name",
+        "is_selected": false,
+        "attributes": null
+      },
+      {
+        "text": "Option B",
+        "name": "option_name",
+        "is_selected": false,
+        "attributes": null
+      },
+      {
+        "text": "Option C",
+        "name": "option_name",
+        "is_selected": false,
+        "attributes": null
+      }
+    ],
+    "submit_text": "Apply",
+    "reset_text": "Clear all",
+    "content_bottom": "",
+    "is_multiple": false,
+    "attributes": null,
+    "modifier_class": ""
+  }
+}

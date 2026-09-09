@@ -1,0 +1,19 @@
+{
+  "storyId": "atoms-heading--heading",
+  "title": "Atoms/Heading",
+  "name": "Heading",
+  "exportName": "Heading",
+  "component": "01-atoms/heading",
+  "importPath": "./components/01-atoms/heading/heading.stories.js",
+  "theme": "dark",
+  "layout": "centered",
+  "background": null,
+  "argsOverride": "theme:dark",
+  "args": {
+    "theme": "dark",
+    "level": "1",
+    "content": "Heading content",
+    "modifier_class": "",
+    "attributes": null
+  }
+}

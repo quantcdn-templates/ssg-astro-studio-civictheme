@@ -1,0 +1,36 @@
+{
+  "storyId": "molecules-callout--callout",
+  "title": "Molecules/Callout",
+  "name": "Callout",
+  "exportName": "Callout",
+  "component": "02-molecules/callout",
+  "importPath": "./components/02-molecules/callout/callout.stories.js",
+  "theme": "light",
+  "layout": "centered",
+  "background": null,
+  "argsOverride": null,
+  "args": {
+    "theme": "light",
+    "links": [
+      {
+        "text": "Link 1",
+        "url": "https://example.com/link1",
+        "is_new_window": false,
+        "is_external": false
+      },
+      {
+        "text": "Link 2",
+        "url": "https://example.com/link2",
+        "is_new_window": true,
+        "is_external": true
+      }
+    ],
+    "content_top": "",
+    "content_bottom": "",
+    "title": "Callout title from knob",
+    "content": "Example content ut fugiat ex nulla enim ipsum proident aliqua in elit irure tempor elit nisi nisi enim labore nostrud mollit ut magna commodo",
+    "vertical_spacing": "none",
+    "modifier_class": "",
+    "attributes": null
+  }
+}

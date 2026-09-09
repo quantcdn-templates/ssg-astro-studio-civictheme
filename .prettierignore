@@ -6,3 +6,4 @@ src/civictheme/components/00-base/icons.ts
 .upstream
 docs/
 tests/story-parity/fixtures
+src/data/component-demos

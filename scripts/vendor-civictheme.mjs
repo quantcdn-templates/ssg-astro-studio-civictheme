@@ -149,6 +149,44 @@ writeFileSync(
     .replace(/- Version: .*/, `- Version: ${version}`)
     .replace(/- Commit: .*/, `- Commit: ${commit}`)
 );
+
+// 6. Storybook demo images/videos → public/civictheme/demo (Task 17 fix)
+//
+// Upstream's captured story args reference `./demo/images/*` and `./demo/videos/*`
+// (e.g. `03-organisms/promo-card` image URLs), which upstream Storybook serves from
+// `packages/twig/.storybook/static/demo/`. The full directory is ~5.3 MB (mostly
+// video fixtures for VideoPlayer stories), over the ~5 MB "vendor everything" budget,
+// so only the files actually referenced by `tests/story-parity/fixtures/args/**/*.json`
+// are copied — found by scanning those fixtures for `demo/(images|videos)/<file>`.
+// A referenced file that doesn't exist upstream (e.g. `demo7.jpg`, only ever shipped
+// under the SDC package's own static demo assets, never the twig one this template
+// vendors from) is skipped with a warning rather than failing the vendor run.
+const storybookDemoDir = join(twig, '.storybook/static/demo');
+const storyFixturesDir = join(root, 'tests/story-parity/fixtures/args');
+if (existsSync(storybookDemoDir) && existsSync(storyFixturesDir)) {
+  const referenced = new Set();
+  for (const f of walk(storyFixturesDir).filter((p) => p.endsWith('.json'))) {
+    const text = readFileSync(f, 'utf8');
+    for (const m of text.matchAll(/demo\/(images|videos)\/[\w.-]+/g)) referenced.add(m[0]);
+  }
+  const demoDest = join(out.pub, 'demo');
+  rmSync(demoDest, { recursive: true, force: true });
+  let copiedDemo = 0;
+  for (const rel of [...referenced].sort()) {
+    const relInDemo = rel.replace(/^demo\//, ''); // e.g. `images/demo1.jpg`
+    const src = join(storybookDemoDir, relInDemo);
+    if (!existsSync(src)) {
+      console.warn(`warning: story fixtures reference ${rel}, not found under ${storybookDemoDir} — skipped`);
+      continue;
+    }
+    const dest = join(demoDest, relInDemo);
+    mkdirSync(dirname(dest), { recursive: true });
+    copyFileSync(src, dest);
+    copiedDemo += 1;
+  }
+  console.log(`vendored ${copiedDemo}/${referenced.size} referenced Storybook demo images/videos`);
+}
+
 console.log(
   `vendored ${scssFiles.length} scss, ${jsFiles.length} js, ${icons.length} icons from uikit ${version} (${commit.slice(0, 7)})`
 );

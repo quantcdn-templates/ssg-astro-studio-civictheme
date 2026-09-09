@@ -1,0 +1,20 @@
+{
+  "storyId": "atoms-content-link--content-link",
+  "title": "Atoms/Content Link",
+  "name": "Content Link",
+  "exportName": "ContentLink",
+  "component": "01-atoms/content-link",
+  "importPath": "./components/01-atoms/content-link/content-link.stories.js",
+  "theme": "light",
+  "layout": "centered",
+  "background": null,
+  "argsOverride": null,
+  "args": {
+    "theme": "light",
+    "text": "Link text",
+    "title": "Link title",
+    "url": "https://example.com",
+    "is_new_window": false,
+    "is_external": false
+  }
+}

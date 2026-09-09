@@ -1,0 +1,74 @@
+{
+  "storyId": "molecules-field--field-radio",
+  "title": "Molecules/Field",
+  "name": "Field Radio",
+  "exportName": "FieldRadio",
+  "component": "02-molecules/field",
+  "importPath": "./components/02-molecules/field/field.stories.js",
+  "theme": "dark",
+  "layout": "centered",
+  "background": null,
+  "argsOverride": "theme:dark",
+  "args": {
+    "theme": "dark",
+    "type": "radio",
+    "title": "Field title",
+    "title_display": "visible",
+    "title_size": "regular",
+    "description": "Description content sample.",
+    "message": {
+      "content": "Message conte nt sample.",
+      "attributes": "id=\"field_id_740--error-message\""
+    },
+    "is_required": true,
+    "required_text": "",
+    "is_invalid": false,
+    "is_disabled": false,
+    "orientation": "vertical",
+    "is_inline": false,
+    "name": "option_group_96",
+    "value": "",
+    "placeholder": "Field placeholder",
+    "id": "field_id_740",
+    "control": [
+      {
+        "label": "Control item 1",
+        "name": "option_group_96",
+        "value": "",
+        "id": "option_group_96_control_item_1",
+        "is_required": true,
+        "is_invalid": false,
+        "is_disabled": false,
+        "attributes": null,
+        "modifier_class": ""
+      },
+      {
+        "label": "Control item 2",
+        "name": "option_group_96",
+        "value": "",
+        "id": "option_group_96_control_item_2",
+        "is_required": true,
+        "is_invalid": false,
+        "is_disabled": false,
+        "attributes": null,
+        "modifier_class": ""
+      },
+      {
+        "label": "Control item 3",
+        "name": "option_group_96",
+        "value": "",
+        "id": "option_group_96_control_item_3",
+        "is_required": true,
+        "is_invalid": false,
+        "is_disabled": false,
+        "attributes": null,
+        "modifier_class": ""
+      }
+    ],
+    "options": null,
+    "attributes": null,
+    "modifier_class": "",
+    "prefix": "",
+    "suffix": ""
+  }
+}

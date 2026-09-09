@@ -14,14 +14,16 @@
     "test": "vitest run",
     "test:parity": "vitest run tests/parity",
     "test:e2e": "playwright test",
-    "vendor": "node scripts/vendor-civictheme.mjs",
-    "test:story-parity": "vitest run tests/story-parity"
+    "vendor": "node scripts/vendor-civictheme.mjs && node scripts/sync-component-demos.mjs",
+    "demos:sync": "node scripts/sync-component-demos.mjs",
+    "test:story-parity": "vitest run tests/story-parity",
+    "test:story-parity:visual": "PUBLIC_STORY_PARITY=1 astro build && playwright test --config playwright.story-parity.config.ts"
   },
   "dependencies": {
-    "astro": "^7.3.1",
     "@astrojs/mdx": "^8.0.0",
     "@astrojs/sitemap": "^3.7.4",
     "@resvg/resvg-js": "^2.6.2",
+    "astro": "^7.3.1",
     "astro-robots-txt": "^1.0.0",
     "satori": "^0.26.0"
   },
@@ -30,6 +32,8 @@
     "@axe-core/playwright": "^4.10.0",
     "@playwright/test": "^1.50.0",
     "linkedom": "^0.18.0",
+    "pixelmatch": "^7.2.0",
+    "pngjs": "^7.0.0",
     "prettier": "^3.0.0",
     "prettier-plugin-astro": "^0.14.0",
     "sass": "^1.104.0",

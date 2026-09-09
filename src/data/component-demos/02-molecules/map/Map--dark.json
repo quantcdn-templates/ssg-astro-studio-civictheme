@@ -1,0 +1,25 @@
+{
+  "storyId": "molecules-map--map",
+  "title": "Molecules/Map",
+  "name": "Map",
+  "exportName": "Map",
+  "component": "02-molecules/map",
+  "importPath": "./components/02-molecules/map/map.stories.js",
+  "theme": "dark",
+  "layout": "padded",
+  "background": null,
+  "argsOverride": "theme:dark",
+  "args": {
+    "theme": "dark",
+    "url": "https://maps.google.com/maps?q=australia&t=&z=3&ie=UTF8&iwloc=&output=embed",
+    "address": "Australia",
+    "view_url": "https://example.com",
+    "view_text": "",
+    "vertical_spacing": "none",
+    "with_background": false,
+    "content_top": "",
+    "content_bottom": "",
+    "modifier_class": "",
+    "attributes": null
+  }
+}

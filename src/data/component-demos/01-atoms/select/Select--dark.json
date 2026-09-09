@@ -1,0 +1,45 @@
+{
+  "storyId": "atoms-form-controls-select--select",
+  "title": "Atoms/Form Controls/Select",
+  "name": "Select",
+  "exportName": "Select",
+  "component": "01-atoms/select",
+  "importPath": "./components/01-atoms/select/select.stories.js",
+  "theme": "dark",
+  "layout": "centered",
+  "background": null,
+  "argsOverride": "theme:dark",
+  "args": {
+    "theme": "dark",
+    "is_multiple": false,
+    "options": [
+      {
+        "type": "optgroup",
+        "label": "Group label",
+        "value": "Group value",
+        "selected": false,
+        "options": [
+          {
+            "label": "Option label",
+            "value": "Option value",
+            "is_selected": false,
+            "is_disabled": false
+          }
+        ]
+      },
+      {
+        "type": "option",
+        "label": "Option label",
+        "value": "Option value",
+        "selected": false
+      }
+    ],
+    "name": "Select name",
+    "id": "select-id",
+    "is_required": false,
+    "is_invalid": false,
+    "is_disabled": false,
+    "attributes": null,
+    "modifier_class": ""
+  }
+}

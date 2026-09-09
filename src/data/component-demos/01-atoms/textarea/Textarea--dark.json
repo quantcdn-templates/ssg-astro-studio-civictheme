@@ -1,0 +1,25 @@
+{
+  "storyId": "atoms-form-controls-textarea--textarea",
+  "title": "Atoms/Form Controls/Textarea",
+  "name": "Textarea",
+  "exportName": "Textarea",
+  "component": "01-atoms/textarea",
+  "importPath": "./components/01-atoms/textarea/textarea.stories.js",
+  "theme": "dark",
+  "layout": "centered",
+  "background": null,
+  "argsOverride": "theme:dark",
+  "args": {
+    "theme": "dark",
+    "rows": 5,
+    "placeholder": "Placeholder",
+    "value": "",
+    "name": "textarea-name",
+    "id": "textarea-id",
+    "is_required": false,
+    "is_invalid": false,
+    "is_disabled": false,
+    "attributes": null,
+    "modifier_class": ""
+  }
+}
