@@ -3,7 +3,7 @@
     "title": "CivicTheme (Astro Studio)",
     "url": "/deploy/static/ssg-astro-studio-civictheme",
     "summary": "CivicTheme design system on Astro with Quant Studio visual editing",
-    "content": "The Salsa Digital CivicTheme design system ported to Astro: 90+ accessible components, live SCSS theming, pages, events, news and publications collections, and a full demo site. Designed for visual editing with Quant Studio.",
+    "content": "The Salsa Digital CivicTheme design system ported to Astro: 77 accessible components, live SCSS theming, pages, events, news and publications collections, and a full demo site. Designed for visual editing with Quant Studio.",
     "image": "https://raw.githubusercontent.com/quantcdn-templates/ssg-astro-studio-civictheme/main/quant/screenshot.png",
     "categories": ["javascript", "astro", "studio", "civictheme"],
     "tags": ["design-system", "government", "scss", "mdx", "og-images", "accessibility"],
