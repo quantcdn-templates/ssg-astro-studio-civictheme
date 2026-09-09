@@ -14,6 +14,11 @@
  *   rendered with `set:html` per this project's autoescape convention
  *   (`title` is used only as a plain attribute value, matching upstream's
  *   `aria-label`/`title` attribute usage — not printed as markup).
+ *   `content` also now has a same-named Astro slot that TAKES PRECEDENCE
+ *   over the string prop when present (Task 14c); the root render gate
+ *   widens to `Boolean(content) || Astro.slots.has('content')`. `title`
+ *   is NOT slotted (Task 14c): it feeds two plain HTML attributes
+ *   (`aria-label`, `title`), not markup — a slot has no attribute analog.
  * - class: Additional CSS classes.
  * - ...rest: Additional HTML attributes, spread onto the root element.
  */
@@ -34,10 +39,13 @@ interface Props {
 const { theme = 'light', position, icon, iconSize, title, content, class: className = '', ...rest } = Astro.props;
 
 const classes = ['ct-tooltip', `ct-theme-${theme}`, className].filter(Boolean).join(' ');
+
+const hasContentSlot = Astro.slots.has('content');
+const hasContent = Boolean(content) || hasContentSlot;
 ---
 
 {
-  content && (
+  hasContent && (
     <div class={classes} data-component-name="tooltip" {...rest}>
       <button
         class="ct-tooltip__button"
@@ -49,7 +57,9 @@ const classes = ['ct-tooltip', `ct-theme-${theme}`, className].filter(Boolean).j
         <Icon symbol={icon || 'information-mark'} size={iconSize || 'large'} />
       </button>{' '}
       <div class="ct-tooltip__description" data-tooltip-content>
-        <div class="ct-tooltip__description__inner" set:html={content} />{' '}
+        <div class="ct-tooltip__description__inner">
+          {hasContentSlot ? <slot name="content" /> : <Fragment set:html={content} />}
+        </div>{' '}
         <div data-tooltip-close>
           <Button type="tertiary" kind="button" icon="cancel" size="regular" class="ct-tooltip__close-button" />
         </div>{' '}

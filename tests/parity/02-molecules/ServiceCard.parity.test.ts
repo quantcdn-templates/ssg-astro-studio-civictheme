@@ -1,6 +1,6 @@
-import { describe } from 'vitest';
+import { describe, it, expect } from 'vitest';
 import ServiceCard from '@civictheme/molecules/ServiceCard.astro';
-import { parityCase, expectAllKeysCovered } from '../harness';
+import { parityCase, expectAllKeysCovered, renderNormalised } from '../harness';
 
 const meta = { layer: '02-molecules', name: 'service-card' };
 
@@ -50,4 +50,36 @@ describe('ServiceCard', () => {
   });
 
   expectAllKeysCovered(meta, [REQUIRED_KEY, OPTIONAL_KEY, NO_TITLE_KEY, SLOTS_KEY]);
+
+  // Task 14c: `contentTop`/`title`/`contentBottom` also have Astro slots
+  // that take precedence over the string props.
+  describe('slot vs string-prop parity', () => {
+    it('title: slot renders identically to the string prop', async () => {
+      const viaProp = await renderNormalised(ServiceCard, { title: 'Card Title' });
+      const viaSlot = await renderNormalised(
+        ServiceCard,
+        {},
+        { title: '<h4 class="ct-heading ct-service-card__title ct-theme-light">Card Title</h4>' }
+      );
+      expect(viaSlot).toBe(viaProp);
+    });
+
+    it('contentTop: slot renders identically to the string prop', async () => {
+      const viaProp = await renderNormalised(ServiceCard, { title: 'x', contentTop: 'Top content' });
+      const viaSlot = await renderNormalised(ServiceCard, { title: 'x' }, { contentTop: 'Top content' });
+      expect(viaSlot).toBe(viaProp);
+    });
+
+    it('contentBottom: slot renders identically to the string prop', async () => {
+      const viaProp = await renderNormalised(ServiceCard, { title: 'x', contentBottom: 'Bottom content' });
+      const viaSlot = await renderNormalised(ServiceCard, { title: 'x' }, { contentBottom: 'Bottom content' });
+      expect(viaSlot).toBe(viaProp);
+    });
+
+    it('a title slot alone (no string prop) still renders the card', async () => {
+      const html = await renderNormalised(ServiceCard, {}, { title: 'Live Title' });
+      expect(html).toContain('ct-service-card__content');
+      expect(html).toContain('Live Title');
+    });
+  });
 });

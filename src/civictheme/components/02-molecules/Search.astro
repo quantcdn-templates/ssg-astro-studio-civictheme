@@ -12,6 +12,12 @@
  * convention, see PORTING.md):
  * - text: Text for the search link.
  * - url: Search page URL.
+ *
+ * Neither is slotted (Task 14c): `text` is wrapped in a `<span>` and fed
+ * straight into `Link`'s `text` prop, a plain string sink (same
+ * "sink can't carry what's needed" case as `Tag.content`/`Button.text`);
+ * `url` is consumed as `Link`'s `url` (href) attribute value, not markup —
+ * a slot has no analogue for "which URL to link to".
  */
 import Link from '@civictheme/atoms/Link.astro';
 

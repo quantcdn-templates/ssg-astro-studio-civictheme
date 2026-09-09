@@ -10,7 +10,11 @@
  *   whole card.
  * - title / imageOver: Documented as Slots upstream, but every upstream
  *   test passes plain string props — ported as `string` props, rendered
- *   with `set:html` per this project's autoescape convention.
+ *   with `set:html` per this project's autoescape convention. Each also
+ *   now has a same-named Astro slot that TAKES PRECEDENCE over the string
+ *   prop when present (Task 14c); every wrapper `{% if %}` gate (root
+ *   included, via `title`) widens to
+ *   `Boolean(prop) || Astro.slots.has('prop')`.
  * - class: Additional CSS classes.
  * - ...rest: Additional HTML attributes, spread onto the root element.
  */
@@ -42,10 +46,15 @@ const classes = [
 ]
   .filter(Boolean)
   .join(' ');
+
+const hasImageOverSlot = Astro.slots.has('imageOver');
+const hasTitleSlot = Astro.slots.has('title');
+const hasImageOver = Boolean(imageOver) || hasImageOverSlot;
+const hasTitle = Boolean(title) || hasTitleSlot;
 ---
 
 {
-  title && (
+  hasTitle && (
     <div class={classes} {...rest}>
       <div class="ct-subject-card__content">
         {withImage && (
@@ -55,16 +64,20 @@ const classes = [
             </div>{' '}
           </Fragment>
         )}
-        {imageOver && (
+        {hasImageOver && (
           <Fragment>
-            <div class="ct-subject-card__image__over" set:html={imageOver} />{' '}
+            <div class="ct-subject-card__image__over">
+              {hasImageOverSlot ? <slot name="imageOver" /> : <Fragment set:html={imageOver} />}
+            </div>{' '}
           </Fragment>
         )}
         <div class="ct-subject-card__title">
           {withLink ? (
             <a class="ct-subject-card__title-link" href={link?.url} target={link?.isNewWindow ? '_blank' : undefined}>
-              <Fragment set:html={title} />
+              {hasTitleSlot ? <slot name="title" /> : <Fragment set:html={title} />}
             </a>
+          ) : hasTitleSlot ? (
+            <slot name="title" />
           ) : (
             <Fragment set:html={title} />
           )}

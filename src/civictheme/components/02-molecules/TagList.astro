@@ -12,6 +12,9 @@
  * - contentTop / contentBottom: Documented as Slots upstream, but every
  *   upstream test passes plain string props — ported as `string` props,
  *   rendered with `set:html` per this project's autoescape convention.
+ *   Each also now has a same-named Astro slot that TAKES PRECEDENCE over
+ *   the string prop when present (Task 14c); their wrapper `{% if %}`
+ *   gates widen to `Boolean(prop) || Astro.slots.has('prop')`.
  * - class: Additional CSS classes.
  * - ...rest: Additional HTML attributes, spread onto the root element.
  *
@@ -69,14 +72,21 @@ const tagProps = (tags ?? []).map((tag): TagItem => {
   const tagObj = typeof tag === 'string' ? { content: tag } : tag;
   return { theme, ...tagObj };
 });
+
+const hasContentTopSlot = Astro.slots.has('contentTop');
+const hasContentBottomSlot = Astro.slots.has('contentBottom');
+const hasContentTop = Boolean(contentTop) || hasContentTopSlot;
+const hasContentBottom = Boolean(contentBottom) || hasContentBottomSlot;
 ---
 
 {
   hasTags && (
     <div class={classes} {...rest}>
-      {contentTop && (
+      {hasContentTop && (
         <Fragment>
-          <div class="ct-tag-list__content-top" set:html={contentTop} />{' '}
+          <div class="ct-tag-list__content-top">
+            {hasContentTopSlot ? <slot name="contentTop" /> : <Fragment set:html={contentTop} />}
+          </div>{' '}
         </Fragment>
       )}
       <ul class="ct-item-list ct-item-list--horizontal ct-item-list--small ct-tag-list__content">
@@ -89,10 +99,12 @@ const tagProps = (tags ?? []).map((tag): TagItem => {
           </Fragment>
         ))}
       </ul>
-      {contentBottom && (
+      {hasContentBottom && (
         <Fragment>
           {' '}
-          <div class="ct-tag-list__content-bottom" set:html={contentBottom} />
+          <div class="ct-tag-list__content-bottom">
+            {hasContentBottomSlot ? <slot name="contentBottom" /> : <Fragment set:html={contentBottom} />}
+          </div>
         </Fragment>
       )}
     </div>

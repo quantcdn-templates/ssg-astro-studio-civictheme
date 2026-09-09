@@ -17,7 +17,8 @@
  * - content: Content HTML (only used in the automatic/behaviour-hook
  *   branch, i.e. when `links` is absent) — documented as a Slot upstream,
  *   ported as a `string` prop rendered with `set:html` per this project's
- *   autoescape convention.
+ *   autoescape convention. Also has a same-named Astro slot that TAKES
+ *   PRECEDENCE over the string prop when present (Task 14c).
  * - class: Additional CSS classes.
  * - ...rest: Additional HTML attributes, spread onto the static-list
  *   branch's root element (matching upstream's `attributes` usage there;
@@ -80,6 +81,8 @@ const classes = [
 ]
   .filter(Boolean)
   .join(' ');
+
+const hasContentSlot = Astro.slots.has('content');
 ---
 
 {
@@ -110,8 +113,9 @@ const classes = [
               data-table-of-contents-anchor-selector={anchorSelector ?? ''}
               data-table-of-contents-anchor-scope-selector={scopeSelector ?? ''}
               data-table-of-contents-position={position ?? ''}
-              set:html={content}
-            />
+            >
+              {hasContentSlot ? <slot name="content" /> : <Fragment set:html={content} />}
+            </div>
           )}
         </div>
       </div>

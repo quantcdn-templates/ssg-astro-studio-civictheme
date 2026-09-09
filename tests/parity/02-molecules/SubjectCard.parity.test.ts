@@ -1,6 +1,6 @@
-import { describe } from 'vitest';
+import { describe, it, expect } from 'vitest';
 import SubjectCard from '@civictheme/molecules/SubjectCard.astro';
-import { parityCase, expectAllKeysCovered } from '../harness';
+import { parityCase, expectAllKeysCovered, renderNormalised } from '../harness';
 
 const meta = { layer: '02-molecules', name: 'subject-card' };
 
@@ -41,4 +41,26 @@ describe('SubjectCard', () => {
   });
 
   expectAllKeysCovered(meta, [REQUIRED_KEY, OPTIONAL_KEY, NO_TITLE_KEY, LINK_IMAGE_KEY, SLOTS_KEY]);
+
+  // Task 14c: `title`/`imageOver` also have Astro slots that take
+  // precedence over the string props.
+  describe('slot vs string-prop parity', () => {
+    it('title: slot renders identically to the string prop', async () => {
+      const viaProp = await renderNormalised(SubjectCard, { title: 'Card Title' });
+      const viaSlot = await renderNormalised(SubjectCard, {}, { title: 'Card Title' });
+      expect(viaSlot).toBe(viaProp);
+    });
+
+    it('imageOver: slot renders identically to the string prop', async () => {
+      const viaProp = await renderNormalised(SubjectCard, { title: 'x', imageOver: 'Over content' });
+      const viaSlot = await renderNormalised(SubjectCard, { title: 'x' }, { imageOver: 'Over content' });
+      expect(viaSlot).toBe(viaProp);
+    });
+
+    it('a title slot alone (no string prop) still renders the card', async () => {
+      const html = await renderNormalised(SubjectCard, {}, { title: 'Live Title' });
+      expect(html).toContain('ct-subject-card__title');
+      expect(html).toContain('Live Title');
+    });
+  });
 });

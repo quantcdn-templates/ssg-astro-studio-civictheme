@@ -1,6 +1,6 @@
-import { describe } from 'vitest';
+import { describe, it, expect } from 'vitest';
 import Tooltip from '@civictheme/molecules/Tooltip.astro';
-import { parityCase, expectAllKeysCovered } from '../harness';
+import { parityCase, expectAllKeysCovered, renderNormalised } from '../harness';
 
 const meta = { layer: '02-molecules', name: 'tooltip' };
 
@@ -34,4 +34,20 @@ describe('Tooltip', () => {
   });
 
   expectAllKeysCovered(meta, [REQUIRED_KEY, OPTIONAL_KEY, EMPTY_KEY, ICON_SIZE_KEY]);
+
+  // Task 14c: `content` also has an Astro slot that takes precedence over
+  // the string prop.
+  describe('slot vs string-prop parity', () => {
+    it('content: slot renders identically to the string prop', async () => {
+      const viaProp = await renderNormalised(Tooltip, { content: 'Tooltip content' });
+      const viaSlot = await renderNormalised(Tooltip, {}, { content: 'Tooltip content' });
+      expect(viaSlot).toBe(viaProp);
+    });
+
+    it('a content slot alone (no string prop) still renders the tooltip', async () => {
+      const html = await renderNormalised(Tooltip, {}, { content: 'Live content' });
+      expect(html).toContain('ct-tooltip__description__inner');
+      expect(html).toContain('Live content');
+    });
+  });
 });

@@ -77,4 +77,19 @@ describe('TableOfContents (smoke — no upstream test.js)', () => {
     expect(html).toContain('data-table-of-contents-anchor-scope-selector=".ct-basic-content"');
     expect(html).toMatch(/\sdata-table-of-contents-position(\s|=|>)/);
   });
+
+  // Task 14c: `content` also has an Astro slot that takes precedence over
+  // the string prop.
+  it('content: slot renders identically to the string prop', async () => {
+    const props = {
+      theme: 'dark' as const,
+      title: 'On this page',
+      anchorSelector: 'h2',
+      scopeSelector: '.ct-basic-content',
+      position: 'before' as const,
+    };
+    const viaProp = await renderNormalised(TableOfContents, { ...props, content: '<h2>Heading</h2><p>Body</p>' });
+    const viaSlot = await renderNormalised(TableOfContents, props, { content: '<h2>Heading</h2><p>Body</p>' });
+    expect(viaSlot).toBe(viaProp);
+  });
 });
