@@ -1,0 +1,139 @@
+---
+/**
+ * CivicTheme Navigation component.
+ *
+ * Props:
+ * - theme: Theme variation (light or dark).
+ * - name: Navigation name for the `<nav>` element's `aria-label`.
+ * - menuId: Optional menu ID used for grouping dropdown items
+ *   (`data-collapsible-group`).
+ * - type: Navigation display type (none, inline, dropdown, drawer).
+ * - variant: One of: primary, secondary.
+ * - dropdownColumns: Dropdown drawer column count.
+ * - dropdownColumnsFill: Whether to fill columns.
+ * - isAnimated: Whether to use animation for transitions.
+ * - items: Menu items (see `Menu.astro`'s `MenuItem`).
+ * - title: Navigation title.
+ * - class: Additional CSS classes.
+ * - ...rest: Additional HTML attributes, spread onto the root element.
+ *
+ * `type: 'dropdown' | 'drawer'` reaches its collapsible behaviour by
+ * decorating each top-level item that has `below` with
+ * `data-collapsible*` attributes and an `ct-navigation__has-dropdown`
+ * class directly (mirroring `navigation.twig`'s `merge()` calls) — NOT by
+ * setting `Menu`'s own `isCollapsible` prop, which produces a different
+ * markup shape (an extra `.ct-menu__item__link-trigger` button and
+ * `aria-expanded`/`data-collapsible-panel` driven by active-trail state).
+ * `Menu` is reused for the recursive item/link rendering only, called with
+ * `isCollapsible` left at its default `false`. For `type: 'none' |
+ * 'inline'`, each top-level item's `below` is stripped instead (submenus
+ * never render) — exactly `navigation.twig`'s own else-branch.
+ * `menuLevelModifierClass` is `{ 1: 'container' }` only for `type:
+ * 'drawer'` (wraps the level-1 `<ul>` in a `.container`), empty otherwise.
+ * Only top-level items are decorated/stripped — nested `below` items are
+ * passed through unchanged, matching `navigation.twig`'s `items|keys`
+ * loop, which never recurses.
+ */
+import Heading from '@civictheme/atoms/Heading.astro';
+import Menu from '@civictheme/base/Menu.astro';
+
+interface MenuItem {
+  title?: string;
+  url?: string;
+  inActiveTrail?: boolean;
+  isExpanded?: boolean;
+  attributes?: Record<string, unknown>;
+  linkAttributes?: Record<string, unknown>;
+  class?: string;
+  isNewWindow?: boolean;
+  isExternal?: boolean;
+  below?: MenuItem[];
+}
+
+interface Props {
+  theme?: 'light' | 'dark';
+  name?: string;
+  menuId?: string;
+  type?: 'none' | 'inline' | 'dropdown' | 'drawer' | string;
+  variant?: 'primary' | 'secondary' | string;
+  dropdownColumns?: number;
+  dropdownColumnsFill?: boolean;
+  isAnimated?: boolean;
+  items?: MenuItem[];
+  title?: string;
+  class?: string;
+  [key: string]: unknown;
+}
+
+const {
+  theme = 'light',
+  name,
+  menuId,
+  type,
+  variant,
+  dropdownColumns,
+  dropdownColumnsFill,
+  isAnimated,
+  items = [],
+  title,
+  class: className = '',
+  ...rest
+} = Astro.props;
+
+const themeClass = `ct-theme-${theme}`;
+const dropdownClass = `ct-navigation--${type || 'none'}`;
+const variantClass = variant ? `ct-navigation--${variant}` : '';
+const classes = `ct-navigation ${themeClass} ${dropdownClass} ${variantClass} ${className}`;
+
+const isDropdownType = type === 'dropdown' || type === 'drawer';
+const menuLevelModifierClass: Record<number, string> = type === 'drawer' ? { 1: 'container' } : {};
+
+function collapsibleAttrs(): Record<string, string> {
+  return {
+    'data-collapsible': '',
+    'data-collapsible-collapsed': '',
+    'data-collapsible-icon-group': '',
+    'data-collapsible-group': menuId || 'navigation',
+    'data-collapsible-duration': isAnimated ? '250' : '0',
+  };
+}
+
+function dropdownModifierClass(): string {
+  if (type !== 'drawer') return 'ct-navigation__has-dropdown';
+  return [
+    'ct-navigation__has-dropdown',
+    dropdownColumns && `ct-navigation__dropdown-columns--${dropdownColumns}`,
+    dropdownColumnsFill && 'ct-navigation__dropdown-columns--fill',
+  ]
+    .filter(Boolean)
+    .join(' ');
+}
+
+// Only top-level items are augmented/stripped — mirrors navigation.twig's
+// `items|keys` loop, which never recurses into `below`.
+const menuItems = items.map((item) => {
+  if (!item.below) return item;
+  if (!isDropdownType) return { ...item, below: undefined };
+  return { ...item, attributes: collapsibleAttrs(), class: dropdownModifierClass() };
+});
+---
+
+{
+  menuItems.length > 0 && (
+    <div class={classes} {...rest}>
+      {title && (
+        <Fragment>
+          <Heading theme={theme} level={2} content={title} class="ct-navigation__title" />{' '}
+        </Fragment>
+      )}
+      <nav class="ct-navigation__items" aria-label={name || undefined}>
+        <Menu
+          theme={theme}
+          items={menuItems}
+          class="ct-navigation__menu"
+          menuLevelModifierClass={menuLevelModifierClass}
+        />
+      </nav>
+    </div>
+  )
+}
