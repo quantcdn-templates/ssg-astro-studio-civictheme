@@ -1,0 +1,58 @@
+---
+/**
+ * Site footer composition.
+ *
+ * Live components inside the `Footer` organism's named slots (Task 15, see
+ * PORTING.md). Slot allocation follows upstream `footer.stories.data.js`:
+ * `Logo` in `contentTop1`, `SocialLinks` in `contentTop2`, the footer menu in
+ * `contentMiddle1`, the acknowledgement in `contentBottom1` and the copyright
+ * in `contentBottom2`.
+ */
+import Footer from '@civictheme/organisms/Footer.astro';
+import Logo from '@civictheme/molecules/Logo.astro';
+import Navigation from '@civictheme/organisms/Navigation.astro';
+import SocialLinks from '@civictheme/molecules/SocialLinks.astro';
+import { siteSettings, menu, humanise } from '@/lib/content';
+
+interface Props {
+  theme?: 'light' | 'dark';
+}
+
+const { theme = 'dark' } = Astro.props;
+const site = await siteSettings();
+const footerMenu = await menu('footer');
+
+const logoUrl = theme === 'dark' ? site.logoDark : site.logoLight;
+const logos = {
+  primary: {
+    mobile: { url: logoUrl, alt: site.name },
+    desktop: { url: logoUrl, alt: site.name },
+  },
+};
+
+const socialItems = site.social.map((link) => ({
+  title: humanise(link.platform),
+  url: link.url,
+  icon: link.platform,
+}));
+
+const year = new Date().getFullYear();
+---
+
+<Footer theme={theme}>
+  <Fragment slot="contentTop1">
+    <Logo theme={theme} logos={logos} url="/" title={site.name} />
+  </Fragment>
+  <Fragment slot="contentTop2">
+    <SocialLinks theme={theme} withBorder items={socialItems} />
+  </Fragment>
+  <Fragment slot="contentMiddle1">
+    <Navigation theme={theme} items={footerMenu} name="footer" type="none" title={site.name} />
+  </Fragment>
+  <Fragment slot="contentBottom1">
+    <div class="ct-footer__acknowledgement ct-text-regular">{site.acknowledgement}</div>
+  </Fragment>
+  <Fragment slot="contentBottom2">
+    <div class="copyright ct-text-regular">© {year} {site.name}</div>
+  </Fragment>
+</Footer>

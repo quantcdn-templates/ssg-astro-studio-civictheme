@@ -1,0 +1,91 @@
+---
+/**
+ * Layout for one entry of a detail collection (`events`, `news`,
+ * `publications`): banner with the collection breadcrumb and date/location
+ * metadata, a `TagList` of topics, the MDX body, and — for publications — an
+ * `Attachment` for the downloadable file.
+ *
+ * All per-collection field access happens here in the frontmatter script: the
+ * three collections do not share one data shape, so each optional field is
+ * read defensively into a plain view model before the template runs.
+ */
+import type { CollectionEntry } from 'astro:content';
+import BaseLayout from './BaseLayout.astro';
+import PageBanner from '@/components/PageBanner.astro';
+import TagList from '@civictheme/molecules/TagList.astro';
+import Attachment from '@civictheme/molecules/Attachment.astro';
+import Button from '@civictheme/atoms/Button.astro';
+import { humanise, type CardCollection } from '@/lib/content';
+
+interface Props {
+  collection: Exclude<CardCollection, 'pages'>;
+  entry: CollectionEntry<'events' | 'news' | 'publications'>;
+}
+
+const { collection, entry } = Astro.props;
+const data = entry.data as Record<string, unknown>;
+
+const fmt = (value?: Date) =>
+  value ? value.toLocaleDateString('en-AU', { day: 'numeric', month: 'long', year: 'numeric' }) : undefined;
+
+const title = data.title as string;
+const summary = (data.summary as string) ?? '';
+const theme = ((data.theme as string) ?? 'light') as 'light' | 'dark';
+const topics = (data.topics as string[]) ?? [];
+const image = data.image as string | undefined;
+
+const startDate = fmt(data.startDate as Date | undefined);
+const endDate = fmt(data.endDate as Date | undefined);
+const date = fmt(data.date as Date | undefined);
+const location = data.location as string | undefined;
+const author = data.author as string | undefined;
+const registrationUrl = data.registrationUrl as string | undefined;
+
+const metaParts = [startDate && endDate ? `${startDate} – ${endDate}` : (startDate ?? date), location, author].filter(
+  Boolean
+) as string[];
+
+const files =
+  collection === 'publications'
+    ? [
+        {
+          name: title,
+          ext: data.fileFormat as string,
+          url: data.fileUrl as string,
+          size: data.fileSize as string | undefined,
+        },
+      ]
+    : [];
+
+const breadcrumbLinks = [
+  { text: 'Home', url: '/' },
+  { text: humanise(collection), url: `/${collection}` },
+  { text: title, url: `/${collection}/${entry.id}` },
+];
+const tagItems = topics.map((topic) => ({ content: topic }));
+---
+
+<BaseLayout title={title} description={summary} image={`/og/${collection}/${entry.id}.png`} theme={theme}>
+  <PageBanner
+    title={title}
+    summary={metaParts.join(' · ')}
+    siteSection={humanise(collection)}
+    breadcrumbLinks={breadcrumbLinks}
+    backgroundImage={image}
+    theme="dark"
+  />
+  <div class="ct-page container">
+    <div class="row">
+      <div class="col-xxs-12 col-m-8">
+        <div class="ct-basic-content ct-vertical-spacing-inset--both">
+          <slot />
+          {registrationUrl && <Button theme={theme} kind="link" type="primary" text="Register" url={registrationUrl} />}
+          {files.length > 0 && <Attachment theme={theme} title="Download" files={files} withBackground />}
+        </div>
+      </div>
+      <div class="col-xxs-12 col-m-4">
+        {tagItems.length > 0 && <TagList theme={theme} tags={tagItems} verticalSpacing="both" />}
+      </div>
+    </div>
+  </div>
+</BaseLayout>

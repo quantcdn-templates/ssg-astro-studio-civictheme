@@ -1,0 +1,57 @@
+---
+/**
+ * Layout for a `pages` collection entry: banner (with the folder-path
+ * breadcrumb), an optional side navigation built from the pages sharing the
+ * entry's `section`, the MDX body, and an optional last-updated line.
+ */
+import type { CollectionEntry } from 'astro:content';
+import BaseLayout from './BaseLayout.astro';
+import PageBanner from '@/components/PageBanner.astro';
+import SideNavigation from '@civictheme/organisms/SideNavigation.astro';
+import Paragraph from '@civictheme/atoms/Paragraph.astro';
+import { breadcrumbForPage, sectionNav, entryUrl } from '@/lib/content';
+
+interface Props {
+  entry: CollectionEntry<'pages'>;
+}
+
+const { entry } = Astro.props;
+const { data } = entry;
+const url = entryUrl('pages', entry.id);
+
+const breadcrumbLinks = data.showBreadcrumb && entry.id !== 'index' ? await breadcrumbForPage(entry) : undefined;
+const sideItems = data.section ? await sectionNav(data.section, url) : [];
+const ogSlug = entry.id === 'index' ? 'home' : entry.id;
+const lastUpdated = data.updated
+  ? `Last updated: ${data.updated.toLocaleDateString('en-AU', { day: 'numeric', month: 'long', year: 'numeric' })}`
+  : '';
+---
+
+<BaseLayout title={data.title} description={data.summary} image={`/og/${ogSlug}.png`} theme={data.theme}>
+  <PageBanner
+    title={data.title}
+    summary={data.summary}
+    siteSection={data.section}
+    breadcrumbLinks={breadcrumbLinks}
+    backgroundImage={data.bannerImage}
+    theme={data.bannerTheme}
+    bannerType={data.bannerType}
+  />
+  <div class="ct-page container">
+    <div class="row">
+      {
+        sideItems.length > 0 && (
+          <div class="col-xxs-12 col-m-3">
+            <SideNavigation theme={data.theme} items={sideItems} title={data.section} verticalSpacing="both" />
+          </div>
+        )
+      }
+      <div class={sideItems.length > 0 ? 'col-xxs-12 col-m-9' : 'col-xxs-12'}>
+        <div class="ct-basic-content ct-vertical-spacing-inset--both">
+          <slot />
+          {data.showLastUpdated && lastUpdated && <Paragraph theme={data.theme} content={lastUpdated} />}
+        </div>
+      </div>
+    </div>
+  </div>
+</BaseLayout>

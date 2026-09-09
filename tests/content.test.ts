@@ -28,6 +28,10 @@ describe('entryUrl', () => {
     expect(entryUrl('events', 'open-day')).toBe('/events/open-day');
   });
 
+  it('maps the pages entry with id "index" to the site root', () => {
+    expect(entryUrl('pages', 'index')).toBe('/');
+  });
+
   it('maps news and publications to their collection path', () => {
     expect(entryUrl('news', 'annual-report')).toBe('/news/annual-report');
     expect(entryUrl('publications', 'budget-2026')).toBe('/publications/budget-2026');

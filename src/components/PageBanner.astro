@@ -1,0 +1,74 @@
+---
+/**
+ * Page banner composition: a CivicTheme `Banner` with a breadcrumb, title and
+ * optional summary, driven by content frontmatter.
+ *
+ * Uses `Banner`'s named `content` slot (Task 15, see PORTING.md) for the
+ * summary, and its `breadcrumb`/`backgroundImage` object props for the rest.
+ * `bannerType: 'large'` maps to `class="ct-banner--large"`, as upstream's
+ * `banner.scss` defines that modifier rather than a prop.
+ *
+ * The banner is written as two branches rather than one with a conditional
+ * `<Fragment slot="content">`: Astro registers a named slot at compile time,
+ * so `Astro.slots.has('content')` is true even when the expression wrapping
+ * the Fragment evaluates to false — which would open an empty
+ * `.ct-banner__content` wrapper. The shared props therefore live in one
+ * `bannerProps` object, spread into both branches.
+ */
+import Banner from '@civictheme/organisms/Banner.astro';
+import Paragraph from '@civictheme/atoms/Paragraph.astro';
+
+export interface BreadcrumbLink {
+  text: string;
+  url: string;
+}
+
+interface Props {
+  title: string;
+  summary?: string;
+  siteSection?: string;
+  breadcrumbLinks?: BreadcrumbLink[];
+  backgroundImage?: string;
+  theme?: 'light' | 'dark';
+  bannerType?: 'default' | 'large';
+  isDecorative?: boolean;
+}
+
+const {
+  title,
+  summary,
+  siteSection,
+  breadcrumbLinks,
+  backgroundImage,
+  theme = 'dark',
+  bannerType = 'default',
+  isDecorative = true,
+} = Astro.props;
+
+const breadcrumb =
+  breadcrumbLinks && breadcrumbLinks.length > 0 ? { links: breadcrumbLinks, activeIsLink: false } : undefined;
+const background = backgroundImage ? { url: backgroundImage, alt: '' } : undefined;
+
+const bannerProps = {
+  theme,
+  title,
+  siteSection,
+  breadcrumb,
+  backgroundImage: background,
+  backgroundImageBlendMode: background ? 'multiply' : undefined,
+  isDecorative,
+  class: bannerType === 'large' ? 'ct-banner--large' : undefined,
+};
+---
+
+{
+  summary ? (
+    <Banner {...bannerProps}>
+      <Fragment slot="content">
+        <Paragraph theme={theme} content={summary} />
+      </Fragment>
+    </Banner>
+  ) : (
+    <Banner {...bannerProps} />
+  )
+}

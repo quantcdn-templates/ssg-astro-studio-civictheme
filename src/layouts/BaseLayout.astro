@@ -1,0 +1,69 @@
+---
+/**
+ * Base HTML document for every route.
+ *
+ * Owns the single `global.scss` import, the head metadata, the skip link,
+ * alerts, header, footer, back-to-top and the one hoisted CivicTheme JS
+ * init script. There is deliberately NO `<ClientRouter>`: the vendored
+ * behaviours self-initialise at module evaluation and would not re-run after
+ * a view transition (see PORTING.md).
+ *
+ * Fonts: CivicTheme's own SCSS `@import`s Lexend and Public Sans from Google
+ * Fonts, so the head only adds the two preconnects.
+ */
+import '@/styles/global.scss';
+import SkipLink from '@civictheme/organisms/SkipLink.astro';
+import BackToTop from '@civictheme/molecules/BackToTop.astro';
+import SiteAlerts from '@/components/SiteAlerts.astro';
+import SiteHeader from '@/components/SiteHeader.astro';
+import SiteFooter from '@/components/SiteFooter.astro';
+
+interface Props {
+  title: string;
+  description?: string;
+  /** OG image path, relative to the site root. Defaults to `/og/home.png`. */
+  image?: string;
+  theme?: 'light' | 'dark';
+}
+
+const { title, description = '', image = '/og/home.png', theme = 'light' } = Astro.props;
+
+const canonical = new URL(Astro.url.pathname, Astro.site ?? 'https://example.com').href;
+const ogImage = new URL(image, Astro.site ?? 'https://example.com').href;
+---
+
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>{title}</title>
+    {description && <meta name="description" content={description} />}
+    <link rel="canonical" href={canonical} />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content={title} />
+    <meta property="og:description" content={description} />
+    <meta property="og:url" content={canonical} />
+    <meta property="og:image" content={ogImage} />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content={title} />
+    <meta name="twitter:description" content={description} />
+    <meta name="twitter:image" content={ogImage} />
+    <link rel="sitemap" href="/sitemap-index.xml" />
+  </head>
+  <body class={`ct-theme-${theme}`}>
+    <SkipLink theme={theme} url="#main-content" />
+    <SiteAlerts theme={theme} />
+    <SiteHeader theme={theme} />
+    <main id="main-content">
+      <slot />
+    </main>
+    <SiteFooter theme="dark" />
+    <BackToTop />
+    <script>
+      import '@/civictheme/js/civictheme.js';
+    </script>
+  </body>
+</html>

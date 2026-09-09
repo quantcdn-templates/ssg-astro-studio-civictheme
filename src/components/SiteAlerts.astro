@@ -1,0 +1,29 @@
+---
+/**
+ * Renders every currently active alert from the `alerts` collection as a
+ * CivicTheme `Alert`. `Alert`'s `title`/`description` are string props
+ * rendered with `set:html`; the JSON `message` field is plain text, so it is
+ * passed through unchanged.
+ */
+import Alert from '@civictheme/organisms/Alert.astro';
+import { activeAlerts } from '@/lib/content';
+
+interface Props {
+  theme?: 'light' | 'dark';
+}
+
+const { theme = 'light' } = Astro.props;
+const alerts = await activeAlerts();
+---
+
+{
+  alerts.map((alert) => (
+    <Alert
+      theme={theme}
+      id={alert.id}
+      type={alert.data.type}
+      title={alert.data.title}
+      description={alert.data.message}
+    />
+  ))
+}

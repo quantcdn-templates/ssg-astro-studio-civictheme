@@ -1,0 +1,72 @@
+---
+/**
+ * Site header composition.
+ *
+ * Arranges live CivicTheme components inside the `Header` organism through the
+ * named slots added to it in Task 15 (see PORTING.md) — no HTML-string
+ * pre-rendering. Slot allocation follows upstream
+ * `header.stories.data.js`: tagline in `contentTop2`, secondary navigation in
+ * `contentTop3`, `Logo` in `contentMiddle2`, and primary navigation + `Search`
+ * + the mobile navigation trigger and panel in `contentMiddle3`.
+ */
+import Header from '@civictheme/organisms/Header.astro';
+import Logo from '@civictheme/molecules/Logo.astro';
+import Navigation from '@civictheme/organisms/Navigation.astro';
+import Search from '@civictheme/molecules/Search.astro';
+import Paragraph from '@civictheme/atoms/Paragraph.astro';
+import MobileNavigationTrigger from '@civictheme/organisms/MobileNavigationTrigger.astro';
+import MobileNavigation from '@civictheme/organisms/MobileNavigation.astro';
+import { siteSettings, menu, withActiveTrail } from '@/lib/content';
+
+interface Props {
+  theme?: 'light' | 'dark';
+}
+
+const { theme = 'light' } = Astro.props;
+const site = await siteSettings();
+const pathname = Astro.url.pathname;
+const primary = withActiveTrail(await menu('primary'), pathname);
+const secondary = withActiveTrail(await menu('secondary'), pathname);
+
+// `settings/site.json` holds one logo path per theme (Studio-friendly flat
+// frontmatter), so both breakpoints of the primary logo use the same image.
+const logoUrl = theme === 'dark' ? site.logoDark : site.logoLight;
+const logos = {
+  primary: {
+    mobile: { url: logoUrl, alt: site.name },
+    desktop: { url: logoUrl, alt: site.name },
+  },
+};
+---
+
+<Header theme={theme}>
+  <Fragment slot="contentTop2">
+    <Paragraph theme={theme} content={site.tagline} noMargin />
+  </Fragment>
+  <Fragment slot="contentTop3">
+    <Navigation
+      theme={theme}
+      items={secondary}
+      name="secondary"
+      type="dropdown"
+      variant="secondary"
+      class="ct-flex-justify-content-end"
+    />
+  </Fragment>
+  <Fragment slot="contentMiddle2">
+    <Logo theme={theme} logos={logos} url="/" title={site.name} />
+  </Fragment>
+  <Fragment slot="contentMiddle3">
+    <Navigation
+      theme={theme}
+      items={primary}
+      name="primary"
+      type="drawer"
+      variant="primary"
+      class="ct-flex-justify-content-end"
+    />
+    <Search theme={theme} text="Search" url="/search" class="ct-flex-justify-content-end" />
+    <MobileNavigationTrigger theme={theme} icon="bars" text="Menu" />
+    <MobileNavigation theme={theme} topMenu={primary} bottomMenu={secondary} />
+  </Fragment>
+</Header>
