@@ -56,7 +56,13 @@ const {
 
 const breadcrumb =
   breadcrumbLinks && breadcrumbLinks.length > 0 ? { links: breadcrumbLinks, activeIsLink: false } : undefined;
-const background = backgroundImage ? { url: backgroundImage, alt: '' } : undefined;
+// `backgroundImage` reaches `Banner` as the `url()` value of an inline
+// `background-image` style, so a value containing a quote, `)` or whitespace
+// could break out of that CSS function. Such values are rejected outright
+// (the banner then renders without a background image) rather than escaped,
+// since every legitimate value here is a plain asset path or URL.
+const isSafeCssUrl = (value: string) => !/['")\s]/.test(value);
+const background = backgroundImage && isSafeCssUrl(backgroundImage) ? { url: backgroundImage, alt: '' } : undefined;
 const tagItems = metaTags.filter(Boolean).map((tag) => ({ content: tag }));
 const hasContent = Boolean(summary) || tagItems.length > 0;
 

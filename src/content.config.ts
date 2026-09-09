@@ -1,7 +1,16 @@
 import { defineCollection, z } from 'astro:content';
-import { glob, file } from 'astro/loaders';
+import { glob } from 'astro/loaders';
 
 const theme = z.enum(['light', 'dark']).default('light');
+/**
+ * A link that is either site-relative (`/x`, `#x`, `./x`) or an absolute
+ * `http(s):`/`mailto:` URL. `z.string().url()` alone would reject the
+ * relative paths this demo content uses, so the scheme allow-list is
+ * applied only to values that carry one.
+ */
+const linkUrl = z.string().refine((value) => /^(\/|#|\.{1,2}\/)/.test(value) || /^(https?|mailto):/i.test(value), {
+  message: 'must be a relative path or an http(s)/mailto URL',
+});
 const pages = defineCollection({
   loader: glob({ pattern: '**/*.mdx', base: 'src/content/pages' }),
   schema: z.object({
@@ -31,7 +40,7 @@ const events = defineCollection({
     image: z.string().optional(),
     topics: z.array(z.string()).default([]),
     theme,
-    registrationUrl: z.string().optional(),
+    registrationUrl: linkUrl.optional(),
     draft: z.boolean().default(false),
   }),
 });
@@ -57,7 +66,7 @@ const publications = defineCollection({
     date: z.coerce.date(),
     image: z.string().optional(),
     topics: z.array(z.string()).default([]),
-    fileUrl: z.string(),
+    fileUrl: linkUrl,
     fileFormat: z.enum(['pdf', 'docx', 'xlsx', 'other']).default('pdf'),
     fileSize: z.string().optional(),
     draft: z.boolean().default(false),
