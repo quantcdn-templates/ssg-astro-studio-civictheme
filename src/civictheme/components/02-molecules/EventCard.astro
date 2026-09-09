@@ -124,9 +124,9 @@ const stripTags = (s: string) => s.replace(/<[^>]*>/g, '');
 const escapeAttr = (v: string) => v.replace(/&/g, '&amp;').replace(/"/g, '&quot;');
 function datetimeMarkup(): string {
   if (!date) return '';
-  let html = `<span class="ct-datetime"><time class="ct-timestamp__start" datetime="${escapeAttr(stripTags(dateIso ?? date))}">${date}</time>`;
+  let html = `<span class="ct-datetime"><time class="ct-timestamp__start" datetime="${escapeAttr(stripTags(dateIso || date))}">${date}</time>`;
   if (dateEnd) {
-    html += ` — <time class="ct-timestamp__end" datetime="${escapeAttr(stripTags(dateEndIso ?? dateEnd))}">${dateEnd}</time>`;
+    html += ` — <time class="ct-timestamp__end" datetime="${escapeAttr(stripTags(dateEndIso || dateEnd))}">${dateEnd}</time>`;
   }
   html += '</span>';
   return html;

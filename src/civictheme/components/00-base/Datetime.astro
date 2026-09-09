@@ -4,9 +4,14 @@
  *
  * Props:
  * - start: Formatted start time (required to render anything).
- * - startIso: Start time in ISO format (falls back to `start`).
+ * - startIso: Start time in ISO format (falls back to `start` when empty).
  * - end: Formatted end time.
- * - endIso: End time in ISO format (falls back to `end`).
+ * - endIso: End time in ISO format (falls back to `end` when empty).
+ *
+ * Note: `datetime.twig` uses `start_iso|default(start)`. Twig's `default`
+ * filter falls back whenever the value is EMPTY, not only when it is
+ * undefined — so `''` must fall back too (`||`, not `??`). Upstream's
+ * `event-card`/`promo-card` stories pass `date_iso: ''`.
  * - class: Additional CSS classes.
  * - ...rest: Additional HTML attributes, spread onto the root element.
  */
@@ -29,11 +34,11 @@ const classes = ['ct-datetime', className].filter(Boolean).join(' ');
 {
   start && (
     <span class={classes} {...rest}>
-      <time class="ct-timestamp__start" datetime={stripTags(startIso ?? start)} set:html={start} />
+      <time class="ct-timestamp__start" datetime={stripTags(startIso || start)} set:html={start} />
       {end && (
         <Fragment>
           {' — '}
-          <time class="ct-timestamp__end" datetime={stripTags(endIso ?? end)} set:html={end} />
+          <time class="ct-timestamp__end" datetime={stripTags(endIso || end)} set:html={end} />
         </Fragment>
       )}
     </span>
