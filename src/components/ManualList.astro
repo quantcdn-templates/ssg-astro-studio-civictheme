@@ -1,8 +1,8 @@
 ---
 /**
  * Curated listing: renders a specific, ordered set of entries (by `id`)
- * from one card collection with `ListingGrid` (see that component's header
- * comment for why `List`/`Grid` aren't used directly).
+ * from one card collection with `ListingGrid`, which composes `List`/
+ * `Grid` directly via slots (see that component's header comment).
  */
 import { getEntry } from 'astro:content';
 import ListingGrid from './ListingGrid.astro';

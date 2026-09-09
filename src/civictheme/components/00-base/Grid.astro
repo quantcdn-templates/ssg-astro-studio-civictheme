@@ -6,6 +6,12 @@ import type { HTMLTag } from 'astro/types';
  *
  * Props:
  * - items: Column items (each rendered as raw HTML content of one column).
+ * - default slot: row children. When present, TAKES PRECEDENCE over
+ *   `items` — the row/container wrapper markup below is unchanged, but its
+ *   content is the slot's own children (already-wrapped columns) instead
+ *   of the `items` map. Lets a caller (e.g. `ListingGrid`) compose real
+ *   Astro components as grid columns instead of pre-rendering each to an
+ *   HTML string.
  * - rowElement: Row element tag (default 'div').
  * - rowClass: Optional row class override.
  * - rowAttributes: Additional row attributes.
@@ -93,30 +99,40 @@ if (!useContainer && modifierClass) {
 const rowClassString = rowClasses.join(' ').trim();
 
 const rowExtraAttrs = useContainer ? rowAttributes : { ...rest, ...rowAttributes };
+
+const hasChildren = Astro.slots.has('default');
 ---
 
 {
-  items.length > 0 && (
+  (items.length > 0 || hasChildren) && (
     <>
       {useContainer ? (
         <div class={containerClass} {...rest} aria-live="polite">
           <RowTag class={rowClassString} {...rowExtraAttrs}>
-            {items.map((item, i) => (
-              <Fragment>
-                {i > 0 && ' '}
-                {item && <ColumnTag class={resolvedColumnClass} {...columnAttributes} set:html={item} />}
-              </Fragment>
-            ))}
+            {hasChildren ? (
+              <slot />
+            ) : (
+              items.map((item, i) => (
+                <Fragment>
+                  {i > 0 && ' '}
+                  {item && <ColumnTag class={resolvedColumnClass} {...columnAttributes} set:html={item} />}
+                </Fragment>
+              ))
+            )}
           </RowTag>
         </div>
       ) : (
         <RowTag class={rowClassString} {...rowExtraAttrs}>
-          {items.map((item, i) => (
-            <Fragment>
-              {i > 0 && ' '}
-              {item && <ColumnTag class={resolvedColumnClass} {...columnAttributes} set:html={item} />}
-            </Fragment>
-          ))}
+          {hasChildren ? (
+            <slot />
+          ) : (
+            items.map((item, i) => (
+              <Fragment>
+                {i > 0 && ' '}
+                {item && <ColumnTag class={resolvedColumnClass} {...columnAttributes} set:html={item} />}
+              </Fragment>
+            ))
+          )}
         </RowTag>
       )}
     </>

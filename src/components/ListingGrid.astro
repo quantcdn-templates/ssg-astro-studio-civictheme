@@ -2,12 +2,20 @@
 /**
  * Shared card-grid renderer used by `ListingAuto` and `ManualList`.
  *
- * See `ListingAuto.astro`'s header comment: `List`/`Grid` only accept
- * pre-rendered HTML strings for their row/item content (no `<slot />` in
- * either template), so this inlines List's header/rows wrapper markup
- * directly instead, with real card components as live children — the same
- * approach already used for Attachment/TagList/ItemList in this codebase
- * (see PORTING.md).
+ * `List`/`Grid` now accept real Astro slots (Task 14b) in addition to
+ * their pre-rendered-string props, so this composes `List` (rows passed
+ * as `<Fragment slot="rows">`) and `Grid` (cards passed as children,
+ * taking precedence over its `items` string-array prop) instead of
+ * inlining their wrapper markup — real card components (EventCard,
+ * PromoCard, …) are live children throughout, with no HTML-string
+ * pre-rendering step. See PORTING.md.
+ *
+ * `Grid` is used with `useContainer={false}` and its own `.container` div
+ * built here instead, so the rendered `.ct-list__rows` div (from `List`'s
+ * `rows` slot wrapper) doesn't also duplicate `Grid`'s own
+ * `aria-live="polite"` container attribute — see PORTING.md for the
+ * resulting (semantically inert) markup delta against the pre-Task-14b
+ * inlined version.
  *
  * All per-entry data extraction happens here, in the frontmatter script —
  * the Astro template's JSX-like expressions can't parse TS type
@@ -16,7 +24,8 @@
  * `CardViewModel`.
  */
 import type { CollectionEntry } from 'astro:content';
-import Heading from '@civictheme/atoms/Heading.astro';
+import List from '@civictheme/organisms/List.astro';
+import Grid from '@civictheme/base/Grid.astro';
 import Paragraph from '@civictheme/atoms/Paragraph.astro';
 import EventCard from '@civictheme/molecules/EventCard.astro';
 import PromoCard from '@civictheme/molecules/PromoCard.astro';
@@ -97,23 +106,10 @@ function toViewModel(entry: CollectionEntry<CardCollection>): CardViewModel {
 const cards = entries.map(toViewModel);
 ---
 
-<div class={`ct-list ct-theme-${theme} ct-listing-grid`}>
-  <div class="ct-list__inner">
-    {
-      title && (
-        <div class="ct-list__header">
-          <div class="container">
-            <div class="row">
-              <div class="col-xxs-12 col-m-9">
-                <Heading content={title} level={2} theme={theme} class="ct-list__title" />
-              </div>
-            </div>
-          </div>
-        </div>
-      )
-    }
-    <div class="container ct-list__rows">
-      <div class="row">
+<List title={title} theme={theme} class="ct-listing-grid">
+  <Fragment slot="rows">
+    <div class="container">
+      <Grid useContainer={false}>
         {
           cards.length === 0 ? (
             <div class="col-xxs-12">
@@ -168,7 +164,7 @@ const cards = entries.map(toViewModel);
             ))
           )
         }
-      </div>
+      </Grid>
     </div>
-  </div>
-</div>
+  </Fragment>
+</List>

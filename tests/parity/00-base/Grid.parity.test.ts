@@ -1,6 +1,6 @@
-import { describe } from 'vitest';
+import { describe, it, expect } from 'vitest';
 import Grid from '@civictheme/base/Grid.astro';
-import { parityCase, expectAllKeysCovered } from '../harness';
+import { parityCase, expectAllKeysCovered, renderNormalised } from '../harness';
 
 const meta = { layer: '00-base', name: 'grid' };
 
@@ -265,4 +265,34 @@ describe('Grid', () => {
   }
 
   expectAllKeysCovered(meta, keys);
+
+  // Task 14b: the default slot takes precedence over `items`, letting a
+  // caller compose real Astro components as columns instead of
+  // pre-rendering each to an HTML string. Passing the equivalent
+  // already-wrapped column markup via the slot must render identically to
+  // the single-item `items` render (which Grid wraps in the same column
+  // div/class itself).
+  describe('slot vs string-prop parity', () => {
+    it('a single item renders identically via the default slot (pre-wrapped) and via items', async () => {
+      const viaProp = await renderNormalised(Grid, { items: ['<p>A</p>'] });
+      const viaSlot = await renderNormalised(Grid, {}, { default: '<div class="col"><p>A</p></div>' });
+      expect(viaSlot).toBe(viaProp);
+    });
+
+    it('a single item renders identically via the default slot without a container', async () => {
+      const viaProp = await renderNormalised(Grid, { items: ['<p>A</p>'], useContainer: false });
+      const viaSlot = await renderNormalised(
+        Grid,
+        { useContainer: false },
+        { default: '<div class="col"><p>A</p></div>' }
+      );
+      expect(viaSlot).toBe(viaProp);
+    });
+
+    it('a slot alone (no items) still renders the row/container wrapper', async () => {
+      const html = await renderNormalised(Grid, {}, { default: '<div class="col">Live child</div>' });
+      expect(html).toContain('row');
+      expect(html).toContain('Live child');
+    });
+  });
 });

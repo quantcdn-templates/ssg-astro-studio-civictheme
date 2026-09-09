@@ -16,17 +16,24 @@
  *   string — a non-empty array of all-empty-string rows still opens the
  *   container even though its joined content is `''`.
  * - title / content / filters / resultsCount / rows / empty / pagination /
- *   footer: Documented as Slots upstream, but every upstream test passes
- *   plain string props — ported as `string` props, rendered with
- *   `set:html` per this project's autoescape convention.
+ *   footer: Documented as Slots upstream. Every upstream test passes plain
+ *   string props, so each is still typed as a `string` prop and rendered
+ *   with `set:html` per this project's autoescape convention — but each
+ *   also now has a same-named Astro slot (camelCase) that TAKES
+ *   PRECEDENCE over the string prop when present, so a real composed
+ *   Astro tree (e.g. `<Fragment slot="rows">`) can be passed instead of a
+ *   pre-rendered HTML string. Every existing wrapper `{% if %}` gate is
+ *   widened to `Boolean(prop) || Astro.slots.has('prop')` so a slot alone
+ *   (with no string prop set) still opens its wrapper markup.
  * - class: Additional CSS classes.
  * - ...rest: Additional HTML attributes, spread onto the root element.
  *
  * Note: `empty_block` gates on `empty is defined and (rows is not defined
  * or rows is empty)` — the "is defined" half of that can't be replicated
  * exactly with plain props (every prop key is always "defined" once
- * destructured), so this ports it as `!rows && typeof empty !==
- * 'undefined'`, which matches every upstream test case.
+ * destructured), so this ports it as `!rows && (typeof empty !==
+ * 'undefined' || Astro.slots.has('empty'))`, which matches every upstream
+ * test case.
  */
 import Heading from '@civictheme/atoms/Heading.astro';
 import Button from '@civictheme/atoms/Button.astro';
@@ -95,9 +102,24 @@ const classes = [
 
 const hasLinkAbove = Boolean(linkAbove && Object.keys(linkAbove).length > 0);
 const hasLinkBelow = Boolean(linkBelow && Object.keys(linkBelow).length > 0);
-const hasHeader = Boolean(title || hasLinkAbove);
-const hasRows = Boolean(rows);
-const hasEmpty = !hasRows && typeof empty !== 'undefined';
+
+// Slot-vs-string-prop precedence: every Slot-documented prop from
+// list.twig's doc header gets a same-named check here. When the slot is
+// present it takes precedence over the string prop, and its own wrapper
+// `{% if %}` gate widens to "string prop OR slot" so a slot-only usage
+// still opens the wrapper markup.
+const hasTitleSlot = Astro.slots.has('title');
+const hasContentSlot = Astro.slots.has('content');
+const hasFiltersSlot = Astro.slots.has('filters');
+const hasResultsCountSlot = Astro.slots.has('resultsCount');
+const hasRowsSlot = Astro.slots.has('rows');
+const hasEmptySlot = Astro.slots.has('empty');
+const hasPaginationSlot = Astro.slots.has('pagination');
+const hasFooterSlot = Astro.slots.has('footer');
+
+const hasHeader = Boolean(title || hasTitleSlot || hasLinkAbove);
+const hasRows = Boolean(rows) || hasRowsSlot;
+const hasEmpty = !hasRows && (typeof empty !== 'undefined' || hasEmptySlot);
 
 const toArray = (v: string | string[] | undefined): string[] => (v == null ? [] : Array.isArray(v) ? v : [v]);
 // list.twig:139/163 gate `{% if rows_above -%}` / `{% if rows_below %}` on
@@ -120,7 +142,11 @@ const rowsBelowHtml = toArray(rowsBelow).join('');
             <div class="container">
               <div class="row">
                 <div class="col-xxs-12 col-m-9">
-                  {title && <Heading content={title} level={2} theme={theme} class="ct-list__title" />}
+                  {hasTitleSlot ? (
+                    <slot name="title" />
+                  ) : (
+                    title && <Heading content={title} level={2} theme={theme} class="ct-list__title" />
+                  )}
                 </div>{' '}
                 <div class="col-xxs-12 col-m-3">
                   {hasLinkAbove && (
@@ -147,13 +173,17 @@ const rowsBelowHtml = toArray(rowsBelow).join('');
       )
     }
     {
-      content && (
+      (content || hasContentSlot) && (
         <Fragment>
           <div class="ct-list__content">
             <div class="container">
               <div class="row">
                 <div class="col-xxs-12">
-                  <Paragraph content={content} theme={theme} class="ct-list__content__inner" />
+                  {hasContentSlot ? (
+                    <slot name="content" />
+                  ) : (
+                    <Paragraph content={content} theme={theme} class="ct-list__content__inner" />
+                  )}
                 </div>
               </div>
             </div>
@@ -162,12 +192,18 @@ const rowsBelowHtml = toArray(rowsBelow).join('');
       )
     }
     {
-      filters && (
+      (filters || hasFiltersSlot) && (
         <Fragment>
           <div class="ct-list__filters">
             <div class="container">
               <div class="row">
-                <div class="col-xxs-12" set:html={filters} />
+                {hasFiltersSlot ? (
+                  <div class="col-xxs-12">
+                    <slot name="filters" />
+                  </div>
+                ) : (
+                  <div class="col-xxs-12" set:html={filters} />
+                )}
               </div>
             </div>
           </div>{' '}
@@ -186,18 +222,26 @@ const rowsBelowHtml = toArray(rowsBelow).join('');
               </div>{' '}
             </Fragment>
           )}
-          {resultsCount && (
+          {(resultsCount || hasResultsCountSlot) && (
             <Fragment>
               <div class="container">
                 <div class="row">
                   <div class="col-xxs-12">
-                    <div class="ct-list__results-count">{resultsCount}</div>
+                    <div class="ct-list__results-count">
+                      {hasResultsCountSlot ? <slot name="resultsCount" /> : resultsCount}
+                    </div>
                   </div>
                 </div>
               </div>{' '}
             </Fragment>
           )}
-          <div class="ct-list__rows" set:html={rows} />
+          {hasRowsSlot ? (
+            <div class="ct-list__rows">
+              <slot name="rows" />
+            </div>
+          ) : (
+            <div class="ct-list__rows" set:html={rows} />
+          )}
           {hasRowsBelow && (
             <Fragment>
               {' '}
@@ -216,7 +260,11 @@ const rowsBelowHtml = toArray(rowsBelow).join('');
         <div class="container ct-list__empty-results">
           <div class="row">
             <div class="col-xxs-12">
-              <Paragraph content={empty} theme={theme} class="ct-list__empty-results__inner" />
+              {hasEmptySlot ? (
+                <slot name="empty" />
+              ) : (
+                <Paragraph content={empty} theme={theme} class="ct-list__empty-results__inner" />
+              )}
             </div>
           </div>
         </div>
@@ -244,14 +292,20 @@ const rowsBelowHtml = toArray(rowsBelow).join('');
       )
     }
     {
-      pagination && (
+      (pagination || hasPaginationSlot) && (
         <Fragment>
           {' '}
           <div class="ct-list__results-below">
             <div class="container">
               <div class="row">
                 <div class="col-xxs-12">
-                  <div class="ct-list__pagination" set:html={pagination} />
+                  {hasPaginationSlot ? (
+                    <div class="ct-list__pagination">
+                      <slot name="pagination" />
+                    </div>
+                  ) : (
+                    <div class="ct-list__pagination" set:html={pagination} />
+                  )}
                 </div>
               </div>
             </div>
@@ -260,13 +314,19 @@ const rowsBelowHtml = toArray(rowsBelow).join('');
       )
     }
     {
-      footer && (
+      (footer || hasFooterSlot) && (
         <Fragment>
           {' '}
           <footer class="ct-list__footer">
             <div class="container">
               <div class="row">
-                <div class="col-xxs-12" set:html={footer} />
+                {hasFooterSlot ? (
+                  <div class="col-xxs-12">
+                    <slot name="footer" />
+                  </div>
+                ) : (
+                  <div class="col-xxs-12" set:html={footer} />
+                )}
               </div>
             </div>
           </footer>

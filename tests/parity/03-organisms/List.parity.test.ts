@@ -60,4 +60,86 @@ describe('List', () => {
     const html = await renderNormalised(List, { rows: 'Rows Content', rowsAbove: [] });
     expect(html).not.toContain('ct-list__rows-above');
   });
+
+  // Task 14b: every Slot-documented prop now has a same-named Astro slot
+  // that takes precedence over the string prop. Passing the same content
+  // via the slot instead of the string prop must render identically.
+  describe('slot vs string-prop parity', () => {
+    it('rows: slot renders identically to the string prop', async () => {
+      const viaProp = await renderNormalised(List, { rows: 'Rows Content' });
+      const viaSlot = await renderNormalised(List, {}, { rows: 'Rows Content' });
+      expect(viaSlot).toBe(viaProp);
+    });
+
+    it('filters: slot renders identically to the string prop', async () => {
+      const viaProp = await renderNormalised(List, { rows: 'Rows Content', filters: 'Sample Filters' });
+      const viaSlot = await renderNormalised(List, { rows: 'Rows Content' }, { filters: 'Sample Filters' });
+      expect(viaSlot).toBe(viaProp);
+    });
+
+    it('pagination: slot renders identically to the string prop', async () => {
+      const viaProp = await renderNormalised(List, { rows: 'Rows Content', pagination: 'Pagination Content' });
+      const viaSlot = await renderNormalised(List, { rows: 'Rows Content' }, { pagination: 'Pagination Content' });
+      expect(viaSlot).toBe(viaProp);
+    });
+
+    // `title`/`content`/`empty` route their string prop through a
+    // sub-component (`Heading`/`Paragraph`) that adds its own wrapper
+    // markup — the slot renders the caller's markup directly (no such
+    // wrapper), so parity is checked against the sub-component's own
+    // known output, not against the raw string.
+    it('title: slot renders identically to the string prop', async () => {
+      const viaProp = await renderNormalised(List, { rows: 'Rows Content', title: 'Sample Title' });
+      const viaSlot = await renderNormalised(
+        List,
+        { rows: 'Rows Content' },
+        { title: '<h2 class="ct-heading ct-list__title ct-theme-light">Sample Title</h2>' }
+      );
+      expect(viaSlot).toBe(viaProp);
+    });
+
+    it('content: slot renders identically to the string prop', async () => {
+      const viaProp = await renderNormalised(List, { rows: 'Rows Content', content: 'Sample Content' });
+      const viaSlot = await renderNormalised(
+        List,
+        { rows: 'Rows Content' },
+        {
+          content:
+            '<div class="ct-list__content__inner ct-paragraph ct-paragraph--regular ct-theme-light">Sample Content</div>',
+        }
+      );
+      expect(viaSlot).toBe(viaProp);
+    });
+
+    it('resultsCount: slot renders identically to the string prop', async () => {
+      const viaProp = await renderNormalised(List, { rows: 'Rows Content', resultsCount: '10 Results' });
+      const viaSlot = await renderNormalised(List, { rows: 'Rows Content' }, { resultsCount: '10 Results' });
+      expect(viaSlot).toBe(viaProp);
+    });
+
+    it('footer: slot renders identically to the string prop', async () => {
+      const viaProp = await renderNormalised(List, { rows: 'Rows Content', footer: 'Footer Content' });
+      const viaSlot = await renderNormalised(List, { rows: 'Rows Content' }, { footer: 'Footer Content' });
+      expect(viaSlot).toBe(viaProp);
+    });
+
+    it('empty: slot renders identically to the string prop (no rows)', async () => {
+      const viaProp = await renderNormalised(List, { empty: 'No results found' });
+      const viaSlot = await renderNormalised(
+        List,
+        {},
+        {
+          empty:
+            '<div class="ct-list__empty-results__inner ct-paragraph ct-paragraph--regular ct-theme-light">No results found</div>',
+        }
+      );
+      expect(viaSlot).toBe(viaProp);
+    });
+
+    it('a slot alone (no string prop) still opens its wrapper markup', async () => {
+      const html = await renderNormalised(List, {}, { rows: 'Live Rows' });
+      expect(html).toContain('ct-list__rows');
+      expect(html).toContain('Live Rows');
+    });
+  });
 });

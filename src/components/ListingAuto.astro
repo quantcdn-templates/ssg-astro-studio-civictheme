@@ -1,8 +1,8 @@
 ---
 /**
  * Auto-populated listing: fetches published entries of one card collection
- * via `listPublished` and renders them with `ListingGrid` (see that
- * component's header comment for why `List`/`Grid` aren't used directly).
+ * via `listPublished` and renders them with `ListingGrid`, which composes
+ * `List`/`Grid` directly via slots (see that component's header comment).
  */
 import ListingGrid from './ListingGrid.astro';
 import { listPublished, type CardCollection, type ListSort } from '../lib/content';
