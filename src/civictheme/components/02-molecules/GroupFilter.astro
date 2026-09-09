@@ -250,10 +250,11 @@ const hasContentBottom = Boolean(contentBottom) || hasContentBottomSlot;
           </div>
         </div>
       </div>
+      {showSelectedFilters && ' '}
       {showSelectedFilters && (
         <div class="ct-group-filter__selected-filter-controls">
           <div class="ct-group-filter__selected-active-filters">
-            <div class="ct-group-filter__selected-title">{selectedTitle || 'Selected filters:'}</div>
+            <div class="ct-group-filter__selected-title">{selectedTitle || 'Selected filters:'}</div>{' '}
             <ul class="ct-item-list ct-item-list--horizontal ct-item-list--small ct-group-filter__selected-list">
               {(selectedFilters ?? []).map((selectedFilter, i) => (
                 <Fragment>
@@ -276,6 +277,7 @@ const hasContentBottom = Boolean(contentBottom) || hasContentBottomSlot;
               ))}
             </ul>
           </div>
+          {selectedClearLink && ' '}
           {selectedClearLink && (
             <div class="ct-group-filter__selected-clear">
               <Button
