@@ -1,0 +1,150 @@
+---
+/**
+ * CivicTheme Footer component.
+ *
+ * Props:
+ * - theme: Theme variation (light or dark).
+ * - backgroundImage: Content background inline image URL.
+ * - contentTop1 / contentTop2 / contentMiddle1..5 / contentBottom1 /
+ *   contentBottom2: Documented as Slots upstream, but every upstream test
+ *   passes plain string props — ported as `string` props, rendered with
+ *   `set:html` per this project's autoescape convention.
+ * - class: Additional CSS classes.
+ * - ...rest: Additional HTML attributes, spread onto the root element.
+ *
+ * Note: upstream declares 5 middle slots (`content_middle1`..`5`), not 4 —
+ * `content_middle5` spans the full `col-xxs-12` width (the other 4 are
+ * `col-m-3` quarters). Ported all 5 for fidelity; each of the 9 slots here
+ * gates its own `<div>` individually (unlike `Header`'s top2/top3 pair).
+ */
+interface Props {
+  theme?: 'light' | 'dark';
+  backgroundImage?: string;
+  contentTop1?: string;
+  contentTop2?: string;
+  contentMiddle1?: string;
+  contentMiddle2?: string;
+  contentMiddle3?: string;
+  contentMiddle4?: string;
+  contentMiddle5?: string;
+  contentBottom1?: string;
+  contentBottom2?: string;
+  class?: string;
+  [key: string]: unknown;
+}
+
+const {
+  theme = 'light',
+  backgroundImage,
+  contentTop1,
+  contentTop2,
+  contentMiddle1,
+  contentMiddle2,
+  contentMiddle3,
+  contentMiddle4,
+  contentMiddle5,
+  contentBottom1,
+  contentBottom2,
+  class: className = '',
+  ...rest
+} = Astro.props;
+
+const classes = ['ct-footer', `ct-theme-${theme}`, className].filter(Boolean).join(' ');
+
+const hasTop = Boolean(contentTop1 || contentTop2);
+const hasMiddle = Boolean(contentMiddle1 || contentMiddle2 || contentMiddle3 || contentMiddle4 || contentMiddle5);
+const hasBottom = Boolean(contentBottom1 || contentBottom2);
+const shouldRender = Boolean(hasTop || hasMiddle || hasBottom);
+---
+
+{
+  shouldRender && (
+    <footer
+      class={classes}
+      role="contentinfo"
+      data-component-name="ct-footer"
+      style={backgroundImage ? `background-image: url('${backgroundImage}')` : undefined}
+      {...rest}
+    >
+      {hasTop && (
+        <Fragment>
+          <div class="container ct-footer__top">
+            <div class="row">
+              {contentTop1 && (
+                <Fragment>
+                  <div class="col-xxs-12 col-m-6">
+                    <div class="ct-footer__top__content-top1" set:html={contentTop1} />
+                  </div>{' '}
+                </Fragment>
+              )}
+              {contentTop2 && (
+                <div class="col-xxs-12 col-m-6">
+                  <div class="ct-footer__top__content-top2" set:html={contentTop2} />
+                </div>
+              )}
+            </div>
+          </div>{' '}
+        </Fragment>
+      )}
+      {hasMiddle && (
+        <Fragment>
+          <div class="container ct-footer__middle">
+            <div class="row">
+              {contentMiddle1 && (
+                <Fragment>
+                  <div class="col-xxs-12 col-m-3">
+                    <div class="ct-footer__middle__content-middle1" set:html={contentMiddle1} />
+                  </div>{' '}
+                </Fragment>
+              )}
+              {contentMiddle2 && (
+                <Fragment>
+                  <div class="col-xxs-12 col-m-3">
+                    <div class="ct-footer__middle__content-middle2" set:html={contentMiddle2} />
+                  </div>{' '}
+                </Fragment>
+              )}
+              {contentMiddle3 && (
+                <Fragment>
+                  <div class="col-xxs-12 col-m-3">
+                    <div class="ct-footer__middle__content-middle3" set:html={contentMiddle3} />
+                  </div>{' '}
+                </Fragment>
+              )}
+              {contentMiddle4 && (
+                <Fragment>
+                  <div class="col-xxs-12 col-m-3">
+                    <div class="ct-footer__middle__content-middle4" set:html={contentMiddle4} />
+                  </div>{' '}
+                </Fragment>
+              )}
+              {contentMiddle5 && (
+                <div class="col-xxs-12">
+                  <div class="ct-footer__middle__content-middle5" set:html={contentMiddle5} />
+                </div>
+              )}
+            </div>
+          </div>{' '}
+        </Fragment>
+      )}
+      {hasBottom && (
+        <div class="container ct-footer__bottom">
+          <div class="row">
+            {contentBottom1 && (
+              <Fragment>
+                <div class="col-xxs-12 col-m-7">
+                  <div class="ct-footer__bottom__content-bottom1" set:html={contentBottom1} />
+                </div>{' '}
+              </Fragment>
+            )}
+            {contentBottom2 && (
+              <div class="col-xxs-12 col-m-5">
+                <div class="ct-footer__bottom__content-bottom2" set:html={contentBottom2} />
+              </div>
+            )}
+          </div>
+        </div>
+      )}
+    </footer>
+  )
+}

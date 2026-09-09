@@ -1,0 +1,141 @@
+---
+/**
+ * CivicTheme Header component.
+ *
+ * Props:
+ * - theme: Theme variation (light or dark).
+ * - contentTop1 / contentTop2 / contentTop3 / contentMiddle1 /
+ *   contentMiddle2 / contentMiddle3 / contentBottom1: Documented as Slots
+ *   upstream, but every upstream test passes plain string props — ported
+ *   as `string` props, rendered with `set:html` per this project's
+ *   autoescape convention.
+ * - class: Additional CSS classes.
+ * - ...rest: Additional HTML attributes, spread onto the root element.
+ *
+ * Note: `content_top2_block`/`content_top3_block` have no individual
+ * `{% if %}` guard of their own — both cols always render, unconditionally,
+ * whenever EITHER `content_top2` or `content_top3` is non-empty (only the
+ * shared outer `.container` is gated on the pair). This differs from
+ * `content_middle2_block`/`content_middle3_block`, which upstream DOES gate
+ * individually. Reproduced faithfully: `hasTop2Or3` gates the whole
+ * container (both cols unconditional inside it), while `contentMiddle2`/
+ * `contentMiddle3` each gate their own col independently.
+ */
+interface Props {
+  theme?: 'light' | 'dark';
+  contentTop1?: string;
+  contentTop2?: string;
+  contentTop3?: string;
+  contentMiddle1?: string;
+  contentMiddle2?: string;
+  contentMiddle3?: string;
+  contentBottom1?: string;
+  class?: string;
+  [key: string]: unknown;
+}
+
+const {
+  theme = 'light',
+  contentTop1,
+  contentTop2,
+  contentTop3,
+  contentMiddle1,
+  contentMiddle2,
+  contentMiddle3,
+  contentBottom1,
+  class: className = '',
+  ...rest
+} = Astro.props;
+
+const classes = ['ct-header', `ct-theme-${theme}`, className].filter(Boolean).join(' ');
+
+const hasTop = Boolean(contentTop1 || contentTop2 || contentTop3);
+const hasTop2Or3 = Boolean(contentTop2 || contentTop3);
+const hasMiddle = Boolean(contentMiddle1 || contentMiddle2 || contentMiddle3);
+const hasMiddle2Or3 = Boolean(contentMiddle2 || contentMiddle3);
+const shouldRender = Boolean(
+  contentTop1 || contentTop2 || contentTop3 || contentMiddle1 || contentMiddle2 || contentMiddle3 || contentBottom1
+);
+---
+
+{
+  shouldRender && (
+    <header class={classes} role="banner" {...rest}>
+      {hasTop && (
+        <Fragment>
+          <div class="ct-header__top hide-xxs show-m">
+            {contentTop1 && (
+              <Fragment>
+                <div class="container">
+                  <div class="row">
+                    <div class="col-xxs-12">
+                      <div class="ct-header__content-top1" set:html={contentTop1} />
+                    </div>
+                  </div>
+                </div>{' '}
+              </Fragment>
+            )}
+            {hasTop2Or3 && (
+              <div class="container">
+                <div class="row">
+                  <div class="col-xxs-12 col-m-4">
+                    <div class="ct-header__content-top2" set:html={contentTop2} />
+                  </div>{' '}
+                  <div class="col-xxs-12 col-m-8">
+                    <div class="ct-header__content-top3" set:html={contentTop3} />
+                  </div>
+                </div>
+              </div>
+            )}
+          </div>{' '}
+        </Fragment>
+      )}
+      {hasMiddle && (
+        <Fragment>
+          <div class="ct-header__middle">
+            {contentMiddle1 && (
+              <Fragment>
+                <div class="container">
+                  <div class="row">
+                    <div class="col-xxs-12">
+                      <div class="ct-header__content-middle1" set:html={contentMiddle1} />
+                    </div>
+                  </div>
+                </div>{' '}
+              </Fragment>
+            )}
+            {hasMiddle2Or3 && (
+              <div class="container">
+                <div class="row row--no-wrap">
+                  {contentMiddle2 && (
+                    <Fragment>
+                      <div class="col col--no-grow">
+                        <div class="ct-header__content-middle2" set:html={contentMiddle2} />
+                      </div>{' '}
+                    </Fragment>
+                  )}
+                  {contentMiddle3 && (
+                    <div class="col">
+                      <div class="ct-header__content-middle3" set:html={contentMiddle3} />
+                    </div>
+                  )}
+                </div>
+              </div>
+            )}
+          </div>{' '}
+        </Fragment>
+      )}
+      {contentBottom1 && (
+        <div class="ct-header__bottom">
+          <div class="container">
+            <div class="row">
+              <div class="col-xxs-12">
+                <div class="ct-header__content-bottom1" set:html={contentBottom1} />
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+    </header>
+  )
+}
