@@ -1,0 +1,51 @@
+---
+/**
+ * CivicTheme Webform component.
+ *
+ * Props:
+ * - theme: Theme variation (light or dark).
+ * - verticalSpacing: Webform vertical spacing (top, bottom, or both).
+ * - withBackground: Whether to display with a background.
+ * - referencedWebform: Rendered webform HTML (rendered with `set:html`,
+ *   documented as a Slot upstream — see this project's autoescape-off
+ *   convention).
+ * - class: Additional CSS classes.
+ * - ...rest: Additional HTML attributes, spread onto the root element.
+ */
+interface Props {
+  theme?: 'light' | 'dark';
+  verticalSpacing?: 'top' | 'bottom' | 'both' | string;
+  withBackground?: boolean;
+  referencedWebform?: string;
+  class?: string;
+  [key: string]: unknown;
+}
+
+const {
+  theme = 'light',
+  verticalSpacing,
+  withBackground,
+  referencedWebform,
+  class: className = '',
+  ...rest
+} = Astro.props;
+
+const themeClass = `ct-theme-${theme}`;
+const verticalSpacingClass = ['top', 'bottom', 'both'].includes(verticalSpacing ?? '')
+  ? `ct-vertical-spacing-inset--${verticalSpacing}`
+  : '';
+const withBackgroundClass = withBackground ? 'ct-webform--with-background' : '';
+const classes = `ct-webform ${themeClass} ${verticalSpacingClass} ${withBackgroundClass} ${className}`;
+---
+
+{
+  referencedWebform && (
+    <div class={classes} {...rest}>
+      <div class="container">
+        <div class="row">
+          <div class="col-xxs-12" set:html={referencedWebform} />
+        </div>
+      </div>
+    </div>
+  )
+}
