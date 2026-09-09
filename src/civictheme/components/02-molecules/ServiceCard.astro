@@ -33,15 +33,7 @@ interface Props {
   [key: string]: unknown;
 }
 
-const {
-  theme = 'light',
-  links,
-  contentTop,
-  title,
-  contentBottom,
-  class: className = '',
-  ...rest
-} = Astro.props;
+const { theme = 'light', links, contentTop, title, contentBottom, class: className = '', ...rest } = Astro.props;
 
 const classes = ['ct-service-card', `ct-theme-${theme}`, className].filter(Boolean).join(' ');
 

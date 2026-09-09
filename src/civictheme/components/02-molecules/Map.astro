@@ -76,11 +76,24 @@ const classes = [
               </Fragment>
             )}
             <div class="ct-map__canvas">
-              <Iframe url={url} class="ct-map__iframe" allowfullscreen data-chromatic="ignore" title={address || undefined} />
+              <Iframe
+                url={url}
+                class="ct-map__iframe"
+                allowfullscreen
+                data-chromatic="ignore"
+                title={address || undefined}
+              />
             </div>{' '}
             {viewUrl && (
               <Fragment>
-                <Link theme={theme} text={viewTextResolved} url={viewUrl} isNewWindow isExternal class="ct-map__link" />{' '}
+                <Link
+                  theme={theme}
+                  text={viewTextResolved}
+                  url={viewUrl}
+                  isNewWindow
+                  isExternal
+                  class="ct-map__link"
+                />{' '}
               </Fragment>
             )}
             {contentBottom && <div class="ct-map__content-bottom" set:html={contentBottom} />}

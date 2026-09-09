@@ -172,7 +172,11 @@ const pageCount = pageEntries.length;
                   </li>
                 </Fragment>
               )}{' '}
-              <li class={isActive ? 'ct-pagination__item ct-pagination__item--active' : 'ct-pagination__item hide-xxs show-m'}>
+              <li
+                class={
+                  isActive ? 'ct-pagination__item ct-pagination__item--active' : 'ct-pagination__item hide-xxs show-m'
+                }
+              >
                 <Link
                   theme={theme}
                   text={`${key}`}

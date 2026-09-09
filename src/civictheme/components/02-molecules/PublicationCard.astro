@@ -142,8 +142,7 @@ const hasFile = Boolean(file && Object.keys(file).length > 0);
         {filename &&
           (title ? (
             <div class="ct-publication-card__filename">
-              <span class="ct-visually-hidden">{filenamePrefix}</span>
-              {' '}{filename}
+              <span class="ct-visually-hidden">{filenamePrefix}</span> {filename}
             </div>
           ) : (
             <Link theme={theme} text={filename} url={file?.url} class="ct-publication-card__link" />

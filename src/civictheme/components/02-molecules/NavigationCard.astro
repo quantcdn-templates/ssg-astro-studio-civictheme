@@ -111,7 +111,11 @@ const withIconBlock = Boolean(icon) || (withImage && imageAsIcon);
         )}
         <div class="ct-navigation-card__title">
           {withLink ? (
-            <a class="ct-navigation-card__title-link" href={link?.url} target={link?.isNewWindow ? '_blank' : undefined}>
+            <a
+              class="ct-navigation-card__title-link"
+              href={link?.url}
+              target={link?.isNewWindow ? '_blank' : undefined}
+            >
               <Fragment set:html={title} />
             </a>
           ) : (

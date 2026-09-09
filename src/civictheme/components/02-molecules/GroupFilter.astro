@@ -1,0 +1,286 @@
+---
+/**
+ * CivicTheme Group Filter component.
+ *
+ * Props:
+ * - theme: Theme variation (light or dark).
+ * - title: Filter title.
+ * - formAttributes: Form attributes (spread onto a wrapping `<form>` when
+ *   present; if absent, no `<form>` wraps the filter row at all).
+ * - formHiddenFields: Form hidden fields (HTML-bearing).
+ * - filters: Filter objects: Array<{ title, content }>.
+ * - submitText: Text on the submit button.
+ * - groupId: Unique ID for filter group.
+ * - showSelectedFilters: Enable the selected filters list below the filter
+ *   fields.
+ * - selectedTitle: Text on the selected filters label.
+ * - selectedFilters: Selected filter objects: Array<{ text, url, label }>.
+ * - selectedClearLink: A link to clear all selected filters: { type, icon,
+ *   iconPlacement, text, url } | null.
+ * - contentTop / contentBottom: Documented as Slots upstream, but every
+ *   upstream test passes plain string props — ported as `string` props,
+ *   rendered with `set:html` per this project's autoescape convention.
+ * - class: Additional CSS classes.
+ * - ...rest: Additional HTML attributes, spread onto the root element.
+ *
+ * Note: `filters_block`'s submit button needs a native `type="submit"` HTML
+ * attribute distinct from `Button`'s own visual `type` prop (`primary`) —
+ * `Button.astro`'s `type` prop destructure consumes that key entirely, so
+ * `...rest` can never carry a second, different `type` value through it.
+ * Replicated `Button`'s own `kind === 'button'` markup formula directly
+ * here (real `TextIcon` child, same class-list formula) rather than
+ * reusing the shared atom, matching the "sink can't carry what's needed"
+ * precedent (e.g. EventCard's `Datetime` replication). See PORTING.md.
+ *
+ * Note: `show_selected_filters`/`selected_filters`/`selected_clear_link`
+ * are ported but exercised by no upstream test (none of `group-filter.
+ * test.js`'s 6 cases sets `show_selected_filters`) — verified by hand
+ * against `group-filter.twig` lines 147-191.
+ */
+import Popover from '@civictheme/atoms/Popover.astro';
+import Chip from '@civictheme/atoms/Chip.astro';
+import Button from '@civictheme/atoms/Button.astro';
+import TextIcon from '@civictheme/base/TextIcon.astro';
+
+interface FilterItem {
+  title?: string;
+  content?: string;
+}
+
+interface SelectedFilterItem {
+  text?: string;
+  url?: string;
+  label?: string;
+}
+
+interface SelectedClearLink {
+  type?: string;
+  icon?: string;
+  iconPlacement?: 'before' | 'after';
+  text?: string;
+  url?: string;
+}
+
+interface Props {
+  theme?: 'light' | 'dark';
+  title?: string;
+  formAttributes?: Record<string, unknown>;
+  formHiddenFields?: string;
+  filters?: FilterItem[];
+  submitText?: string;
+  groupId?: string;
+  showSelectedFilters?: boolean;
+  selectedTitle?: string;
+  selectedFilters?: SelectedFilterItem[];
+  selectedClearLink?: SelectedClearLink | null;
+  contentTop?: string;
+  contentBottom?: string;
+  class?: string;
+  [key: string]: unknown;
+}
+
+const {
+  theme = 'light',
+  title: titleProp,
+  formAttributes,
+  formHiddenFields,
+  filters,
+  submitText,
+  groupId,
+  showSelectedFilters,
+  selectedTitle,
+  selectedFilters,
+  selectedClearLink,
+  contentTop,
+  contentBottom,
+  class: className = '',
+  ...rest
+} = Astro.props;
+
+// group-filter.twig gates on `filters is not empty` — Twig's `empty` test
+// on an array checks its element count.
+const hasFilters = Boolean(filters && filters.length > 0);
+const title = titleProp || 'Filter results by:';
+const classes = ['ct-group-filter', `ct-theme-${theme}`, className].filter(Boolean).join(' ');
+const group = `ct-group-filter--group-${groupId ?? Math.floor(Math.random() * 9000 + 1000)}`;
+const withForm = Boolean(formAttributes);
+const formWrapperProps = formAttributes ?? {};
+
+const submitClasses = [
+  'ct-button',
+  `ct-theme-${theme}`,
+  'ct-button--primary',
+  'ct-button--button',
+  'ct-button--small',
+  'ct-group-filter__submit',
+]
+  .filter(Boolean)
+  .join(' ');
+
+const selectedClearType = selectedClearLink?.type || 'secondary';
+const selectedClearIcon = selectedClearLink?.icon || 'close-outline';
+const selectedClearIconPlacement = selectedClearLink?.iconPlacement || 'after';
+const selectedClearText = selectedClearLink?.text || 'Clear all';
+---
+
+{
+  hasFilters && (
+    <div class={classes} data-component-name="ct-group-filter" {...rest}>
+      <div class="ct-group-filter__filter-controls" data-group-filter-element="">
+        <div class="row">
+          <div class="col-xxs-12">
+            {contentTop && (
+              <Fragment>
+                <div class="ct-group-filter__content-top" set:html={contentTop} />{' '}
+              </Fragment>
+            )}
+            {withForm ? (
+              <form {...formWrapperProps}>
+                <div class="row row--no-wrap ct-group-filter__row">
+                  <div class="col col--no-grow">
+                    <div class="ct-flex-row-align-middle">
+                      {title && <div class="ct-group-filter__title">{title}</div>}
+                    </div>
+                  </div>{' '}
+                  <div class="col">
+                    <div class="ct-flex-row-align-middle">
+                      <ul
+                        class="ct-item-list ct-item-list--horizontal ct-item-list--large ct-group-filter__filters"
+                        data-group-filter-filters=""
+                      >
+                        {(filters ?? []).map((filter, i) => (
+                          <Fragment>
+                            {i > 0 && ' '}
+                            <li class="ct-item-list__item">
+                              <Popover
+                                theme={theme}
+                                content={filter.content}
+                                trigger={{ text: filter.title }}
+                                group={group}
+                              />
+                            </li>
+                          </Fragment>
+                        ))}
+                      </ul>
+                    </div>
+                  </div>{' '}
+                  <div class="col col--no-grow">
+                    <div class="ct-flex-row-align-middle">
+                      <button class={submitClasses} data-component-name="button" type="submit">
+                        <TextIcon
+                          text={submitText || 'Apply filters'}
+                          icon="approve"
+                          iconPlacement="after"
+                          iconClass="ct-button__icon"
+                        />
+                      </button>
+                    </div>
+                  </div>
+                </div>
+                {formHiddenFields && (
+                  <Fragment>
+                    {' '}
+                    <Fragment set:html={formHiddenFields} />
+                  </Fragment>
+                )}
+              </form>
+            ) : (
+              <Fragment>
+                <div class="row row--no-wrap ct-group-filter__row">
+                  <div class="col col--no-grow">
+                    <div class="ct-flex-row-align-middle">
+                      {title && <div class="ct-group-filter__title">{title}</div>}
+                    </div>
+                  </div>{' '}
+                  <div class="col">
+                    <div class="ct-flex-row-align-middle">
+                      <ul
+                        class="ct-item-list ct-item-list--horizontal ct-item-list--large ct-group-filter__filters"
+                        data-group-filter-filters=""
+                      >
+                        {(filters ?? []).map((filter, i) => (
+                          <Fragment>
+                            {i > 0 && ' '}
+                            <li class="ct-item-list__item">
+                              <Popover
+                                theme={theme}
+                                content={filter.content}
+                                trigger={{ text: filter.title }}
+                                group={group}
+                              />
+                            </li>
+                          </Fragment>
+                        ))}
+                      </ul>
+                    </div>
+                  </div>{' '}
+                  <div class="col col--no-grow">
+                    <div class="ct-flex-row-align-middle">
+                      <button class={submitClasses} data-component-name="button" type="submit">
+                        <TextIcon
+                          text={submitText || 'Apply filters'}
+                          icon="approve"
+                          iconPlacement="after"
+                          iconClass="ct-button__icon"
+                        />
+                      </button>
+                    </div>
+                  </div>
+                </div>
+                {formHiddenFields && <Fragment set:html={formHiddenFields} />}
+              </Fragment>
+            )}
+            {contentBottom && (
+              <Fragment>
+                {' '}
+                <div class="ct-group-filter__content-bottom" set:html={contentBottom} />
+              </Fragment>
+            )}
+          </div>
+        </div>
+      </div>
+      {showSelectedFilters && (
+        <div class="ct-group-filter__selected-filter-controls">
+          <div class="ct-group-filter__selected-active-filters">
+            <div class="ct-group-filter__selected-title">{selectedTitle || 'Selected filters:'}</div>
+            <ul class="ct-item-list ct-item-list--horizontal ct-item-list--small ct-group-filter__selected-list">
+              {(selectedFilters ?? []).map((selectedFilter, i) => (
+                <Fragment>
+                  {i > 0 && ' '}
+                  <li class="ct-item-list__item">
+                    <Chip
+                      kind="link"
+                      theme={theme}
+                      content={selectedFilter.text}
+                      isDismissible
+                      isSelected
+                      url={selectedFilter.url}
+                      size="small"
+                      label={
+                        selectedFilter.label || `Selected filter: ${selectedFilter.text} - Click to remove filter.`
+                      }
+                    />
+                  </li>
+                </Fragment>
+              ))}
+            </ul>
+          </div>
+          {selectedClearLink && (
+            <div class="ct-group-filter__selected-clear">
+              <Button
+                theme={theme}
+                kind="link"
+                type={selectedClearType as any}
+                size="small"
+                icon={selectedClearIcon}
+                iconPlacement={selectedClearIconPlacement}
+                text={selectedClearText}
+                url={selectedClearLink.url}
+              />
+            </div>
+          )}
+        </div>
+      )}
+    </div>
+  )
+}
