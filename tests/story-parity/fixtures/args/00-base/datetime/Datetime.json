@@ -1,0 +1,18 @@
+{
+  "storyId": "base-utilities-datetime--datetime",
+  "title": "Base/Utilities/Datetime",
+  "name": "Datetime",
+  "exportName": "Datetime",
+  "component": "00-base/datetime",
+  "importPath": "./components/00-base/datetime/datetime.stories.js",
+  "theme": null,
+  "layout": "centered",
+  "background": null,
+  "argsOverride": null,
+  "args": {
+    "start": "20 Jan 2023 11:00",
+    "end": "21 Jan 2023 15:00",
+    "start_iso": "2023-01-20T00:00:00.000Z",
+    "end_iso": "2023-01-21T04:00:00.000Z"
+  }
+}

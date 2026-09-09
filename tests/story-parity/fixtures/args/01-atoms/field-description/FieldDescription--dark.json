@@ -1,0 +1,19 @@
+{
+  "storyId": "atoms-form-controls-field-description--field-description",
+  "title": "Atoms/Form Controls/Field Description",
+  "name": "Field Description",
+  "exportName": "FieldDescription",
+  "component": "01-atoms/field-description",
+  "importPath": "./components/01-atoms/field-description/field-description.stories.js",
+  "theme": "dark",
+  "layout": "centered",
+  "background": null,
+  "argsOverride": "theme:dark",
+  "args": {
+    "theme": "dark",
+    "size": "regular",
+    "content": "Field message content sample.",
+    "modifier_class": "",
+    "attributes": null
+  }
+}

@@ -1,0 +1,23 @@
+{
+  "storyId": "atoms-form-controls-label--label",
+  "title": "Atoms/Form Controls/Label",
+  "name": "Label",
+  "exportName": "Label",
+  "component": "01-atoms/label",
+  "importPath": "./components/01-atoms/label/label.stories.js",
+  "theme": "dark",
+  "layout": "centered",
+  "background": null,
+  "argsOverride": "theme:dark",
+  "args": {
+    "theme": "dark",
+    "tag": "label",
+    "content": "Label content",
+    "size": "regular",
+    "is_required": false,
+    "required_text": "",
+    "for": "",
+    "attributes": null,
+    "modifier_class": ""
+  }
+}

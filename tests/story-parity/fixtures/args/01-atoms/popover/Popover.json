@@ -1,0 +1,26 @@
+{
+  "storyId": "atoms-popover--popover",
+  "title": "Atoms/Popover",
+  "name": "Popover",
+  "exportName": "Popover",
+  "component": "01-atoms/popover",
+  "importPath": "./components/01-atoms/popover/popover.stories.js",
+  "theme": "light",
+  "layout": "centered",
+  "background": null,
+  "argsOverride": null,
+  "args": {
+    "theme": "light",
+    "trigger": {
+      "text": "Click me",
+      "url": "",
+      "is_new_window": false
+    },
+    "content": "Popover content",
+    "content_top": "",
+    "content_bottom": "",
+    "group": "group-name",
+    "modifier_class": "",
+    "attributes": null
+  }
+}

@@ -1,0 +1,24 @@
+{
+  "storyId": "atoms-tag--tag",
+  "title": "Atoms/Tag",
+  "name": "Tag",
+  "exportName": "Tag",
+  "component": "01-atoms/tag",
+  "importPath": "./components/01-atoms/tag/tag.stories.js",
+  "theme": "light",
+  "layout": "centered",
+  "background": null,
+  "argsOverride": null,
+  "args": {
+    "theme": "light",
+    "type": "primary",
+    "content": "Tag content",
+    "icon": "",
+    "icon_placement": "before",
+    "url": "https://www.example.com",
+    "is_new_window": false,
+    "is_external": false,
+    "attributes": null,
+    "modifier_class": ""
+  }
+}

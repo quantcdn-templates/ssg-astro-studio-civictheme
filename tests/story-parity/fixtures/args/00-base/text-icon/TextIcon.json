@@ -1,0 +1,22 @@
+{
+  "storyId": "base-text-icon--text-icon",
+  "title": "Base/Text Icon",
+  "name": "Text Icon",
+  "exportName": "TextIcon",
+  "component": "00-base/text-icon",
+  "importPath": "./components/00-base/text-icon/text-icon.stories.js",
+  "theme": null,
+  "layout": "centered",
+  "background": null,
+  "argsOverride": null,
+  "args": {
+    "text": "Text icon example",
+    "is_new_window": false,
+    "is_external": false,
+    "icon": "account",
+    "icon_placement": "before",
+    "icon_class": "",
+    "icon_group_disabled": false,
+    "icon_single_only": false
+  }
+}

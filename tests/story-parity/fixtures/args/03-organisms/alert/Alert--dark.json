@@ -1,0 +1,21 @@
+{
+  "storyId": "organisms-alert--alert",
+  "title": "Organisms/Alert",
+  "name": "Alert",
+  "exportName": "Alert",
+  "component": "03-organisms/alert",
+  "importPath": "./components/03-organisms/alert/alert.stories.js",
+  "theme": "dark",
+  "layout": "fullscreen",
+  "background": null,
+  "argsOverride": "theme:dark",
+  "args": {
+    "theme": "dark",
+    "type": "information",
+    "id": "alert-1",
+    "title": "Site information",
+    "description": "Alert description",
+    "attributes": null,
+    "modifier_class": ""
+  }
+}

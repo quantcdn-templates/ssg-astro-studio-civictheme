@@ -1,0 +1,20 @@
+{
+  "storyId": "organisms-webform--webform",
+  "title": "Organisms/Webform",
+  "name": "Webform",
+  "exportName": "Webform",
+  "component": "03-organisms/webform",
+  "importPath": "./components/03-organisms/webform/webform.stories.js",
+  "theme": "light",
+  "layout": "padded",
+  "background": null,
+  "argsOverride": null,
+  "args": {
+    "theme": "light",
+    "referenced_webform": "Webform title",
+    "with_background": false,
+    "vertical_spacing": "none",
+    "attributes": null,
+    "modifier_class": ""
+  }
+}

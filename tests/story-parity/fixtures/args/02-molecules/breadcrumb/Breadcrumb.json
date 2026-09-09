@@ -1,0 +1,32 @@
+{
+  "storyId": "molecules-breadcrumb--breadcrumb",
+  "title": "Molecules/Breadcrumb",
+  "name": "Breadcrumb",
+  "exportName": "Breadcrumb",
+  "component": "02-molecules/breadcrumb",
+  "importPath": "./components/02-molecules/breadcrumb/breadcrumb.stories.js",
+  "theme": "light",
+  "layout": "centered",
+  "background": null,
+  "argsOverride": null,
+  "args": {
+    "theme": "light",
+    "active_is_link": false,
+    "links": [
+      {
+        "text": "Link 1",
+        "url": "https://example.com/link1"
+      },
+      {
+        "text": "Link 2",
+        "url": "https://example.com/link2"
+      },
+      {
+        "text": "Link 3",
+        "url": "https://example.com/link3"
+      }
+    ],
+    "modifier_class": "",
+    "attributes": null
+  }
+}

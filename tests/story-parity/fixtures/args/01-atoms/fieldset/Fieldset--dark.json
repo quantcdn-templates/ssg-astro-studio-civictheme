@@ -1,0 +1,27 @@
+{
+  "storyId": "atoms-form-controls-fieldset--fieldset",
+  "title": "Atoms/Form Controls/Fieldset",
+  "name": "Fieldset",
+  "exportName": "Fieldset",
+  "component": "01-atoms/fieldset",
+  "importPath": "./components/01-atoms/fieldset/fieldset.stories.js",
+  "theme": "dark",
+  "layout": "centered",
+  "background": null,
+  "argsOverride": "theme:dark",
+  "args": {
+    "theme": "dark",
+    "legend": "Fieldset legend",
+    "description": "Fieldset example description",
+    "description_display": "before",
+    "message": "Fieldset example message",
+    "message_type": "error",
+    "fields": "<div class=\"ct-field ct-theme-light ct-field--checkbox ct-field--vertical ct-field--required   \" >\n    \n    <fieldset class=\"ct-field__wrapper\">\n              \n\n<legend\n  class=\"ct-label ct-theme-light ct-label--regular ct-label--required ct-field__title\"\n      >Field title <span class=\"ct-label__required\">(required)</span></legend>            \n      \n      \n                                                                                                            \n\n  <ul class=\"ct-item-list ct-item-list--vertical ct-item-list--regular  \" >\n                  <li class=\"ct-item-list__item\">                          \n\n  <input\n    type=\"checkbox\"\n    class=\"ct-checkbox ct-theme-light  ct-field__control\"\n    name=\"option_group_947\"\n    value=\"\"\n    id=\"option_group_947_control_item_1\"\n        required              />\n      \n\n<label\n  class=\"ct-label ct-theme-light ct-label--small  ct-checkbox__label\"\n   for=\"option_group_947_control_item_1\"     >Control item 1</label>                        </li>\n                        <li class=\"ct-item-list__item\">                          \n\n  <input\n    type=\"checkbox\"\n    class=\"ct-checkbox ct-theme-light  ct-field__control\"\n    name=\"option_group_947\"\n    value=\"\"\n    id=\"option_group_947_control_item_2\"\n        required              />\n      \n\n<label\n  class=\"ct-label ct-theme-light ct-label--small  ct-checkbox__label\"\n   for=\"option_group_947_control_item_2\"     >Control item 2</label>                        </li>\n                        <li class=\"ct-item-list__item\">                          \n\n  <input\n    type=\"checkbox\"\n    class=\"ct-checkbox ct-theme-light  ct-field__control\"\n    name=\"option_group_947\"\n    value=\"\"\n    id=\"option_group_947_control_item_3\"\n        required              />\n      \n\n<label\n  class=\"ct-label ct-theme-light ct-label--small  ct-checkbox__label\"\n   for=\"option_group_947_control_item_3\"     >Control item 3</label>                        </li>\n            </ul>\n\n      \n      \n          </fieldset>\n  </div>\n\n\n\n\n    \n          \n    \n              \n    \n              \n    \n      <div class=\"ct-field ct-theme-light ct-field--radio ct-field--vertical ct-field--required   \" >\n    \n    <fieldset class=\"ct-field__wrapper\">\n              \n\n<legend\n  class=\"ct-label ct-theme-light ct-label--regular ct-label--required ct-field__title\"\n      >Field title <span class=\"ct-label__required\">(required)</span></legend>                            \n                \n        \n\n<div class=\"ct-field-description ct-theme-light ct-field-description--regular ct-field__description\" >Description content sample.</div>      \n      \n      \n                                                                                                            \n\n  <ul class=\"ct-item-list ct-item-list--vertical ct-item-list--regular  \" >\n                  <li class=\"ct-item-list__item\">                          \n\n  <input\n    type=\"radio\"\n    class=\"ct-radio ct-theme-light  ct-field__control\"\n    name=\"option_group_928\"\n    value=\"\"\n    id=\"option_group_928_control_item_1\"\n        required              />\n      \n\n<label\n  class=\"ct-label ct-theme-light ct-label--small  ct-radio__label\"\n   for=\"option_group_928_control_item_1\"     >Control item 1</label>                        </li>\n                        <li class=\"ct-item-list__item\">                          \n\n  <input\n    type=\"radio\"\n    class=\"ct-radio ct-theme-light  ct-field__control\"\n    name=\"option_group_928\"\n    value=\"\"\n    id=\"option_group_928_control_item_2\"\n        required              />\n      \n\n<label\n  class=\"ct-label ct-theme-light ct-label--small  ct-radio__label\"\n   for=\"option_group_928_control_item_2\"     >Control item 2</label>                        </li>\n                        <li class=\"ct-item-list__item\">                          \n\n  <input\n    type=\"radio\"\n    class=\"ct-radio ct-theme-light  ct-field__control\"\n    name=\"option_group_928\"\n    value=\"\"\n    id=\"option_group_928_control_item_3\"\n        required              />\n      \n\n<label\n  class=\"ct-label ct-theme-light ct-label--small  ct-radio__label\"\n   for=\"option_group_928_control_item_3\"     >Control item 3</label>                        </li>\n            </ul>\n\n      \n      \n          </fieldset>\n  </div>",
+    "is_required": true,
+    "required_text": "",
+    "prefix": "",
+    "suffix": "",
+    "modifier_class": "",
+    "attributes": null
+  }
+}

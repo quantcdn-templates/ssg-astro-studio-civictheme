@@ -1,0 +1,27 @@
+{
+  "storyId": "molecules-next-steps--next-steps",
+  "title": "Molecules/Next Steps",
+  "name": "Next Steps",
+  "exportName": "NextSteps",
+  "component": "02-molecules/next-step",
+  "importPath": "./components/02-molecules/next-step/next-step.stories.js",
+  "theme": "light",
+  "layout": "centered",
+  "background": null,
+  "argsOverride": null,
+  "args": {
+    "theme": "light",
+    "title": "Next steps title from knob",
+    "content": "Short summary explaining why this link is relevant.",
+    "link": {
+      "text": "Sign up",
+      "url": "https://example.com",
+      "is_new_window": true,
+      "is_external": true
+    },
+    "content_top": "",
+    "content_bottom": "",
+    "modifier_class": "",
+    "attributes": null
+  }
+}

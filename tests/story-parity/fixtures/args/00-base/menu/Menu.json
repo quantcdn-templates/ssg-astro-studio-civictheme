@@ -1,0 +1,86 @@
+{
+  "storyId": "base-utilities-menu--menu",
+  "title": "Base/Utilities/Menu",
+  "name": "Menu",
+  "exportName": "Menu",
+  "component": "00-base/menu",
+  "importPath": "./components/00-base/menu/menu.stories.js",
+  "theme": "light",
+  "layout": "centered",
+  "background": null,
+  "argsOverride": null,
+  "args": {
+    "theme": "light",
+    "items": [
+      {
+        "title": "Link 1",
+        "url": "#",
+        "below": [
+          {
+            "title": "Sublink 1",
+            "url": "#",
+            "below": [
+              {
+                "title": "Subsublink 1",
+                "url": "#",
+                "below": [],
+                "is_expanded": false,
+                "in_active_trail": false
+              },
+              {
+                "title": "Subsublink 2",
+                "url": "#",
+                "below": [],
+                "is_expanded": false,
+                "in_active_trail": false
+              }
+            ],
+            "is_expanded": false,
+            "in_active_trail": false
+          },
+          {
+            "title": "Sublink 2",
+            "url": "#",
+            "below": [],
+            "is_expanded": false,
+            "in_active_trail": false
+          }
+        ],
+        "is_expanded": false,
+        "in_active_trail": false
+      },
+      {
+        "title": "Link 2",
+        "url": "#",
+        "below": [],
+        "is_expanded": false,
+        "in_active_trail": false
+      },
+      {
+        "title": "Link 3",
+        "url": "#",
+        "below": [
+          {
+            "title": "Sublink 3",
+            "url": "#",
+            "below": [
+              {
+                "title": "Subsublink 3",
+                "url": "#",
+                "below": [],
+                "is_expanded": false,
+                "in_active_trail": false
+              }
+            ],
+            "is_expanded": false,
+            "in_active_trail": false
+          }
+        ],
+        "is_expanded": false,
+        "in_active_trail": false
+      }
+    ],
+    "is_collapsible": false,
+    "modifier_class": ""
+  }
+}

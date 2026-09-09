@@ -1,0 +1,22 @@
+{
+  "storyId": "molecules-tooltip--tooltip",
+  "title": "Molecules/Tooltip",
+  "name": "Tooltip",
+  "exportName": "Tooltip",
+  "component": "02-molecules/tooltip",
+  "importPath": "./components/02-molecules/tooltip/tooltip.stories.js",
+  "theme": "light",
+  "layout": "centered",
+  "background": null,
+  "argsOverride": null,
+  "args": {
+    "theme": "light",
+    "position": "auto",
+    "icon": "account",
+    "icon_size": "regular",
+    "title": "Toggle tooltip display",
+    "content": "Ullamco incididunt laborum aliquip.",
+    "modifier_class": "",
+    "attributes": null
+  }
+}

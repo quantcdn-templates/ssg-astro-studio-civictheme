@@ -1,0 +1,23 @@
+{
+  "storyId": "atoms-form-controls-checkbox--checkbox",
+  "title": "Atoms/Form Controls/Checkbox",
+  "name": "Checkbox",
+  "exportName": "Checkbox",
+  "component": "01-atoms/checkbox",
+  "importPath": "./components/01-atoms/checkbox/checkbox.stories.js",
+  "theme": "dark",
+  "layout": "centered",
+  "background": null,
+  "argsOverride": "theme:dark",
+  "args": {
+    "theme": "dark",
+    "label": "This is a checkbox",
+    "name": "name",
+    "id": "id-name",
+    "value": "50",
+    "is_checked": false,
+    "is_required": false,
+    "is_invalid": false,
+    "is_disabled": false
+  }
+}

@@ -1,0 +1,25 @@
+{
+  "storyId": "atoms-form-controls-input--input",
+  "title": "Atoms/Form Controls/Input",
+  "name": "Input",
+  "exportName": "Input",
+  "component": "01-atoms/input",
+  "importPath": "./components/01-atoms/input/input.stories.js",
+  "theme": "light",
+  "layout": "centered",
+  "background": null,
+  "argsOverride": null,
+  "args": {
+    "theme": "light",
+    "type": "email",
+    "placeholder": "Placeholder",
+    "value": "",
+    "name": "input-name",
+    "id": "input-id",
+    "is_required": false,
+    "is_invalid": false,
+    "is_disabled": false,
+    "modifier_class": "",
+    "attributes": null
+  }
+}

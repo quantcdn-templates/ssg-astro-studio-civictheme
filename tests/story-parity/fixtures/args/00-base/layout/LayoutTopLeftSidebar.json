@@ -1,0 +1,32 @@
+{
+  "storyId": "base-layout--layout-top-left-sidebar",
+  "title": "Base/Layout",
+  "name": "Layout Top Left Sidebar",
+  "exportName": "LayoutTopLeftSidebar",
+  "component": "00-base/layout",
+  "importPath": "./components/00-base/layout/layout.stories.js",
+  "theme": null,
+  "layout": "padded",
+  "background": null,
+  "argsOverride": null,
+  "args": {
+    "content_top": "<div class=\"story-placeholder\" contenteditable=\"true\">content_top</div>",
+    "sidebar_top_left": "<div class=\"story-placeholder\" contenteditable=\"true\">sidebar_top_left</div>",
+    "sidebar_top_right": "",
+    "content": "<div class=\"story-placeholder\" contenteditable=\"true\">content</div>",
+    "sidebar_bottom_left": "",
+    "sidebar_bottom_right": "",
+    "content_bottom": "<div class=\"story-placeholder\" contenteditable=\"true\">content_bottom</div>",
+    "sidebar_top_left_attributes": null,
+    "sidebar_top_right_attributes": null,
+    "content_attributes": null,
+    "sidebar_bottom_left_attributes": null,
+    "sidebar_bottom_right_attributes": null,
+    "hide_sidebar_left": false,
+    "hide_sidebar_right": false,
+    "is_contained": false,
+    "vertical_spacing": "none",
+    "attributes": null,
+    "modifier_class": ""
+  }
+}

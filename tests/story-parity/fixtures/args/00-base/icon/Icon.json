@@ -1,0 +1,19 @@
+{
+  "storyId": "base-icon--icon",
+  "title": "Base/Icon",
+  "name": "Icon",
+  "exportName": "Icon",
+  "component": "00-base/icon",
+  "importPath": "./components/00-base/icon/icon.stories.js",
+  "theme": null,
+  "layout": "centered",
+  "background": null,
+  "argsOverride": null,
+  "args": {
+    "symbol": "account",
+    "size": "auto",
+    "modifier_class": "",
+    "attributes": null,
+    "assets_dir": "@civictheme/../assets"
+  }
+}

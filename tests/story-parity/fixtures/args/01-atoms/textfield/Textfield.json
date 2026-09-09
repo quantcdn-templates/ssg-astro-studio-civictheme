@@ -1,0 +1,24 @@
+{
+  "storyId": "atoms-form-controls-textfield--textfield",
+  "title": "Atoms/Form Controls/Textfield",
+  "name": "Textfield",
+  "exportName": "Textfield",
+  "component": "01-atoms/textfield",
+  "importPath": "./components/01-atoms/textfield/textfield.stories.js",
+  "theme": "light",
+  "layout": "centered",
+  "background": null,
+  "argsOverride": null,
+  "args": {
+    "theme": "light",
+    "placeholder": "Placeholder",
+    "value": "",
+    "name": "textarea-name",
+    "id": "textarea-id",
+    "is_required": false,
+    "is_invalid": false,
+    "is_disabled": false,
+    "attributes": null,
+    "modifier_class": ""
+  }
+}

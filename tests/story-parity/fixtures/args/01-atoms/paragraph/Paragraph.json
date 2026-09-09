@@ -1,0 +1,20 @@
+{
+  "storyId": "atoms-paragraph--paragraph",
+  "title": "Atoms/Paragraph",
+  "name": "Paragraph",
+  "exportName": "Paragraph",
+  "component": "01-atoms/paragraph",
+  "importPath": "./components/01-atoms/paragraph/paragraph.stories.js",
+  "theme": "light",
+  "layout": "centered",
+  "background": null,
+  "argsOverride": null,
+  "args": {
+    "theme": "light",
+    "content": "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed sit amet nulla auctor, vestibulum magna sed, convallis ex.",
+    "size": "regular",
+    "no_margin": false,
+    "modifier_class": "",
+    "attributes": null
+  }
+}

@@ -1,0 +1,29 @@
+{
+  "storyId": "atoms-form-controls-button--button",
+  "title": "Atoms/Form Controls/Button",
+  "name": "Button",
+  "exportName": "Button",
+  "component": "01-atoms/button",
+  "importPath": "./components/01-atoms/button/button.stories.js",
+  "theme": "dark",
+  "layout": "centered",
+  "background": null,
+  "argsOverride": "theme:dark",
+  "args": {
+    "theme": "dark",
+    "type": "primary",
+    "kind": "button",
+    "size": "regular",
+    "icon": "",
+    "icon_placement": "after",
+    "icon_group_disabled": false,
+    "icon_single_only": false,
+    "text": "My title",
+    "url": "",
+    "is_new_window": false,
+    "is_external": false,
+    "is_disabled": false,
+    "attributes": null,
+    "modifier_class": ""
+  }
+}

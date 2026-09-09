@@ -1,0 +1,28 @@
+{
+  "storyId": "molecules-list-subject-card--subject-card",
+  "title": "Molecules/List/Subject Card",
+  "name": "Subject Card",
+  "exportName": "SubjectCard",
+  "component": "02-molecules/subject-card",
+  "importPath": "./components/02-molecules/subject-card/subject-card.stories.js",
+  "theme": "dark",
+  "layout": "centered",
+  "background": null,
+  "argsOverride": "theme:dark",
+  "args": {
+    "theme": "dark",
+    "title": "Subject card title which runs across two or three lines",
+    "link": {
+      "url": "https://example.com",
+      "is_new_window": false
+    },
+    "image": {
+      "url": "./demo/images/demo1.jpg",
+      "alt": "Image alt text"
+    },
+    "image_over": "",
+    "is_title_click": false,
+    "modifier_class": "",
+    "attributes": null
+  }
+}

@@ -1,0 +1,36 @@
+{
+  "storyId": "atoms-video--video",
+  "title": "Atoms/Video",
+  "name": "Video",
+  "exportName": "Video",
+  "component": "01-atoms/video",
+  "importPath": "./components/01-atoms/video/video.stories.js",
+  "theme": "dark",
+  "layout": "centered",
+  "background": null,
+  "argsOverride": "theme:dark",
+  "args": {
+    "theme": "dark",
+    "has_controls": true,
+    "poster": "demo/videos/demo_poster.png",
+    "sources": [
+      {
+        "url": "demo/videos/demo.webm",
+        "type": "video/webm"
+      },
+      {
+        "url": "demo/videos/demo.mp4",
+        "type": "video/mp4"
+      },
+      {
+        "url": "demo/videos/demo.avi",
+        "type": "video/avi"
+      }
+    ],
+    "width": "",
+    "height": "",
+    "fallback_text": "Your browser doesn't support HTML5 video tag.",
+    "attributes": null,
+    "modifier_class": ""
+  }
+}

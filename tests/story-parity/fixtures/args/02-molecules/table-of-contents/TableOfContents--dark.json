@@ -1,0 +1,33 @@
+{
+  "storyId": "molecules-table-of-contents--table-of-contents",
+  "title": "Molecules/Table Of Contents",
+  "name": "Table Of Contents",
+  "exportName": "TableOfContents",
+  "component": "02-molecules/table-of-contents",
+  "importPath": "./components/02-molecules/table-of-contents/table-of-contents.stories.js",
+  "theme": "dark",
+  "layout": null,
+  "background": null,
+  "argsOverride": "theme:dark",
+  "args": {
+    "theme": "dark",
+    "title": "On this page",
+    "links": [
+      {
+        "title": "Link 1",
+        "url": "/"
+      },
+      {
+        "title": "Link 2",
+        "url": "/"
+      },
+      {
+        "title": "Link 3",
+        "url": "/"
+      }
+    ],
+    "position": "before",
+    "modifier_class": "",
+    "attributes": null
+  }
+}

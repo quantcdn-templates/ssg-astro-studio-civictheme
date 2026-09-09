@@ -1,0 +1,25 @@
+{
+  "storyId": "atoms-form-controls-radio--radio",
+  "title": "Atoms/Form Controls/Radio",
+  "name": "Radio",
+  "exportName": "Radio",
+  "component": "01-atoms/radio",
+  "importPath": "./components/01-atoms/radio/radio.stories.js",
+  "theme": "light",
+  "layout": "centered",
+  "background": null,
+  "argsOverride": null,
+  "args": {
+    "theme": "light",
+    "label": "Radio label",
+    "name": "radio-name",
+    "id": "radio-id",
+    "value": "123",
+    "is_checked": false,
+    "is_required": false,
+    "is_invalid": false,
+    "is_disabled": false,
+    "attributes": null,
+    "modifier_class": ""
+  }
+}

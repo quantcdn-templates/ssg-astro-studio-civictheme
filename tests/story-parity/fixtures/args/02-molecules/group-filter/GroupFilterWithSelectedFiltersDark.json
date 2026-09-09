@@ -1,0 +1,62 @@
+{
+  "storyId": "molecules-list-group-filter--group-filter-with-selected-filters-dark",
+  "title": "Molecules/List/Group Filter",
+  "name": "Group Filter With Selected Filters Dark",
+  "exportName": "GroupFilterWithSelectedFiltersDark",
+  "component": "02-molecules/group-filter",
+  "importPath": "./components/02-molecules/group-filter/group-filter.stories.js",
+  "theme": "dark",
+  "layout": "padded",
+  "background": null,
+  "argsOverride": null,
+  "args": {
+    "theme": "dark",
+    "title": "Filter results by:",
+    "filters": [
+      {
+        "title": "Filter 1",
+        "content": [
+          "\n\n\n\n    \n          \n    \n              \n    \n              \n    \n      <div class=\"ct-field ct-theme-dark ct-field--checkbox ct-field--vertical    \" >\n    \n    <fieldset class=\"ct-field__wrapper\">\n              \n\n<legend\n  class=\"ct-label ct-theme-dark ct-label--regular  ct-field__title\"\n      >Field title</legend>            \n      \n      \n                                                                                                            \n\n  <ul class=\"ct-item-list ct-item-list--vertical ct-item-list--regular  \" >\n                  <li class=\"ct-item-list__item\">                          \n\n  <input\n    type=\"checkbox\"\n    class=\"ct-checkbox ct-theme-dark  ct-field__control\"\n    name=\"option_group_971\"\n    value=\"\"\n    id=\"option_group_971_control_item_1\"\n                      />\n      \n\n<label\n  class=\"ct-label ct-theme-dark ct-label--small  ct-checkbox__label\"\n   for=\"option_group_971_control_item_1\"     >Control item 1</label>                        </li>\n                        <li class=\"ct-item-list__item\">                          \n\n  <input\n    type=\"checkbox\"\n    class=\"ct-checkbox ct-theme-dark  ct-field__control\"\n    name=\"option_group_971\"\n    value=\"\"\n    id=\"option_group_971_control_item_2\"\n                      />\n      \n\n<label\n  class=\"ct-label ct-theme-dark ct-label--small  ct-checkbox__label\"\n   for=\"option_group_971_control_item_2\"     >Control item 2</label>                        </li>\n                        <li class=\"ct-item-list__item\">                          \n\n  <input\n    type=\"checkbox\"\n    class=\"ct-checkbox ct-theme-dark  ct-field__control\"\n    name=\"option_group_971\"\n    value=\"\"\n    id=\"option_group_971_control_item_3\"\n                      />\n      \n\n<label\n  class=\"ct-label ct-theme-dark ct-label--small  ct-checkbox__label\"\n   for=\"option_group_971_control_item_3\"     >Control item 3</label>                        </li>\n            </ul>\n\n      \n      \n          </fieldset>\n  </div>\n"
+        ]
+      },
+      {
+        "title": "Filter 2",
+        "content": "\n\n\n\n    \n          \n    \n              \n    \n              \n    \n      <div class=\"ct-field ct-theme-dark ct-field--radio ct-field--vertical    \" >\n    \n    <fieldset class=\"ct-field__wrapper\">\n              \n\n<legend\n  class=\"ct-label ct-theme-dark ct-label--regular  ct-field__title\"\n      >Field title</legend>            \n      \n      \n                                                                                                            \n\n  <ul class=\"ct-item-list ct-item-list--vertical ct-item-list--regular  \" >\n                  <li class=\"ct-item-list__item\">                          \n\n  <input\n    type=\"radio\"\n    class=\"ct-radio ct-theme-dark  ct-field__control\"\n    name=\"option_group_16\"\n    value=\"\"\n    id=\"option_group_16_control_item_1\"\n                      />\n      \n\n<label\n  class=\"ct-label ct-theme-dark ct-label--small  ct-radio__label\"\n   for=\"option_group_16_control_item_1\"     >Control item 1</label>                        </li>\n                        <li class=\"ct-item-list__item\">                          \n\n  <input\n    type=\"radio\"\n    class=\"ct-radio ct-theme-dark  ct-field__control\"\n    name=\"option_group_16\"\n    value=\"\"\n    id=\"option_group_16_control_item_2\"\n                      />\n      \n\n<label\n  class=\"ct-label ct-theme-dark ct-label--small  ct-radio__label\"\n   for=\"option_group_16_control_item_2\"     >Control item 2</label>                        </li>\n                        <li class=\"ct-item-list__item\">                          \n\n  <input\n    type=\"radio\"\n    class=\"ct-radio ct-theme-dark  ct-field__control\"\n    name=\"option_group_16\"\n    value=\"\"\n    id=\"option_group_16_control_item_3\"\n                      />\n      \n\n<label\n  class=\"ct-label ct-theme-dark ct-label--small  ct-radio__label\"\n   for=\"option_group_16_control_item_3\"     >Control item 3</label>                        </li>\n            </ul>\n\n      \n      \n          </fieldset>\n  </div>\n\n\n\n\n  \n          \n    \n      <div class=\"ct-field ct-theme-dark ct-field--textfield ct-field--vertical    \" >\n          \n\n<label\n  class=\"ct-label ct-theme-dark ct-label--regular  ct-field__title\"\n   for=\"field_id_25\"     >Field title</label>    \n    <div class=\"ct-field__wrapper\">\n            \n      \n              \n\n  <input\n    type=\"text\"\n    class=\"ct-textfield ct-theme-dark  ct-field__control\"\n    name=\"option_group_182\"\n        id=\"field_id_25\"                placeholder=\"Field placeholder\"      />\n\n      \n      \n          </div>\n  </div>\n"
+      }
+    ],
+    "submit_text": "Submit",
+    "form_attributes": null,
+    "form_hidden_fields": null,
+    "content_top": "",
+    "content_bottom": "",
+    "attributes": null,
+    "modifier_class": "",
+    "show_selected_filters": true,
+    "selected_title": "Selected filters:",
+    "selected_filters": [
+      {
+        "text": "Option A",
+        "url": "#",
+        "label": "Selected filter: Option A - Click to remove filter."
+      },
+      {
+        "text": "Option B",
+        "url": "#",
+        "label": "Selected filter: Option B - Click to remove filter."
+      },
+      {
+        "text": "Option C",
+        "url": "#",
+        "label": "Selected filter: Option C - Click to remove filter."
+      }
+    ],
+    "selected_clear_link": {
+      "text": "Clear all",
+      "url": "#",
+      "type": "secondary",
+      "size": "regular",
+      "icon": "close-outline",
+      "icon_placement": "after"
+    }
+  }
+}

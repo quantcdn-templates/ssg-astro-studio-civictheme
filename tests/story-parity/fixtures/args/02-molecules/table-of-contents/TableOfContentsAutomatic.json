@@ -1,0 +1,22 @@
+{
+  "storyId": "molecules-table-of-contents--table-of-contents-automatic",
+  "title": "Molecules/Table Of Contents",
+  "name": "Table Of Contents Automatic",
+  "exportName": "TableOfContentsAutomatic",
+  "component": "02-molecules/table-of-contents",
+  "importPath": "./components/02-molecules/table-of-contents/table-of-contents.stories.js",
+  "theme": "light",
+  "layout": "centered",
+  "background": null,
+  "argsOverride": null,
+  "args": {
+    "theme": "light",
+    "title": "On this page",
+    "anchor_selector": "h2",
+    "scope_selector": ".ct-basic-content",
+    "position": "before",
+    "content": "\n\n\n  <div class=\"ct-basic-content ct-theme-light   \" >\n        <div class=\"container\">\n      <div class=\"row\">\n        <div class=\"col-xxs-12\">\n          \n      <h2>Heading 2 - 1</h2>\n      <p>Ex cillum irure id occaecat aliquip in cillum aute occaecat ullamco in dolore nulla et veniam sed consectetur ut excepteur eu eiusmod excepteur nulla id mollit veniam deserunt ea nostrud.</p>\n      <h3>Heading 3</h3>\n      <h4>Heading 4</h4>\n      <h5>Heading 5</h5>\n      <h6>Heading 6</h6>\n      <p>Consectetur veniam exercitation voluptate reprehenderit in esse est magna minim sunt cupidatat reprehenderit ut pariatur cillum do aute adipisicing commodo voluptate quis in tempor eu irure velit esse non dolore officia sit cupidatat officia fugiat mollit eu.</p>\n      <h2>Heading 2 - 2</h2>\n      <p>Est incididunt irure eu elit eiusmod incididunt occaecat labore aute in ad non irure sunt ad ut nostrud commodo do fugiat fugiat tempor occaecat mollit sunt in id sed commodo enim occaecat eu proident nostrud fugiat cupidatat.</p>\n      <h2>Heading 2 - 3</h2>\n      <p>Nulla sed cupidatat irure quis veniam ut in in pariatur do minim adipisicing minim exercitation magna eiusmod culpa tempor.</p>\n      <h2>&nbsp;</h2>\n            </div>\n      </div>\n    </div>\n      </div>\n",
+    "modifier_class": "",
+    "attributes": null
+  }
+}

@@ -1,0 +1,35 @@
+{
+  "storyId": "molecules-list-service-card--service-card",
+  "title": "Molecules/List/Service Card",
+  "name": "Service Card",
+  "exportName": "ServiceCard",
+  "component": "02-molecules/service-card",
+  "importPath": "./components/02-molecules/service-card/service-card.stories.js",
+  "theme": "light",
+  "layout": "centered",
+  "background": null,
+  "argsOverride": null,
+  "args": {
+    "theme": "light",
+    "title": "Services category title across one or two lines",
+    "summary": "Summary",
+    "links": [
+      {
+        "text": "Link text",
+        "url": "https://example.com",
+        "is_new_window": false,
+        "is_external": false
+      },
+      {
+        "text": "Link title 2",
+        "url": "https://example.com",
+        "is_new_window": false,
+        "is_external": false
+      }
+    ],
+    "content_top": "",
+    "content_bottom": "",
+    "modifier_class": "",
+    "attributes": null
+  }
+}

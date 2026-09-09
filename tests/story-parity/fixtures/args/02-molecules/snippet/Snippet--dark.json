@@ -1,0 +1,30 @@
+{
+  "storyId": "molecules-list-snippet--snippet",
+  "title": "Molecules/List/Snippet",
+  "name": "Snippet",
+  "exportName": "Snippet",
+  "component": "02-molecules/snippet",
+  "importPath": "./components/02-molecules/snippet/snippet.stories.js",
+  "theme": "dark",
+  "layout": "centered",
+  "background": null,
+  "argsOverride": "theme:dark",
+  "args": {
+    "theme": "dark",
+    "title": "Snippet name which runs across two or three lines",
+    "summary": "Summary of the snippet",
+    "link": {
+      "url": "https://example.com",
+      "is_new_window": false
+    },
+    "tags": [
+      "Tag 1",
+      "Tag 2"
+    ],
+    "content_top": "",
+    "content_middle": "",
+    "content_bottom": "",
+    "modifier_class": "",
+    "attributes": null
+  }
+}

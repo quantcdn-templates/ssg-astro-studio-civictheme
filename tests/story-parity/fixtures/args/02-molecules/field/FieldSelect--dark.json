@@ -1,0 +1,59 @@
+{
+  "storyId": "molecules-field--field-select",
+  "title": "Molecules/Field",
+  "name": "Field Select",
+  "exportName": "FieldSelect",
+  "component": "02-molecules/field",
+  "importPath": "./components/02-molecules/field/field.stories.js",
+  "theme": "dark",
+  "layout": "centered",
+  "background": null,
+  "argsOverride": "theme:dark",
+  "args": {
+    "theme": "dark",
+    "type": "select",
+    "title": "Field title",
+    "title_display": "visible",
+    "title_size": "regular",
+    "description": "Description content sample.",
+    "message": {
+      "content": "Message conte nt sample.",
+      "attributes": "id=\"field_id_410--error-message\""
+    },
+    "is_required": true,
+    "required_text": "",
+    "is_invalid": false,
+    "is_disabled": false,
+    "orientation": "vertical",
+    "is_inline": false,
+    "name": "option_group_780",
+    "value": "",
+    "placeholder": "Field placeholder",
+    "id": "field_id_410",
+    "control": null,
+    "options": [
+      {
+        "type": "option",
+        "label": "Option 1",
+        "value": "option_1",
+        "selected": false
+      },
+      {
+        "type": "option",
+        "label": "Option 2",
+        "value": "option_2",
+        "selected": false
+      },
+      {
+        "type": "option",
+        "label": "Option 3",
+        "value": "option_3",
+        "selected": false
+      }
+    ],
+    "attributes": null,
+    "modifier_class": "",
+    "prefix": "",
+    "suffix": ""
+  }
+}

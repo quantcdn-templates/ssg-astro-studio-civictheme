@@ -1,0 +1,19 @@
+{
+  "storyId": "molecules-search--search",
+  "title": "Molecules/Search",
+  "name": "Search",
+  "exportName": "Search",
+  "component": "02-molecules/search",
+  "importPath": "./components/02-molecules/search/search.stories.js",
+  "theme": "light",
+  "layout": "centered",
+  "background": null,
+  "argsOverride": null,
+  "args": {
+    "theme": "light",
+    "text": "Search",
+    "url": "/search",
+    "modifier_class": "",
+    "attributes": null
+  }
+}

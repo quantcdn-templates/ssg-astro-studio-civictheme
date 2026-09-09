@@ -1,0 +1,50 @@
+{
+  "storyId": "molecules-tabs--tabs",
+  "title": "Molecules/Tabs",
+  "name": "Tabs",
+  "exportName": "Tabs",
+  "component": "02-molecules/tabs",
+  "importPath": "./components/02-molecules/tabs/tabs.stories.js",
+  "theme": "dark",
+  "layout": "centered",
+  "background": null,
+  "argsOverride": "theme:dark",
+  "args": {
+    "theme": "dark",
+    "panels": [
+      {
+        "title": "Panel title",
+        "content": "Panel content",
+        "id": "panel-1",
+        "is_selected": true
+      },
+      {
+        "title": "Panel title 2",
+        "content": "Panel content 2",
+        "id": "panel-2",
+        "is_selected": false
+      }
+    ],
+    "links": [
+      {
+        "text": "Link text",
+        "url": "https://example.com",
+        "is_new_window": false,
+        "is_external": false,
+        "modifier_class": "",
+        "attributes": {}
+      },
+      {
+        "text": "Link text 2",
+        "url": "https://example.com",
+        "is_new_window": false,
+        "is_external": false,
+        "modifier_class": "",
+        "attributes": {}
+      }
+    ],
+    "vertical_spacing": "none",
+    "attributes": null,
+    "modifier_class": ""
+  }
+}

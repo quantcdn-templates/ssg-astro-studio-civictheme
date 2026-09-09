@@ -1,0 +1,28 @@
+{
+  "storyId": "atoms-link--link",
+  "title": "Atoms/Link",
+  "name": "Link",
+  "exportName": "Link",
+  "component": "01-atoms/link",
+  "importPath": "./components/01-atoms/link/link.stories.js",
+  "theme": "light",
+  "layout": "centered",
+  "background": null,
+  "argsOverride": null,
+  "args": {
+    "theme": "light",
+    "text": "Link text",
+    "title": "Link title",
+    "url": "https://www.example.com",
+    "is_external": false,
+    "is_active": false,
+    "is_disabled": false,
+    "is_new_window": false,
+    "icon": "",
+    "icon_placement": "before",
+    "icon_group_disabled": false,
+    "icon_single_only": false,
+    "modifier_class": "",
+    "attributes": null
+  }
+}

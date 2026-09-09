@@ -1,0 +1,23 @@
+{
+  "storyId": "organisms-message--message",
+  "title": "Organisms/Message",
+  "name": "Message",
+  "exportName": "Message",
+  "component": "03-organisms/message",
+  "importPath": "./components/03-organisms/message/message.stories.js",
+  "theme": "dark",
+  "layout": "centered",
+  "background": null,
+  "argsOverride": "theme:dark",
+  "args": {
+    "theme": "dark",
+    "type": "information",
+    "title": "The information on this page is currently being updated.",
+    "content": "Message description",
+    "vertical_spacing": "none",
+    "with_background": false,
+    "has_aria": true,
+    "attributes": null,
+    "modifier_class": ""
+  }
+}
