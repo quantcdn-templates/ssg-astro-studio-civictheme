@@ -92,7 +92,11 @@ const hasContentSlot = Astro.slots.has('content');
         <div class="col-xxs-12">
           {hasLinks ? (
             <div class={classes} {...rest}>
-              {title && <h2 class="ct-table-of-contents__title">{title}</h2>}
+              {title && (
+                <Fragment>
+                  <h2 class="ct-table-of-contents__title">{title}</h2>{' '}
+                </Fragment>
+              )}
               <ul class="ct-table-of-contents__links">
                 {(links ?? []).map((link, i) => (
                   <Fragment>
