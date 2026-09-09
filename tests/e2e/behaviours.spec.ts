@@ -30,12 +30,13 @@ import { test, expect } from '@playwright/test';
  *   via `anchorSelector`/`anchorScopeSelector` (defaults `h2`/`.ct-basic-content`,
  *   table-of-contents.js:15-16), inserts a `.ct-table-of-contents` block containing
  *   `.ct-table-of-contents__links > .ct-table-of-contents__link-item > a` — one per
- *   heading (table-of-contents.js:111-125/48-49) — there is no upstream "highlight the
- *   active link on scroll" logic on this component (that would be `scrollspy.js`, which
- *   only toggles a class on the element it is attached to, not on TOC links). The scroll-
- *   driven part of this test instead exercises `BackToTop`'s own `scrollspy.js` usage
- *   (`data-scrollspy`/`data-scrollspy-offset="400"`, `BackToTop.astro`): scrolling past
- *   400px adds `.ct-scrollspy-scrolled` to `[data-scrollspy]` (scrollspy.js:27-28).
+ *   heading (table-of-contents.js:111-125/48-49). This component has no "highlight the
+ *   active link on scroll" logic of its own — the last test's name and assertions
+ *   reflect that: it checks the TOC's links are built from the headings, and separately
+ *   checks `BackToTop`'s own `scrollspy.js` usage (`data-scrollspy`/
+ *   `data-scrollspy-offset="400"`, `BackToTop.astro`) — scrolling past 400px adds
+ *   `.ct-scrollspy-scrolled` to `[data-scrollspy]` (scrollspy.js:27-28) — since that is
+ *   the only actual scroll-driven class toggle anywhere on this page.
  */
 test.describe('CivicTheme behaviours', () => {
   test.beforeEach(async ({ page }) => {
@@ -60,7 +61,9 @@ test.describe('CivicTheme behaviours', () => {
     await expect(page.locator('[data-flyout]').first()).toHaveAttribute('data-flyout-expanded', 'true');
   });
 
-  test('table of contents builds links and back-to-top highlights on scroll', async ({ page }) => {
+  test('table of contents builds links from headings; back-to-top gains scrollspy class on scroll', async ({
+    page,
+  }) => {
     // table-of-contents.js builds the link list client-side from the three h2 sections.
     const tocLinks = page.locator('.ct-table-of-contents__links a.ct-table-of-contents__link');
     await expect(tocLinks).toHaveCount(3);

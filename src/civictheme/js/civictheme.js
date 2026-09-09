@@ -1,36 +1,23 @@
-// Loads the vendored CivicTheme behaviours once and re-runs their initialisers after
-// Astro client-side navigation. Vendored files under ./behaviours/ are never edited;
-// any shim required to make a behaviour init-safe lives only in this file.
+// Loads the vendored CivicTheme behaviours. Vendored files under ./behaviours/ are
+// never edited; a shim, if one is ever required, would live only in this file.
 //
-// Init-contract findings (see PORTING.md for the full record):
-// - None of the vendored behaviours listen for `DOMContentLoaded` — each self-initialises
-//   by running `document.querySelectorAll('[data-x]').forEach(...)` directly at the top
-//   level of its module, once, when the module is evaluated (this matches the upstream
-//   source verbatim — .upstream/uikit's collapsible.js and mobile-navigation's flyout.js
-//   have no `DOMContentLoaded` listener either). Because `./behaviours/index.js` is a
-//   singleton ES module, that top-level init runs exactly once no matter how many times
-//   it is imported, so the `astro:page-load` → `DOMContentLoaded` re-dispatch below does
-//   not currently re-run anything (no listener exists to catch it). It is kept only as
-//   forward-compatible scaffolding for when Task 15 (BaseLayout, possibly View
-//   Transitions) needs a real re-init hook; it is a documented no-op today, not a bug.
-// - Double-init guards (safe to invoke `new CivicTheme*(el)` twice on the same element):
-//   collapsible.js (`data-collapsible==='true'`), flyout.js (`data-flyout==='true'`),
-//   scrollspy.js (`data-scrollspy==='true'`), table-of-contents.js
-//   (`data-table-of-contents-initialised`) — all guarded.
-//   tabs.js and skip-to-target.js have NO such guard: re-invoking their constructors on
-//   an already-initialised element re-attaches duplicate event listeners. Both used on
-//   this page (Tabs; BackToTop's skip-to-target button). No shim is added here because
-//   there is currently no mechanism that re-invokes them (see previous point) — flagged
-//   here and in PORTING.md so Task 15 adds an idempotency guard before wiring a real
-//   client-side re-init.
-// - No behaviour references `Drupal`, `drupalSettings` or `once()` — no Drupal-global
-//   shim is required.
+// Init contract: every vendored behaviour self-initialises at module-evaluation time —
+// each runs `document.querySelectorAll('[data-x]').forEach(...)` directly at the top
+// level of its module, once (this matches upstream verbatim; none of them listen for
+// `DOMContentLoaded`). That means this module must be loaded as a deferred module
+// script, after the DOM it queries already exists — which is exactly how Astro loads a
+// hoisted `<script>` containing an `import` (it's emitted as `<script type="module">`,
+// and module scripts are deferred by the platform).
+//
+// This template deliberately does NOT enable Astro's `<ClientRouter>` (view
+// transitions): every navigation is a full page load, so the behaviours above simply
+// re-run naturally on each page — there is no swapped-in DOM needing a manual re-init.
+// Adding `<ClientRouter>` would require a real re-init hook, but the vendored
+// constructors (`CivicThemeCollapsible`, `CivicThemeTabs`, etc.) are module-private —
+// never exported — so nothing outside `./behaviours/*.js` can re-invoke them; and
+// `tabs.js`/`skip-to-target.js` have no double-init guard, so re-running the top-level
+// `querySelectorAll` init a second time (e.g. via a page swap) would attach duplicate
+// event listeners. Wiring view transitions safely would need an upstream change to
+// export initialisers (and add the missing guards) at the next vendoring pass — see
+// PORTING.md.
 import './behaviours/index.js';
-
-function reinit() {
-  // Behaviours attach on DOMContentLoaded; after an Astro page swap fire it again on the
-  // new document. See the note above: this is currently inert (no vendored behaviour
-  // listens for this event) and is kept as forward-compatible scaffolding.
-  document.dispatchEvent(new Event('DOMContentLoaded', { bubbles: false }));
-}
-document.addEventListener('astro:page-load', reinit);
