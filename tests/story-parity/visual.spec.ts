@@ -74,11 +74,29 @@ const stories = listFiles(join(FIXTURES, 'args'))
 
 test.describe.configure({ mode: 'parallel' });
 
-test('every built story page has a PNG fixture', () => {
+/**
+ * Pins the coverage. The story list is derived from what
+ * `dist-story-parity/` actually contains, so a build that silently emitted
+ * fewer pages — a broken `getStaticPaths`, a partial build, a stale directory
+ * — would otherwise shrink this suite without failing it.
+ *
+ * The expected count is the fixture total `fixtures/SOURCE.md` declares, less
+ * the stories `accepted-differences.json` marks `noComponent` (there is no
+ * component to render, so no page is built for them).
+ */
+test('covers every story that has a page', () => {
+  const declared = /- Total fixtures: (\d+)/.exec(readFileSync(join(FIXTURES, 'SOURCE.md'), 'utf8'));
+  expect(declared, 'SOURCE.md does not state a fixture total').not.toBeNull();
+  const noComponent = (
+    JSON.parse(readFileSync(join(process.cwd(), 'tests/story-parity/accepted-differences.json'), 'utf8')) as Array<{
+      noComponent?: boolean;
+    }>
+  ).filter((entry) => entry.noComponent).length;
+
+  expect(stories.length).toBe(Number(declared![1]) - noComponent);
   for (const name of stories) {
     expect(existsSync(join(FIXTURES, 'png', `${name}.png`)), `missing PNG fixture for ${name}`).toBe(true);
   }
-  expect(stories.length).toBeGreaterThan(0);
 });
 
 for (const name of stories) {
@@ -122,14 +140,15 @@ for (const name of stories) {
     );
     await page.waitForTimeout(SETTLE_MS);
 
-    // Playwright cannot screenshot a zero-area element (`skip-link` renders
-    // entirely `ct-visually-hidden`); the capture writes a 1x1 transparent PNG
-    // in that case, so this side does the same.
+    // A story whose root has no box cannot be screenshotted at all
+    // (`skip-link` is entirely `ct-visually-hidden`). Both sides record the
+    // same 1x1 transparent PNG, so comparing them proves nothing about
+    // rendering — such a story is reported as UNMEASURABLE, never as a pass.
     const box = await page.locator('#story-root').boundingBox();
-    const shot =
-      !box || box.width < 1 || box.height < 1
-        ? EMPTY_PNG
-        : await page.locator('#story-root').screenshot({ animations: 'disabled', scale: 'css' });
+    const unmeasurable = !box || box.width < 1 || box.height < 1;
+    const shot = unmeasurable
+      ? EMPTY_PNG
+      : await page.locator('#story-root').screenshot({ animations: 'disabled', scale: 'css' });
 
     const actual = PNG.sync.read(shot);
     const expectedPng = PNG.sync.read(readFileSync(join(FIXTURES, 'png', `${name}.png`)));
@@ -155,12 +174,16 @@ for (const name of stories) {
     // One file per story (workers run in parallel, so nothing is appended to
     // a shared file). `scripts/story-parity-report.mjs` reads these to fill in
     // PARITY.md's pixel-delta column.
+    // One file per story: workers run in parallel, so nothing is appended to a
+    // shared file. `visual-setup.ts` clears the directory before the run, so
+    // what is here afterwards is exactly this run.
     const deltaFile = join(RESULTS, `${name.replace(/\//g, '__')}.json`);
     mkdirSync(dirname(deltaFile), { recursive: true });
     writeFileSync(
       deltaFile,
       `${JSON.stringify({
         story: name,
+        unmeasurable,
         delta,
         limit,
         width,
@@ -170,6 +193,16 @@ for (const name of stories) {
         accepted: difference?.reason ?? null,
       })}\n`
     );
+
+    if (unmeasurable) {
+      // The capture recorded the same empty marker, which is the only thing
+      // this case can assert: that upstream also rendered nothing with a box.
+      expect(
+        expectedPng.width * expectedPng.height,
+        `${name} renders no box here but the upstream fixture is ${expectedPng.width}x${expectedPng.height}`
+      ).toBe(1);
+      return;
+    }
 
     if (delta > limit) {
       const base = join(OUT, name);

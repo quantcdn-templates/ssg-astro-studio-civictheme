@@ -56,6 +56,17 @@ suite proves nothing about them. Their `tests/parity/` snapshot cases still do.
 - `03-organisms/MobileNavigationTrigger`
 - `03-organisms/Slide`
 
+## Stories with no measurable render
+
+These render with NO box at all — `skip-link` is entirely
+`ct-visually-hidden` — so Playwright cannot screenshot them and a 1x1
+transparent PNG is recorded instead. The visual suite reports them as
+`unmeasurable`, NOT as passing: comparing two empty markers proves nothing
+about rendering. Their HTML comparison still applies in full.
+
+- `03-organisms/skip-link/SkipLink`
+- `03-organisms/skip-link/SkipLink--dark`
+
 ## Wrapper-only stories
 
 For these, more than half the fixture HTML arrives PRE-RENDERED in the args:

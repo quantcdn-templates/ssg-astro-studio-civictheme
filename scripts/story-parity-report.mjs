@@ -119,8 +119,8 @@ const rows = stories.map(({ name, data }) => {
     theme: data.theme ?? '—',
     html: htmlResults.get(name) ?? 'not run',
     wrapper: wrapperOnly.has(name) ? `${wrapperOnly.get(name)}%` : '—',
-    pixels: delta ? `${(delta.delta * 100).toFixed(3)}%` : 'not compared',
-    visual: delta ? (delta.delta <= delta.limit ? 'within' : 'FAIL') : '—',
+    pixels: !delta || delta.unmeasurable ? '—' : `${(delta.delta * 100).toFixed(3)}%`,
+    visual: !delta ? 'no page' : delta.unmeasurable ? 'unmeasurable' : delta.delta <= delta.limit ? 'within' : 'FAIL',
     reason: reason.replace(/\s+/g, ' '),
   };
 });
@@ -132,7 +132,8 @@ const failed = count('html', 'FAIL');
 const wrapperCount = rows.filter((row) => row.wrapper !== '—').length;
 const within = count('visual', 'within');
 const visualFailed = count('visual', 'FAIL');
-const notCompared = count('visual', '—');
+const noPage = count('visual', 'no page');
+const unmeasurable = count('visual', 'unmeasurable');
 const visualAccepted = rows.filter((row) => acceptedVisualByStory.has(row.name)).length;
 
 const escape = (value) => value.replace(/\|/g, '\\|');
@@ -149,11 +150,12 @@ const lines = [
   '## Summary',
   '',
   `**${rows.length} stories, ${exact} exact HTML matches, ${acceptedCount} accepted differences, ` +
-    `${within} visually within tolerance` +
+    `${within} measured within tolerance` +
+    (unmeasurable ? `, ${unmeasurable} unmeasurable` : '') +
     (visualAccepted ? `, ${visualAccepted} accepted visual differences` : '') +
     (visualFailed ? `, ${visualFailed} visually failing` : '') +
     (failed ? `, ${failed} HTML failures` : '') +
-    (notCompared ? `, ${notCompared} with no visual comparison` : '') +
+    (noPage ? `, ${noPage} with no page to screenshot` : '') +
     '.**',
   '',
   '"Exact" means the rendered Astro markup and the story\'s own rendered markup',
@@ -165,10 +167,15 @@ const lines = [
   'and by the 697 `tests/parity/` snapshot cases. The `Wrapper` column gives the',
   'passthrough percentage.',
   '',
-  notCompared
-    ? `${notCompared} stories have no visual comparison: \`04-templates\` is not a ported layer, so no page exists to screenshot.`
+  noPage
+    ? `\`no page\` (${noPage} stories): \`04-templates\` is not a ported layer, so nothing is built to screenshot.`
     : null,
-  notCompared ? '' : null,
+  unmeasurable
+    ? `\`unmeasurable\` (${unmeasurable} stories): the component renders with NO box at all — \`skip-link\` is entirely` +
+      ' `ct-visually-hidden` — so both sides record a 1x1 transparent PNG and comparing them proves nothing about' +
+      ' rendering. These are NOT counted as passing.'
+    : null,
+  noPage || unmeasurable ? '' : null,
   '- `npm run test:story-parity` — HTML comparison (fast, no browser).',
   '- `npm run test:story-parity:visual` — pixel comparison (builds the site, runs Playwright).',
   '- `node scripts/story-parity-report.mjs` — regenerates this file.',
@@ -193,5 +200,6 @@ fs.writeFileSync(output, `${lines.join('\n')}\n`);
 execFileSync('npx', ['prettier', '--write', output], { cwd: REPO, stdio: 'pipe' });
 console.log(
   `PARITY.md: ${rows.length} stories, ${exact} exact, ${acceptedCount} accepted, ` +
-    `${within} visually within tolerance, ${visualFailed} visually failing, ${failed} HTML failures.`
+    `${within} measured within tolerance, ${unmeasurable} unmeasurable, ${visualFailed} visually failing, ` +
+    `${failed} HTML failures.`
 );

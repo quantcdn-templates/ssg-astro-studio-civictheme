@@ -55,7 +55,7 @@ re-initialise. See `PORTING.md` for why. (Task 19 expands this README further.)
 
 ## Parity with upstream
 
-Every component is checked against the pinned CivicTheme UI Kit
+The ported components are checked against the pinned CivicTheme UI Kit
 (`packages/twig`, commit `fe4291907b1ea15cfc0ea5d9ca47d31964a5b91a`) by two
 independent oracles:
 
@@ -70,6 +70,16 @@ npm run test:story-parity          # HTML comparison, no browser
 npm run test:story-parity:visual   # pixel comparison, builds the site and runs Playwright
 ```
 
+The coverage is not uniform: 43 of the 171 stories are wrapper-only (most of
+their markup arrives pre-rendered in the story's args, so a pass proves the
+wrapper, not the children), and 8 components have no upstream story at all —
+see `PARITY.md` and `tests/story-parity/fixtures/SOURCE.md` for exactly which.
+
 `PARITY.md` lists every story with its HTML result, its pixel delta, and the
 reason for any accepted difference. Regenerate it with
 `node scripts/story-parity-report.mjs`.
+
+The visual suite builds the whole site and drives Chromium, so it takes a few
+minutes, and it needs network access: CivicTheme loads Lexend and Public Sans
+from Google Fonts, and an offline run fails on font-metric differences rather
+than passing quietly.

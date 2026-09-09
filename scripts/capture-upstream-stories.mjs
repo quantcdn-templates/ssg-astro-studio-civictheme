@@ -225,6 +225,13 @@ async function prepareForScreenshot(page, selectors, pixel) {
  * - PNG comes from the mounted, fully-initialised story, because the visual
  *   comparison in the Astro template runs the same behaviours in the browser.
  */
+/**
+ * Stories whose `#storybook-root` has no box at all, so no screenshot is
+ * possible and a 1x1 transparent PNG stands in. Listed in SOURCE.md, and
+ * reported as `unmeasurable` (never as passing) by the visual suite.
+ */
+const zeroArea = [];
+
 async function capture(page, baseUrl, story, fixtureName, themeOverride, argsOverride, skipPng) {
   const query = argsOverride ? `&args=${encodeURIComponent(argsOverride)}` : '';
   await page.goto(`${baseUrl}/iframe.html?id=${story.storyId}&viewMode=story${query}`, {
@@ -304,6 +311,7 @@ async function capture(page, baseUrl, story, fixtureName, themeOverride, argsOve
     // `ct-visually-hidden`. Playwright cannot screenshot a zero-area element,
     // so both sides record the same 1x1 transparent PNG (see visual.spec.ts).
     writeFile(pngFile, Buffer.from(EMPTY_PNG_BASE64, 'base64'));
+    zeroArea.push(`${dir}/${fixtureName}`.replaceAll(path.sep, '/'));
     return args;
   }
   await page.locator('#storybook-root').screenshot({
@@ -502,6 +510,20 @@ async function main() {
         'suite proves nothing about them. Their `tests/parity/` snapshot cases still do.',
         '',
         ...componentsWithoutFixtures(captured).map((name) => `- \`${name}\``),
+        '',
+        '## Stories with no measurable render',
+        '',
+        'These render with NO box at all — `skip-link` is entirely',
+        '`ct-visually-hidden` — so Playwright cannot screenshot them and a 1x1',
+        'transparent PNG is recorded instead. The visual suite reports them as',
+        '`unmeasurable`, NOT as passing: comparing two empty markers proves nothing',
+        'about rendering. Their HTML comparison still applies in full.',
+        '',
+        ...(skipPng
+          ? ['- (PNGs were not re-captured in this run; see the previous list)']
+          : zeroArea.length
+            ? zeroArea.sort().map((name) => `- \`${name}\``)
+            : ['- (none)']),
         '',
         '## Wrapper-only stories',
         '',
