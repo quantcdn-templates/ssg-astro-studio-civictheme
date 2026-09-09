@@ -10,7 +10,11 @@
  * - rowsAbove / rowsBelow: Above/below rows content — a string or array of
  *   strings; each entry is concatenated raw (matching the un-trimmed-once
  *   `{%- rows_above_row -%}` loop upstream, which drops all inter-row
- *   whitespace).
+ *   whitespace). Gated on the RAW prop's own truthiness (`list.twig:139,163`
+ *   — `{% if rows_above -%}` / `{% if rows_below %}`, an array's
+ *   Twig-truthiness being "non-empty array"), not on the joined HTML
+ *   string — a non-empty array of all-empty-string rows still opens the
+ *   container even though its joined content is `''`.
  * - title / content / filters / resultsCount / rows / empty / pagination /
  *   footer: Documented as Slots upstream, but every upstream test passes
  *   plain string props — ported as `string` props, rendered with
@@ -96,6 +100,13 @@ const hasRows = Boolean(rows);
 const hasEmpty = !hasRows && typeof empty !== 'undefined';
 
 const toArray = (v: string | string[] | undefined): string[] => (v == null ? [] : Array.isArray(v) ? v : [v]);
+// list.twig:139/163 gate `{% if rows_above -%}` / `{% if rows_below %}` on
+// the RAW prop's own truthiness — an array's Twig-truthiness is "non-empty
+// array" (independent of what its joined content looks like), so this must
+// NOT be based on the joined HTML string (which could be empty even for a
+// non-empty array of all-empty-string rows).
+const hasRowsAbove = Boolean(Array.isArray(rowsAbove) ? rowsAbove.length > 0 : rowsAbove);
+const hasRowsBelow = Boolean(Array.isArray(rowsBelow) ? rowsBelow.length > 0 : rowsBelow);
 const rowsAboveHtml = toArray(rowsAbove).join('');
 const rowsBelowHtml = toArray(rowsBelow).join('');
 ---
@@ -166,7 +177,7 @@ const rowsBelowHtml = toArray(rowsBelow).join('');
     {
       hasRows && (
         <Fragment>
-          {rowsAboveHtml && (
+          {hasRowsAbove && (
             <Fragment>
               <div class="container ct-list__rows-above">
                 <div class="row">
@@ -187,7 +198,7 @@ const rowsBelowHtml = toArray(rowsBelow).join('');
             </Fragment>
           )}
           <div class="ct-list__rows" set:html={rows} />
-          {rowsBelowHtml && (
+          {hasRowsBelow && (
             <Fragment>
               {' '}
               <div class="container ct-list__rows-below">

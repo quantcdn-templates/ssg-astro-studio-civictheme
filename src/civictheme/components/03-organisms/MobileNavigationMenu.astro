@@ -6,7 +6,17 @@
  * - theme: Theme variation (light or dark).
  * - items: Menu links array (see MenuItem below).
  * - class: Additional CSS classes.
- * - ...rest: Additional HTML attributes, spread onto the root <ul>.
+ *
+ * No `...rest`/`attributes` spread on the root `<ul>`: the level-0
+ * `menu_links` macro's `{{- attributes|default('') -}}` (`menu.twig`'s own
+ * doc header lists `attributes` as a component prop) only resolves via
+ * Twig's `{% import _self as menus %}` implicit-context sharing, and this
+ * component's only caller — `mobile-navigation.twig`'s two
+ * `{% include ... with { theme, items: ..., modifier_class: ... } only %}`
+ * calls — passes `only`, which strips every other variable (including
+ * `attributes`) from that included template's context. So `attributes`
+ * is unreachable in practice at this call site; there is nothing for a
+ * `...rest` spread here to ever carry.
  *
  * `menuLevel` and `parentItem` are internal recursion parameters (not part
  * of the public Twig API), mirroring `Menu.astro`'s own recursion
@@ -52,10 +62,9 @@ interface Props {
   class?: string;
   menuLevel?: number;
   parentItem?: MenuItem;
-  [key: string]: unknown;
 }
 
-const { theme = 'light', items = [], class: modifierClass = '', menuLevel = 0, parentItem, ...rest } = Astro.props;
+const { theme = 'light', items = [], class: modifierClass = '', menuLevel = 0, parentItem } = Astro.props;
 
 const themeClass = `ct-theme-${theme}`;
 
@@ -137,7 +146,7 @@ function hasChildren(item: MenuItem): boolean {
       });
 
       return menuLevel === 0 ? (
-        <ul class={`ct-menu ct-menu--level-0 ${themeClass} ${modifierClass}`} data-component-name="ct-menu" {...rest}>
+        <ul class={`ct-menu ct-menu--level-0 ${themeClass} ${modifierClass}`} data-component-name="ct-menu">
           {itemsMarkup}
         </ul>
       ) : (

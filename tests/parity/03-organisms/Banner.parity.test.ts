@@ -1,6 +1,6 @@
-import { describe } from 'vitest';
+import { describe, it, expect } from 'vitest';
 import Banner from '@civictheme/organisms/Banner.astro';
-import { parityCase, expectAllKeysCovered } from '../harness';
+import { parityCase, expectAllKeysCovered, renderNormalised } from '../harness';
 
 const meta = { layer: '03-organisms', name: 'banner' };
 
@@ -49,4 +49,25 @@ describe('Banner', () => {
   parityCase(meta, EMPTY_KEY, Banner, {});
 
   expectAllKeysCovered(meta, [REQUIRED_KEY, ALL_KEY, NO_EXTRA_KEY, EMPTY_KEY]);
+
+  // banner.twig:78,84 — `breadcrumb is not empty` / `featured_image is not
+  // empty` are Twig's `empty` test on an OBJECT (property-count check),
+  // not `.links.length`/`.url` specifically — not exercised by any
+  // upstream snapshot, so tested directly.
+  it('opens the breadcrumb row (outer gate) for a breadcrumb object with no links key', async () => {
+    // Breadcrumb.astro itself renders nothing for an empty `links` array —
+    // what this asserts is that Banner's OWN gate (whether the row/column
+    // wrapper opens at all) reacts to object-presence, not to `.links`.
+    const rowCount = (html: string) => [...html.matchAll(/<div class="row">/g)].length;
+    const withoutLinks = await renderNormalised(Banner, { title: 'T', breadcrumb: { activeIsLink: true } });
+    const withoutBreadcrumb = await renderNormalised(Banner, { title: 'T' });
+    expect(rowCount(withoutLinks)).toBe(rowCount(withoutBreadcrumb) + 1);
+  });
+
+  it('widens to col-m-6 for a featuredImage object with no url', async () => {
+    const html = await renderNormalised(Banner, { title: 'T', featuredImage: { alt: 'no url' } });
+    expect(html).toContain('col-m-6');
+    // Image.astro's own `url` gate still means no <img> renders.
+    expect(html).not.toContain('<img');
+  });
 });

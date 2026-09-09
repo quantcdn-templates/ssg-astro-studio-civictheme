@@ -1,6 +1,6 @@
-import { describe } from 'vitest';
+import { describe, it, expect } from 'vitest';
 import List from '@civictheme/organisms/List.astro';
-import { parityCase, expectAllKeysCovered } from '../harness';
+import { parityCase, expectAllKeysCovered, renderNormalised } from '../harness';
 
 const meta = { layer: '03-organisms', name: 'list' };
 
@@ -46,4 +46,18 @@ describe('List', () => {
   });
 
   expectAllKeysCovered(meta, [ALL_KEY, MISSING_KEY]);
+
+  // list.twig:139,163 — `{% if rows_above -%}` / `{% if rows_below %}` gate
+  // on the raw prop's own truthiness (an array is truthy in Twig whenever
+  // non-empty), not on the joined HTML string — not exercised by any
+  // upstream snapshot, so tested directly.
+  it('opens the rows-above container for a non-empty array of empty-string rows', async () => {
+    const html = await renderNormalised(List, { rows: 'Rows Content', rowsAbove: ['', ''] });
+    expect(html).toContain('ct-list__rows-above');
+  });
+
+  it('does not open the rows-above container for an empty array', async () => {
+    const html = await renderNormalised(List, { rows: 'Rows Content', rowsAbove: [] });
+    expect(html).not.toContain('ct-list__rows-above');
+  });
 });

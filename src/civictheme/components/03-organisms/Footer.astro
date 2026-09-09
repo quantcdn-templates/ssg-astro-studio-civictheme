@@ -16,6 +16,14 @@
  * `content_middle5` spans the full `col-xxs-12` width (the other 4 are
  * `col-m-3` quarters). Ported all 5 for fidelity; each of the 9 slots here
  * gates its own `<div>` individually (unlike `Header`'s top2/top3 pair).
+ *
+ * Note: `footer.twig:40`'s ROOT `<footer>` gate deliberately omits
+ * `content_middle5` from its `is not empty` chain (only `content_top1/2`,
+ * `content_middle1..4` and `content_bottom1/2` are listed) — so a Footer
+ * given ONLY `contentMiddle5` renders nothing at all, even though the
+ * inner `.ct-footer__middle` container's own gate (`footer.twig:70`) DOES
+ * include all five. `shouldRender` excludes `contentMiddle5`; `hasMiddle`
+ * (used for the inner container) includes it.
  */
 interface Props {
   theme?: 'light' | 'dark';
@@ -54,7 +62,18 @@ const classes = ['ct-footer', `ct-theme-${theme}`, className].filter(Boolean).jo
 const hasTop = Boolean(contentTop1 || contentTop2);
 const hasMiddle = Boolean(contentMiddle1 || contentMiddle2 || contentMiddle3 || contentMiddle4 || contentMiddle5);
 const hasBottom = Boolean(contentBottom1 || contentBottom2);
-const shouldRender = Boolean(hasTop || hasMiddle || hasBottom);
+// footer.twig:40 — the root gate excludes contentMiddle5 on purpose (see
+// the note above); do not fold it into this Boolean.
+const shouldRender = Boolean(
+  contentTop1 ||
+  contentTop2 ||
+  contentMiddle1 ||
+  contentMiddle2 ||
+  contentMiddle3 ||
+  contentMiddle4 ||
+  contentBottom1 ||
+  contentBottom2
+);
 ---
 
 {
