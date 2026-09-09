@@ -1,0 +1,325 @@
+---
+/**
+ * Forms reference page (Task 17). Every field atom/molecule and the
+ * webform organism and list-filter molecules, each story light and dark.
+ */
+import BaseLayout from '@/layouts/BaseLayout.astro';
+import ComponentDemoBlock from '@/components/ComponentDemoBlock.astro';
+import Input from '@civictheme/atoms/Input.astro';
+import Textfield from '@civictheme/atoms/Textfield.astro';
+import Textarea from '@civictheme/atoms/Textarea.astro';
+import Select from '@civictheme/atoms/Select.astro';
+import Checkbox from '@civictheme/atoms/Checkbox.astro';
+import Radio from '@civictheme/atoms/Radio.astro';
+import Fieldset from '@civictheme/atoms/Fieldset.astro';
+import Label from '@civictheme/atoms/Label.astro';
+import FieldDescription from '@civictheme/atoms/FieldDescription.astro';
+import FieldMessage from '@civictheme/atoms/FieldMessage.astro';
+import Field from '@civictheme/molecules/Field.astro';
+import Webform from '@civictheme/organisms/Webform.astro';
+import GroupFilter from '@civictheme/molecules/GroupFilter.astro';
+import InlineFilter from '@civictheme/molecules/InlineFilter.astro';
+import SingleFilter from '@civictheme/molecules/SingleFilter.astro';
+import Search from '@civictheme/molecules/Search.astro';
+import { storiesFor, propsFor, componentTagName } from '@/lib/component-demos';
+
+const inputStories = storiesFor('01-atoms/input');
+const textfieldStories = storiesFor('01-atoms/textfield');
+const textareaStories = storiesFor('01-atoms/textarea');
+const selectStories = storiesFor('01-atoms/select');
+const checkboxStories = storiesFor('01-atoms/checkbox');
+const radioStories = storiesFor('01-atoms/radio');
+const fieldsetStories = storiesFor('01-atoms/fieldset');
+const labelStories = storiesFor('01-atoms/label');
+const fieldDescriptionStories = storiesFor('01-atoms/field-description');
+const fieldMessageStories = storiesFor('01-atoms/field-message');
+const fieldStories = storiesFor('02-molecules/field');
+const webformStories = storiesFor('03-organisms/webform');
+const groupFilterStories = storiesFor('02-molecules/group-filter');
+const inlineFilterStories = storiesFor('02-molecules/inline-filter');
+const singleFilterStories = storiesFor('02-molecules/single-filter');
+const searchStories = storiesFor('02-molecules/search');
+---
+
+<BaseLayout
+  title="CivicTheme — Forms"
+  description="Every form field, webform and list-filter variant, light and dark."
+  image="/og/home.png"
+>
+  <div class="ct-basic-content">
+    <h1>Forms</h1>
+    <p>Form fields, labels, messages, the webform organism and the list-filter molecules.</p>
+  </div>
+
+  <h2 class="ct-basic-content">Input</h2>
+  {
+    inputStories.map((fixture) => {
+      const props = propsFor(fixture);
+      return (
+        <ComponentDemoBlock
+          heading={fixture.name}
+          tag={componentTagName(fixture.component)}
+          props={props}
+          theme={fixture.theme}
+        >
+          <Input {...props} />
+        </ComponentDemoBlock>
+      );
+    })
+  }
+
+  <h2 class="ct-basic-content">Textfield</h2>
+  {
+    textfieldStories.map((fixture) => {
+      const props = propsFor(fixture);
+      return (
+        <ComponentDemoBlock
+          heading={fixture.name}
+          tag={componentTagName(fixture.component)}
+          props={props}
+          theme={fixture.theme}
+        >
+          <Textfield {...props} />
+        </ComponentDemoBlock>
+      );
+    })
+  }
+
+  <h2 class="ct-basic-content">Textarea</h2>
+  {
+    textareaStories.map((fixture) => {
+      const props = propsFor(fixture);
+      return (
+        <ComponentDemoBlock
+          heading={fixture.name}
+          tag={componentTagName(fixture.component)}
+          props={props}
+          theme={fixture.theme}
+        >
+          <Textarea {...props} />
+        </ComponentDemoBlock>
+      );
+    })
+  }
+
+  <h2 class="ct-basic-content">Select</h2>
+  {
+    selectStories.map((fixture) => {
+      const props = propsFor(fixture);
+      return (
+        <ComponentDemoBlock
+          heading={fixture.name}
+          tag={componentTagName(fixture.component)}
+          props={props}
+          theme={fixture.theme}
+        >
+          <Select {...props} />
+        </ComponentDemoBlock>
+      );
+    })
+  }
+
+  <h2 class="ct-basic-content">Checkbox</h2>
+  {
+    checkboxStories.map((fixture) => {
+      const props = propsFor(fixture);
+      return (
+        <ComponentDemoBlock
+          heading={fixture.name}
+          tag={componentTagName(fixture.component)}
+          props={props}
+          theme={fixture.theme}
+        >
+          <Checkbox {...props} />
+        </ComponentDemoBlock>
+      );
+    })
+  }
+
+  <h2 class="ct-basic-content">Radio</h2>
+  {
+    radioStories.map((fixture) => {
+      const props = propsFor(fixture);
+      return (
+        <ComponentDemoBlock
+          heading={fixture.name}
+          tag={componentTagName(fixture.component)}
+          props={props}
+          theme={fixture.theme}
+        >
+          <Radio {...props} />
+        </ComponentDemoBlock>
+      );
+    })
+  }
+
+  <h2 class="ct-basic-content">Fieldset</h2>
+  {
+    fieldsetStories.map((fixture) => {
+      const props = propsFor(fixture);
+      return (
+        <ComponentDemoBlock
+          heading={fixture.name}
+          tag={componentTagName(fixture.component)}
+          props={props}
+          theme={fixture.theme}
+        >
+          <Fieldset {...props} />
+        </ComponentDemoBlock>
+      );
+    })
+  }
+
+  <h2 class="ct-basic-content">Label</h2>
+  {
+    labelStories.map((fixture) => {
+      const props = propsFor(fixture);
+      return (
+        <ComponentDemoBlock
+          heading={fixture.name}
+          tag={componentTagName(fixture.component)}
+          props={props}
+          theme={fixture.theme}
+        >
+          <Label {...props} />
+        </ComponentDemoBlock>
+      );
+    })
+  }
+
+  <h2 class="ct-basic-content">Field description</h2>
+  {
+    fieldDescriptionStories.map((fixture) => {
+      const props = propsFor(fixture);
+      return (
+        <ComponentDemoBlock
+          heading={fixture.name}
+          tag={componentTagName(fixture.component)}
+          props={props}
+          theme={fixture.theme}
+        >
+          <FieldDescription {...props} />
+        </ComponentDemoBlock>
+      );
+    })
+  }
+
+  <h2 class="ct-basic-content">Field message</h2>
+  {
+    fieldMessageStories.map((fixture) => {
+      const props = propsFor(fixture);
+      return (
+        <ComponentDemoBlock
+          heading={fixture.name}
+          tag={componentTagName(fixture.component)}
+          props={props}
+          theme={fixture.theme}
+        >
+          <FieldMessage {...props} />
+        </ComponentDemoBlock>
+      );
+    })
+  }
+
+  <h2 class="ct-basic-content">Field</h2>
+  {
+    fieldStories.map((fixture) => {
+      const props = propsFor(fixture);
+      return (
+        <ComponentDemoBlock
+          heading={fixture.name}
+          tag={componentTagName(fixture.component)}
+          props={props}
+          theme={fixture.theme}
+        >
+          <Field {...props} />
+        </ComponentDemoBlock>
+      );
+    })
+  }
+
+  <h2 class="ct-basic-content">Webform</h2>
+  {
+    webformStories.map((fixture) => {
+      const props = propsFor(fixture);
+      return (
+        <ComponentDemoBlock
+          heading={fixture.name}
+          tag={componentTagName(fixture.component)}
+          props={props}
+          theme={fixture.theme}
+        >
+          <Webform {...props} />
+        </ComponentDemoBlock>
+      );
+    })
+  }
+
+  <h2 class="ct-basic-content">Group filter</h2>
+  {
+    groupFilterStories.map((fixture) => {
+      const props = propsFor(fixture);
+      return (
+        <ComponentDemoBlock
+          heading={fixture.name}
+          tag={componentTagName(fixture.component)}
+          props={props}
+          theme={fixture.theme}
+        >
+          <GroupFilter {...props} />
+        </ComponentDemoBlock>
+      );
+    })
+  }
+
+  <h2 class="ct-basic-content">Inline filter</h2>
+  {
+    inlineFilterStories.map((fixture) => {
+      const props = propsFor(fixture);
+      return (
+        <ComponentDemoBlock
+          heading={fixture.name}
+          tag={componentTagName(fixture.component)}
+          props={props}
+          theme={fixture.theme}
+        >
+          <InlineFilter {...props} />
+        </ComponentDemoBlock>
+      );
+    })
+  }
+
+  <h2 class="ct-basic-content">Single filter</h2>
+  {
+    singleFilterStories.map((fixture) => {
+      const props = propsFor(fixture);
+      return (
+        <ComponentDemoBlock
+          heading={fixture.name}
+          tag={componentTagName(fixture.component)}
+          props={props}
+          theme={fixture.theme}
+        >
+          <SingleFilter {...props} />
+        </ComponentDemoBlock>
+      );
+    })
+  }
+
+  <h2 class="ct-basic-content">Search</h2>
+  {
+    searchStories.map((fixture) => {
+      const props = propsFor(fixture);
+      return (
+        <ComponentDemoBlock
+          heading={fixture.name}
+          tag={componentTagName(fixture.component)}
+          props={props}
+          theme={fixture.theme}
+        >
+          <Search {...props} />
+        </ComponentDemoBlock>
+      );
+    })
+  }
+</BaseLayout>

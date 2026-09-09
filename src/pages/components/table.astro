@@ -1,0 +1,60 @@
+---
+/**
+ * Table reference page (Task 17). The `Table` atom has no captured
+ * upstream story fixture (`01-atoms/table/table.stories.js` is not part of
+ * the story-parity capture set), so its demo props are adapted directly
+ * from that upstream stories file's own `Table` export — plain-text cells
+ * only, to sidestep `Table.astro`'s own escaping behaviour for
+ * markup-bearing cells (see `tests/parity/01-atoms/Table.parity.test.ts`).
+ */
+import BaseLayout from '@/layouts/BaseLayout.astro';
+import ComponentDemoBlock from '@/components/ComponentDemoBlock.astro';
+import Table from '@civictheme/atoms/Table.astro';
+
+const rows = [
+  ['Row 1', 'Description summary on odd row', 'Another column', 'One more column'],
+  ['Row 2', 'Description summary on even row', 'Another column', 'One more column'],
+  ['Row 3', 'Description summary on odd row', 'Another column', 'One more column'],
+];
+
+const tableProps = {
+  caption: 'Table caption',
+  captionPosition: 'before' as const,
+  header: ['Header 1', 'Header 2', 'Header 3', 'Header 4'],
+  headerSanitized: ['Header 1', 'Header 2', 'Header 3', 'Header 4'],
+  rows,
+  footer: ['Footer 1', 'Footer 2', 'Footer 3', 'Footer 4'],
+};
+---
+
+<BaseLayout
+  title="CivicTheme — Table"
+  description="The Table atom, plain, striped and as a data table."
+  image="/og/home.png"
+>
+  <div class="ct-basic-content">
+    <h1>Table</h1>
+    <p>The data table atom.</p>
+  </div>
+
+  <ComponentDemoBlock heading="Table" tag="Table" props={tableProps} theme="light">
+    <Table {...tableProps} />
+  </ComponentDemoBlock>
+
+  <ComponentDemoBlock heading="Table (striped)" tag="Table" props={{ ...tableProps, isStriped: true }} theme="light">
+    <Table {...tableProps} isStriped />
+  </ComponentDemoBlock>
+
+  <ComponentDemoBlock
+    heading="Table (data table)"
+    tag="Table"
+    props={{ ...tableProps, isDataTable: true }}
+    theme="light"
+  >
+    <Table {...tableProps} isDataTable />
+  </ComponentDemoBlock>
+
+  <ComponentDemoBlock heading="Table (dark)" tag="Table" props={{ ...tableProps, theme: 'dark' }} theme="dark">
+    <Table {...tableProps} theme="dark" />
+  </ComponentDemoBlock>
+</BaseLayout>

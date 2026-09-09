@@ -1,0 +1,35 @@
+---
+/**
+ * Lists reference page (Task 17). Every captured `03-organisms/list` story,
+ * light and dark — including the group-filter, no-results and multi-column
+ * variants captured upstream.
+ */
+import BaseLayout from '@/layouts/BaseLayout.astro';
+import ComponentDemoBlock from '@/components/ComponentDemoBlock.astro';
+import List from '@civictheme/organisms/List.astro';
+import { storiesFor, propsFor, componentTagName } from '@/lib/component-demos';
+
+const stories = storiesFor('03-organisms/list');
+---
+
+<BaseLayout title="CivicTheme — Lists" description="Every List variant, light and dark." image="/og/home.png">
+  <div class="ct-basic-content">
+    <h1>Lists</h1>
+    <p>The list organism: rows, filters, pagination and empty state.</p>
+  </div>
+  {
+    stories.map((fixture) => {
+      const props = propsFor(fixture);
+      return (
+        <ComponentDemoBlock
+          heading={fixture.name}
+          tag={componentTagName(fixture.component)}
+          props={props}
+          theme={fixture.theme}
+        >
+          <List {...props} />
+        </ComponentDemoBlock>
+      );
+    })
+  }
+</BaseLayout>

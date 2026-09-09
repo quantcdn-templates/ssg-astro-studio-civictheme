@@ -1,0 +1,92 @@
+---
+/**
+ * One variant on a `/components/*` reference page (Task 17): a `Heading`
+ * naming the story, the live component (default slot), and a
+ * `<pre class="ct-code">` showing the equivalent Astro/MDX tag so an editor
+ * can copy it into content.
+ *
+ * The live component itself is always a normal, statically-imported child
+ * in the caller's slot (never rendered dynamically here) — only its props
+ * vary per story, which the caller supplies both as real props (the slot)
+ * and, in `props`, as the data this block prints back out as code.
+ */
+import Heading from '@civictheme/atoms/Heading.astro';
+
+interface Props {
+  /** Story/variant name, e.g. "Banner Dark". */
+  heading: string;
+  /** Astro tag name for the code sample, e.g. "Banner". */
+  tag: string;
+  /** camelCase props passed to the live component, for the code sample. */
+  props: Record<string, unknown>;
+  /** When `'dark'`, the live component renders on a `ct-theme-dark` stage. */
+  theme?: string | null;
+}
+
+const { heading, tag, props, theme } = Astro.props;
+
+const HTML_MAX_LENGTH = 60;
+
+function truncateHtml(value: string): string {
+  const isHtml = /<[a-z][\s\S]*>/i.test(value);
+  if (!isHtml || value.length <= HTML_MAX_LENGTH) return value;
+  return `${value.slice(0, HTML_MAX_LENGTH)}…`;
+}
+
+function formatValue(value: unknown): string {
+  if (typeof value === 'string') return JSON.stringify(truncateHtml(value));
+  if (Array.isArray(value)) return `[${value.map(formatValue).join(', ')}]`;
+  if (value && typeof value === 'object') {
+    const entries = Object.entries(value as Record<string, unknown>).map(
+      ([key, entryValue]) => `${key}: ${formatValue(entryValue)}`
+    );
+    return `{ ${entries.join(', ')} }`;
+  }
+  return JSON.stringify(value);
+}
+
+const propLines = Object.entries(props)
+  .filter(([, value]) => value !== undefined)
+  .map(([key, value]) => `  ${key}={${formatValue(value)}}`);
+
+const codeSample = propLines.length > 0 ? `<${tag}\n${propLines.join('\n')}\n/>` : `<${tag} />`;
+const isDark = theme === 'dark';
+---
+
+<section class="ct-component-demo">
+  <Heading level={3} content={heading} class="ct-component-demo__heading" />
+  <div class:list={['ct-component-demo__stage', isDark && 'ct-theme-dark']}>
+    <slot />
+  </div>
+  <pre class="ct-code">{codeSample}</pre>
+</section>
+
+<style>
+  .ct-component-demo {
+    margin-block-end: 3rem;
+    padding-block-end: 2rem;
+    border-block-end: 1px solid #d8d8d8;
+  }
+
+  .ct-component-demo__heading {
+    margin-block-end: 1rem;
+  }
+
+  .ct-component-demo__stage {
+    padding: 1.5rem;
+    margin-block-end: 1rem;
+  }
+
+  .ct-component-demo__stage.ct-theme-dark {
+    background: #12172b;
+  }
+
+  .ct-code {
+    background: #f4f4f4;
+    padding: 1rem;
+    overflow-x: auto;
+    font-size: 0.8rem;
+    line-height: 1.4;
+    white-space: pre;
+  }
+</style>

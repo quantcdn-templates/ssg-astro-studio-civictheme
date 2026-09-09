@@ -1,0 +1,66 @@
+---
+/**
+ * Slider reference page (Task 17). `Slider` renders from its captured
+ * `03-organisms/slider` story (its `slides` prop is upstream's own
+ * pre-rendered slide markup, per shared-reference R2's html-string-prop
+ * treatment). `Slide` — the individual slide `slider.twig` composes —
+ * has no story of its own upstream (`slide.twig` shares `slider.test.js`'s
+ * snapshot file, not a story file), so its demo props below are adapted
+ * from `tests/parity/03-organisms/Slide.parity.test.ts`.
+ */
+import BaseLayout from '@/layouts/BaseLayout.astro';
+import ComponentDemoBlock from '@/components/ComponentDemoBlock.astro';
+import Slider from '@civictheme/organisms/Slider.astro';
+import Slide from '@civictheme/organisms/Slide.astro';
+import { storiesFor, propsFor, componentTagName } from '@/lib/component-demos';
+
+const sliderStories = storiesFor('03-organisms/slider');
+
+const slideProps = {
+  title: 'Slide title',
+  content: 'Slide content, describing this individual slide.',
+  image: { url: '/demo/images/demo1.jpg', alt: '' },
+  tags: ['Tag one', 'Tag two'],
+  date: 'Jan 1, 2024',
+  dateIso: '2024-01-01',
+  links: [{ text: 'Read more', url: '#' }],
+};
+---
+
+<BaseLayout
+  title="CivicTheme — Slider"
+  description="Every Slider variant, and the Slide it is built from."
+  image="/og/home.png"
+>
+  <div class="ct-basic-content">
+    <h1>Slider</h1>
+    <p>The slider organism, and the individual Slide component it composes.</p>
+  </div>
+  {
+    sliderStories.map((fixture) => {
+      const props = propsFor(fixture);
+      return (
+        <ComponentDemoBlock
+          heading={fixture.name}
+          tag={componentTagName(fixture.component)}
+          props={props}
+          theme={fixture.theme}
+        >
+          <Slider {...props} />
+        </ComponentDemoBlock>
+      );
+    })
+  }
+
+  <ComponentDemoBlock heading="Slide (individual slide)" tag="Slide" props={slideProps} theme="light">
+    <Slide {...slideProps} />
+  </ComponentDemoBlock>
+  <ComponentDemoBlock
+    heading="Slide (individual slide, dark)"
+    tag="Slide"
+    props={{ ...slideProps, theme: 'dark' }}
+    theme="dark"
+  >
+    <Slide {...slideProps} theme="dark" />
+  </ComponentDemoBlock>
+</BaseLayout>

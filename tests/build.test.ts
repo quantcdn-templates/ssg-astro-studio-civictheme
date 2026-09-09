@@ -106,3 +106,86 @@ describe('astro build', () => {
     expect(series).toContain('ct-navigation-card');
   });
 });
+
+describe('components reference section (Task 17)', () => {
+  const familyPages = [
+    'index',
+    'banners',
+    'promo',
+    'campaign',
+    'callout',
+    'next-step',
+    'cards',
+    'lists',
+    'slider',
+    'accordion',
+    'tabs',
+    'table',
+    'forms',
+    'navigation',
+    'footer',
+    'alerts',
+    'base',
+    'behaviours',
+  ];
+
+  it('emits every family page under dist/components/', () => {
+    for (const page of familyPages) {
+      const file = page === 'index' ? 'dist/components.html' : `dist/components/${page}.html`;
+      expect(existsSync(join(root, file))).toBe(true);
+    }
+  });
+
+  it('emits the eight card classes on the cards family page', () => {
+    const cards = readFileSync(join(root, 'dist/components/cards.html'), 'utf8');
+    for (const className of [
+      'ct-promo-card',
+      'ct-event-card',
+      'ct-publication-card',
+      'ct-navigation-card',
+      'ct-service-card',
+      'ct-subject-card',
+      'ct-snippet',
+      'ct-fast-fact-card',
+    ]) {
+      expect(cards).toContain(className);
+    }
+  });
+
+  it('links every family page from the components index', () => {
+    const index = readFileSync(join(root, 'dist/components.html'), 'utf8');
+    for (const page of familyPages.filter((page) => page !== 'index' && page !== 'behaviours')) {
+      expect(index).toContain(`/components/${page}`);
+    }
+  });
+
+  it('has no ported component missing from every components page (definition-of-done audit)', () => {
+    const componentsDir = join(root, 'src/pages/components');
+    const pagesSource = readdirSync(componentsDir)
+      .filter((file) => file.endsWith('.astro'))
+      .map((file) => readFileSync(join(componentsDir, file), 'utf8'))
+      .join('\n');
+
+    function componentFiles(dir: string): string[] {
+      return readdirSync(join(root, dir), { withFileTypes: true }).flatMap((entry) =>
+        entry.isDirectory() ? componentFiles(join(dir, entry.name)) : entry.name.endsWith('.astro') ? [entry.name] : []
+      );
+    }
+
+    const missing = componentFiles('src/civictheme/components')
+      .map((file) => file.replace(/\.astro$/, ''))
+      .filter((name) => !pagesSource.includes(name));
+
+    expect(missing).toEqual([]);
+  });
+
+  it('renders Slider and Table light and dark on their family pages', () => {
+    const slider = readFileSync(join(root, 'dist/components/slider.html'), 'utf8');
+    expect(slider).toContain('ct-slider');
+    expect(slider).toContain('ct-theme-dark');
+
+    const table = readFileSync(join(root, 'dist/components/table.html'), 'utf8');
+    expect(table).toContain('ct-table');
+    expect(table).toContain('ct-theme-dark');
+  });
+});

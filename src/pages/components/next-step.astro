@@ -1,0 +1,34 @@
+---
+/**
+ * Next step reference page (Task 17). Every captured
+ * `02-molecules/next-step` story, light and dark.
+ */
+import BaseLayout from '@/layouts/BaseLayout.astro';
+import ComponentDemoBlock from '@/components/ComponentDemoBlock.astro';
+import NextStep from '@civictheme/molecules/NextStep.astro';
+import { storiesFor, propsFor, componentTagName } from '@/lib/component-demos';
+
+const stories = storiesFor('02-molecules/next-step');
+---
+
+<BaseLayout title="CivicTheme — Next step" description="Every Next Step variant, light and dark." image="/og/home.png">
+  <div class="ct-basic-content">
+    <h1>Next step</h1>
+    <p>Linked "what to do next" panels.</p>
+  </div>
+  {
+    stories.map((fixture) => {
+      const props = propsFor(fixture);
+      return (
+        <ComponentDemoBlock
+          heading={fixture.name}
+          tag={componentTagName(fixture.component)}
+          props={props}
+          theme={fixture.theme}
+        >
+          <NextStep {...props} />
+        </ComponentDemoBlock>
+      );
+    })
+  }
+</BaseLayout>

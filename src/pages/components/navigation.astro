@@ -1,0 +1,239 @@
+---
+/**
+ * Navigation reference page (Task 17): Header, Navigation, the four Mobile
+ * Navigation components, Side Navigation, Breadcrumb, Pagination, Table of
+ * Contents, Skip Link, Logo and Back to Top.
+ *
+ * Mobile navigation isolation: `MobileNavigationTrigger` hardcodes
+ * `data-flyout-target=".ct-mobile-navigation"` (the SiteHeader's own
+ * flyout panel) — see `MobileNavigationTrigger.astro`'s doc comment. A
+ * second trigger/panel pair on this page using that same default would
+ * silently drive the real site header's flyout instead of its own (the
+ * same hazard `behaviours.astro`'s doc comment already documents). Here
+ * the demo trigger and panel are given a page-local `data-flyout-target`/
+ * `id` pair (`#components-mobile-nav-demo`) via rest props, which
+ * (spread after the component's own hardcoded attribute) overrides it —
+ * so the demo's flyout only ever opens the demo's own panel.
+ */
+import BaseLayout from '@/layouts/BaseLayout.astro';
+import ComponentDemoBlock from '@/components/ComponentDemoBlock.astro';
+import Header from '@civictheme/organisms/Header.astro';
+import Navigation from '@civictheme/organisms/Navigation.astro';
+import MobileNavigationTrigger from '@civictheme/organisms/MobileNavigationTrigger.astro';
+import MobileNavigation from '@civictheme/organisms/MobileNavigation.astro';
+import MobileNavigationClose from '@civictheme/organisms/MobileNavigationClose.astro';
+import MobileNavigationMenu from '@civictheme/organisms/MobileNavigationMenu.astro';
+import SideNavigation from '@civictheme/organisms/SideNavigation.astro';
+import Breadcrumb from '@civictheme/molecules/Breadcrumb.astro';
+import Pagination from '@civictheme/molecules/Pagination.astro';
+import TableOfContents from '@civictheme/molecules/TableOfContents.astro';
+import SkipLink from '@civictheme/organisms/SkipLink.astro';
+import Logo from '@civictheme/molecules/Logo.astro';
+import BackToTop from '@civictheme/molecules/BackToTop.astro';
+import { storiesFor, propsFor, componentTagName } from '@/lib/component-demos';
+
+const headerStories = storiesFor('03-organisms/header');
+const navigationStories = storiesFor('03-organisms/navigation');
+const sideNavigationStories = storiesFor('03-organisms/side-navigation');
+const breadcrumbStories = storiesFor('02-molecules/breadcrumb');
+const paginationStories = storiesFor('02-molecules/pagination');
+const tableOfContentsStories = storiesFor('02-molecules/table-of-contents');
+const skipLinkStories = storiesFor('03-organisms/skip-link');
+const logoStories = storiesFor('02-molecules/logo');
+
+const mobileMenuItems = [
+  { title: 'Item one', url: '#' },
+  { title: 'Item two', url: '#', below: [{ title: 'Sub item', url: '#' }] },
+  { title: 'Item three', url: '#' },
+];
+
+const mobileNavTargetSelector = '#components-mobile-nav-demo';
+---
+
+<BaseLayout
+  title="CivicTheme — Navigation"
+  description="Header, navigation, mobile navigation, breadcrumb, pagination and table of contents."
+  image="/og/home.png"
+>
+  <div class="ct-basic-content">
+    <h1>Navigation</h1>
+    <p>
+      Header, primary/mobile/side navigation, breadcrumb, pagination, table of contents, skip link, logo and back to
+      top.
+    </p>
+  </div>
+
+  <h2 class="ct-basic-content">Header</h2>
+  {
+    headerStories.map((fixture) => {
+      const props = propsFor(fixture);
+      return (
+        <ComponentDemoBlock
+          heading={fixture.name}
+          tag={componentTagName(fixture.component)}
+          props={props}
+          theme={fixture.theme}
+        >
+          <Header {...props} />
+        </ComponentDemoBlock>
+      );
+    })
+  }
+
+  <h2 class="ct-basic-content">Navigation</h2>
+  {
+    navigationStories.map((fixture) => {
+      const props = propsFor(fixture);
+      return (
+        <ComponentDemoBlock
+          heading={fixture.name}
+          tag={componentTagName(fixture.component)}
+          props={props}
+          theme={fixture.theme}
+        >
+          <Navigation {...props} />
+        </ComponentDemoBlock>
+      );
+    })
+  }
+
+  <h2 class="ct-basic-content">Mobile navigation</h2>
+  <p class="ct-basic-content">
+    Isolated from the real site header's flyout with a page-local <code>data-flyout-target</code>/<code>id</code>{' '}
+    pair — see the note at the top of this file.
+  </p>
+
+  <ComponentDemoBlock
+    heading="Mobile navigation trigger + panel"
+    tag="MobileNavigationTrigger"
+    props={{ text: 'Menu', icon: 'bars', 'data-flyout-target': mobileNavTargetSelector }}
+    theme="light"
+  >
+    <MobileNavigationTrigger text="Menu" icon="bars" data-flyout-target={mobileNavTargetSelector} />
+    <MobileNavigation
+      id="components-mobile-nav-demo"
+      topMenu={mobileMenuItems}
+      bottomMenu={[{ title: 'Contact us', url: '#' }]}
+    />
+  </ComponentDemoBlock>
+
+  <ComponentDemoBlock heading="Mobile navigation close" tag="MobileNavigationClose" props={{}} theme="light">
+    <MobileNavigationClose />
+  </ComponentDemoBlock>
+
+  <ComponentDemoBlock
+    heading="Mobile navigation menu"
+    tag="MobileNavigationMenu"
+    props={{ items: mobileMenuItems }}
+    theme="light"
+  >
+    <MobileNavigationMenu items={mobileMenuItems} />
+  </ComponentDemoBlock>
+
+  <h2 class="ct-basic-content">Side navigation</h2>
+  {
+    sideNavigationStories.map((fixture) => {
+      const props = propsFor(fixture);
+      return (
+        <ComponentDemoBlock
+          heading={fixture.name}
+          tag={componentTagName(fixture.component)}
+          props={props}
+          theme={fixture.theme}
+        >
+          <SideNavigation {...props} />
+        </ComponentDemoBlock>
+      );
+    })
+  }
+
+  <h2 class="ct-basic-content">Breadcrumb</h2>
+  {
+    breadcrumbStories.map((fixture) => {
+      const props = propsFor(fixture);
+      return (
+        <ComponentDemoBlock
+          heading={fixture.name}
+          tag={componentTagName(fixture.component)}
+          props={props}
+          theme={fixture.theme}
+        >
+          <Breadcrumb {...props} />
+        </ComponentDemoBlock>
+      );
+    })
+  }
+
+  <h2 class="ct-basic-content">Pagination</h2>
+  {
+    paginationStories.map((fixture) => {
+      const props = propsFor(fixture);
+      return (
+        <ComponentDemoBlock
+          heading={fixture.name}
+          tag={componentTagName(fixture.component)}
+          props={props}
+          theme={fixture.theme}
+        >
+          <Pagination {...props} />
+        </ComponentDemoBlock>
+      );
+    })
+  }
+
+  <h2 class="ct-basic-content">Table of contents</h2>
+  {
+    tableOfContentsStories.map((fixture) => {
+      const props = propsFor(fixture);
+      return (
+        <ComponentDemoBlock
+          heading={fixture.name}
+          tag={componentTagName(fixture.component)}
+          props={props}
+          theme={fixture.theme}
+        >
+          <TableOfContents {...props} />
+        </ComponentDemoBlock>
+      );
+    })
+  }
+
+  <h2 class="ct-basic-content">Skip link</h2>
+  {
+    skipLinkStories.map((fixture) => {
+      const props = propsFor(fixture);
+      return (
+        <ComponentDemoBlock
+          heading={fixture.name}
+          tag={componentTagName(fixture.component)}
+          props={props}
+          theme={fixture.theme}
+        >
+          <SkipLink {...props} />
+        </ComponentDemoBlock>
+      );
+    })
+  }
+
+  <h2 class="ct-basic-content">Logo</h2>
+  {
+    logoStories.map((fixture) => {
+      const props = propsFor(fixture);
+      return (
+        <ComponentDemoBlock
+          heading={fixture.name}
+          tag={componentTagName(fixture.component)}
+          props={props}
+          theme={fixture.theme}
+        >
+          <Logo {...props} />
+        </ComponentDemoBlock>
+      );
+    })
+  }
+
+  <h2 class="ct-basic-content">Back to top</h2>
+  <ComponentDemoBlock heading="Back to top" tag="BackToTop" props={{}} theme="light">
+    <BackToTop />
+  </ComponentDemoBlock>
+</BaseLayout>

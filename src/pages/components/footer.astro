@@ -1,0 +1,34 @@
+---
+/**
+ * Footer reference page (Task 17). Every captured `03-organisms/footer`
+ * story, light and dark.
+ */
+import BaseLayout from '@/layouts/BaseLayout.astro';
+import ComponentDemoBlock from '@/components/ComponentDemoBlock.astro';
+import Footer from '@civictheme/organisms/Footer.astro';
+import { storiesFor, propsFor, componentTagName } from '@/lib/component-demos';
+
+const stories = storiesFor('03-organisms/footer');
+---
+
+<BaseLayout title="CivicTheme — Footer" description="Every Footer variant, light and dark." image="/og/home.png">
+  <div class="ct-basic-content">
+    <h1>Footer</h1>
+    <p>The site footer organism.</p>
+  </div>
+  {
+    stories.map((fixture) => {
+      const props = propsFor(fixture);
+      return (
+        <ComponentDemoBlock
+          heading={fixture.name}
+          tag={componentTagName(fixture.component)}
+          props={props}
+          theme={fixture.theme}
+        >
+          <Footer {...props} />
+        </ComponentDemoBlock>
+      );
+    })
+  }
+</BaseLayout>

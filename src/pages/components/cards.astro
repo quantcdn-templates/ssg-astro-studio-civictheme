@@ -1,0 +1,204 @@
+---
+/**
+ * Cards reference page (Task 17): the eight card molecules — promo, event,
+ * publication, navigation, service, subject, snippet, fast fact — every
+ * captured story, light and dark. Each renders inside a 3-column `Grid`
+ * cell, matching how cards appear in a real listing.
+ */
+import BaseLayout from '@/layouts/BaseLayout.astro';
+import ComponentDemoBlock from '@/components/ComponentDemoBlock.astro';
+import Grid from '@civictheme/base/Grid.astro';
+import PromoCard from '@civictheme/molecules/PromoCard.astro';
+import EventCard from '@civictheme/molecules/EventCard.astro';
+import PublicationCard from '@civictheme/molecules/PublicationCard.astro';
+import NavigationCard from '@civictheme/molecules/NavigationCard.astro';
+import ServiceCard from '@civictheme/molecules/ServiceCard.astro';
+import SubjectCard from '@civictheme/molecules/SubjectCard.astro';
+import Snippet from '@civictheme/molecules/Snippet.astro';
+import FastFactCard from '@civictheme/molecules/FastFactCard.astro';
+import { storiesFor, propsFor, componentTagName } from '@/lib/component-demos';
+
+const promoCardStories = storiesFor('02-molecules/promo-card');
+const eventCardStories = storiesFor('02-molecules/event-card');
+const publicationCardStories = storiesFor('02-molecules/publication-card');
+const navigationCardStories = storiesFor('02-molecules/navigation-card');
+const serviceCardStories = storiesFor('02-molecules/service-card');
+const subjectCardStories = storiesFor('02-molecules/subject-card');
+const snippetStories = storiesFor('02-molecules/snippet');
+const fastFactCardStories = storiesFor('02-molecules/fast-fact-card');
+---
+
+<BaseLayout title="CivicTheme — Cards" description="All eight card types, light and dark." image="/og/home.png">
+  <div class="ct-basic-content">
+    <h1>Cards</h1>
+    <p>The eight card molecules, each shown in a three-column grid cell.</p>
+  </div>
+
+  <h2 class="ct-basic-content">Promo card</h2>
+  {
+    promoCardStories.map((fixture) => {
+      const props = propsFor(fixture);
+      return (
+        <ComponentDemoBlock
+          heading={fixture.name}
+          tag={componentTagName(fixture.component)}
+          props={props}
+          theme={fixture.theme}
+        >
+          <Grid useContainer={false} templateColumnCount={3}>
+            <div class="col-xxs-12 col-l-4">
+              <PromoCard {...props} />
+            </div>
+          </Grid>
+        </ComponentDemoBlock>
+      );
+    })
+  }
+
+  <h2 class="ct-basic-content">Event card</h2>
+  {
+    eventCardStories.map((fixture) => {
+      const props = propsFor(fixture);
+      return (
+        <ComponentDemoBlock
+          heading={fixture.name}
+          tag={componentTagName(fixture.component)}
+          props={props}
+          theme={fixture.theme}
+        >
+          <Grid useContainer={false} templateColumnCount={3}>
+            <div class="col-xxs-12 col-l-4">
+              <EventCard {...props} />
+            </div>
+          </Grid>
+        </ComponentDemoBlock>
+      );
+    })
+  }
+
+  <h2 class="ct-basic-content">Publication card</h2>
+  {
+    publicationCardStories.map((fixture) => {
+      const props = propsFor(fixture);
+      return (
+        <ComponentDemoBlock
+          heading={fixture.name}
+          tag={componentTagName(fixture.component)}
+          props={props}
+          theme={fixture.theme}
+        >
+          <Grid useContainer={false} templateColumnCount={3}>
+            <div class="col-xxs-12 col-l-4">
+              <PublicationCard {...props} />
+            </div>
+          </Grid>
+        </ComponentDemoBlock>
+      );
+    })
+  }
+
+  <h2 class="ct-basic-content">Navigation card</h2>
+  {
+    navigationCardStories.map((fixture) => {
+      const props = propsFor(fixture);
+      return (
+        <ComponentDemoBlock
+          heading={fixture.name}
+          tag={componentTagName(fixture.component)}
+          props={props}
+          theme={fixture.theme}
+        >
+          <Grid useContainer={false} templateColumnCount={3}>
+            <div class="col-xxs-12 col-l-4">
+              <NavigationCard {...props} />
+            </div>
+          </Grid>
+        </ComponentDemoBlock>
+      );
+    })
+  }
+
+  <h2 class="ct-basic-content">Service card</h2>
+  {
+    serviceCardStories.map((fixture) => {
+      const props = propsFor(fixture);
+      return (
+        <ComponentDemoBlock
+          heading={fixture.name}
+          tag={componentTagName(fixture.component)}
+          props={props}
+          theme={fixture.theme}
+        >
+          <Grid useContainer={false} templateColumnCount={3}>
+            <div class="col-xxs-12 col-l-4">
+              <ServiceCard {...props} />
+            </div>
+          </Grid>
+        </ComponentDemoBlock>
+      );
+    })
+  }
+
+  <h2 class="ct-basic-content">Subject card</h2>
+  {
+    subjectCardStories.map((fixture) => {
+      const props = propsFor(fixture);
+      return (
+        <ComponentDemoBlock
+          heading={fixture.name}
+          tag={componentTagName(fixture.component)}
+          props={props}
+          theme={fixture.theme}
+        >
+          <Grid useContainer={false} templateColumnCount={3}>
+            <div class="col-xxs-12 col-l-4">
+              <SubjectCard {...props} />
+            </div>
+          </Grid>
+        </ComponentDemoBlock>
+      );
+    })
+  }
+
+  <h2 class="ct-basic-content">Snippet</h2>
+  {
+    snippetStories.map((fixture) => {
+      const props = propsFor(fixture);
+      return (
+        <ComponentDemoBlock
+          heading={fixture.name}
+          tag={componentTagName(fixture.component)}
+          props={props}
+          theme={fixture.theme}
+        >
+          <Grid useContainer={false} templateColumnCount={3}>
+            <div class="col-xxs-12 col-l-4">
+              <Snippet {...props} />
+            </div>
+          </Grid>
+        </ComponentDemoBlock>
+      );
+    })
+  }
+
+  <h2 class="ct-basic-content">Fast fact card</h2>
+  {
+    fastFactCardStories.map((fixture) => {
+      const props = propsFor(fixture);
+      return (
+        <ComponentDemoBlock
+          heading={fixture.name}
+          tag={componentTagName(fixture.component)}
+          props={props}
+          theme={fixture.theme}
+        >
+          <Grid useContainer={false} templateColumnCount={3}>
+            <div class="col-xxs-12 col-l-4">
+              <FastFactCard {...props} />
+            </div>
+          </Grid>
+        </ComponentDemoBlock>
+      );
+    })
+  }
+</BaseLayout>

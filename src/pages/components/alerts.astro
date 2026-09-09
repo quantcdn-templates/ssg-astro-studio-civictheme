@@ -1,0 +1,173 @@
+---
+/**
+ * Alerts reference page (Task 17): Alert, Message, Popover, Tooltip, Chip,
+ * Tag, Tag list and Social links, each story light and dark.
+ */
+import BaseLayout from '@/layouts/BaseLayout.astro';
+import ComponentDemoBlock from '@/components/ComponentDemoBlock.astro';
+import Alert from '@civictheme/organisms/Alert.astro';
+import Message from '@civictheme/organisms/Message.astro';
+import Popover from '@civictheme/atoms/Popover.astro';
+import Tooltip from '@civictheme/molecules/Tooltip.astro';
+import Chip from '@civictheme/atoms/Chip.astro';
+import Tag from '@civictheme/atoms/Tag.astro';
+import TagList from '@civictheme/molecules/TagList.astro';
+import SocialLinks from '@civictheme/molecules/SocialLinks.astro';
+import { storiesFor, propsFor, componentTagName } from '@/lib/component-demos';
+
+const alertStories = storiesFor('03-organisms/alert');
+const messageStories = storiesFor('03-organisms/message');
+const popoverStories = storiesFor('01-atoms/popover');
+const tooltipStories = storiesFor('02-molecules/tooltip');
+const chipStories = storiesFor('01-atoms/chip');
+const tagStories = storiesFor('01-atoms/tag');
+const tagListStories = storiesFor('02-molecules/tag-list');
+const socialLinksStories = storiesFor('02-molecules/social-links');
+---
+
+<BaseLayout
+  title="CivicTheme — Alerts"
+  description="Alerts, messages, popovers, tooltips, chips, tags and social links, light and dark."
+  image="/og/home.png"
+>
+  <div class="ct-basic-content">
+    <h1>Alerts</h1>
+    <p>Alerts, messages, popovers, tooltips, chips, tags and social links.</p>
+  </div>
+
+  <h2 class="ct-basic-content">Alert</h2>
+  {
+    alertStories.map((fixture) => {
+      const props = propsFor(fixture);
+      return (
+        <ComponentDemoBlock
+          heading={fixture.name}
+          tag={componentTagName(fixture.component)}
+          props={props}
+          theme={fixture.theme}
+        >
+          <Alert {...props} />
+        </ComponentDemoBlock>
+      );
+    })
+  }
+
+  <h2 class="ct-basic-content">Message</h2>
+  {
+    messageStories.map((fixture) => {
+      const props = propsFor(fixture);
+      return (
+        <ComponentDemoBlock
+          heading={fixture.name}
+          tag={componentTagName(fixture.component)}
+          props={props}
+          theme={fixture.theme}
+        >
+          <Message {...props} />
+        </ComponentDemoBlock>
+      );
+    })
+  }
+
+  <h2 class="ct-basic-content">Popover</h2>
+  {
+    popoverStories.map((fixture) => {
+      const props = propsFor(fixture);
+      return (
+        <ComponentDemoBlock
+          heading={fixture.name}
+          tag={componentTagName(fixture.component)}
+          props={props}
+          theme={fixture.theme}
+        >
+          <Popover {...props} />
+        </ComponentDemoBlock>
+      );
+    })
+  }
+
+  <h2 class="ct-basic-content">Tooltip</h2>
+  {
+    tooltipStories.map((fixture) => {
+      const props = propsFor(fixture);
+      return (
+        <ComponentDemoBlock
+          heading={fixture.name}
+          tag={componentTagName(fixture.component)}
+          props={props}
+          theme={fixture.theme}
+        >
+          <Tooltip {...props} />
+        </ComponentDemoBlock>
+      );
+    })
+  }
+
+  <h2 class="ct-basic-content">Chip</h2>
+  {
+    chipStories.map((fixture) => {
+      const props = propsFor(fixture);
+      return (
+        <ComponentDemoBlock
+          heading={fixture.name}
+          tag={componentTagName(fixture.component)}
+          props={props}
+          theme={fixture.theme}
+        >
+          <Chip {...props} />
+        </ComponentDemoBlock>
+      );
+    })
+  }
+
+  <h2 class="ct-basic-content">Tag</h2>
+  {
+    tagStories.map((fixture) => {
+      const props = propsFor(fixture);
+      return (
+        <ComponentDemoBlock
+          heading={fixture.name}
+          tag={componentTagName(fixture.component)}
+          props={props}
+          theme={fixture.theme}
+        >
+          <Tag {...props} />
+        </ComponentDemoBlock>
+      );
+    })
+  }
+
+  <h2 class="ct-basic-content">Tag list</h2>
+  {
+    tagListStories.map((fixture) => {
+      const props = propsFor(fixture);
+      return (
+        <ComponentDemoBlock
+          heading={fixture.name}
+          tag={componentTagName(fixture.component)}
+          props={props}
+          theme={fixture.theme}
+        >
+          <TagList {...props} />
+        </ComponentDemoBlock>
+      );
+    })
+  }
+
+  <h2 class="ct-basic-content">Social links</h2>
+  {
+    socialLinksStories.map((fixture) => {
+      const props = propsFor(fixture);
+      return (
+        <ComponentDemoBlock
+          heading={fixture.name}
+          tag={componentTagName(fixture.component)}
+          props={props}
+          theme={fixture.theme}
+        >
+          <SocialLinks {...props} />
+        </ComponentDemoBlock>
+      );
+    })
+  }
+</BaseLayout>

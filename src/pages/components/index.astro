@@ -1,0 +1,100 @@
+---
+/**
+ * Components reference index (Task 17).
+ *
+ * Links every family page below. Each family page renders every captured
+ * upstream Storybook story (shared-reference R2 args → camelCase props) for
+ * its components, light and dark, each with a copyable Astro/MDX code
+ * sample — see `src/lib/component-demos.ts`.
+ */
+import BaseLayout from '@/layouts/BaseLayout.astro';
+import Heading from '@civictheme/atoms/Heading.astro';
+import Link from '@civictheme/atoms/Link.astro';
+
+const families: Array<{ href: string; title: string; description: string }> = [
+  { href: '/components/banners', title: 'Banners', description: 'Page-header banners in every variant.' },
+  { href: '/components/promo', title: 'Promo', description: 'The full-width promotional organism.' },
+  { href: '/components/campaign', title: 'Campaign', description: 'The campaign call-to-action organism.' },
+  { href: '/components/callout', title: 'Callout', description: 'Inline highlighted content callouts.' },
+  { href: '/components/next-step', title: 'Next step', description: 'Linked "what to do next" panels.' },
+  {
+    href: '/components/cards',
+    title: 'Cards',
+    description: 'All eight card types: promo, event, publication, navigation, service, subject, snippet, fast fact.',
+  },
+  {
+    href: '/components/lists',
+    title: 'Lists',
+    description: 'The list organism with its filter and pagination variants.',
+  },
+  { href: '/components/slider', title: 'Slider', description: 'The slider organism and its individual slides.' },
+  { href: '/components/accordion', title: 'Accordion', description: 'Expandable/collapsible content panels.' },
+  { href: '/components/tabs', title: 'Tabs', description: 'Tabbed content panels.' },
+  { href: '/components/table', title: 'Table', description: 'The data table atom, striped and captioned.' },
+  {
+    href: '/components/forms',
+    title: 'Forms',
+    description: 'Form fields, labels, messages, webform and the list-filter molecules.',
+  },
+  {
+    href: '/components/navigation',
+    title: 'Navigation',
+    description: 'Header, primary/mobile/side navigation, breadcrumb, pagination and table of contents.',
+  },
+  { href: '/components/footer', title: 'Footer', description: 'The site footer organism.' },
+  {
+    href: '/components/alerts',
+    title: 'Alerts',
+    description: 'Alerts, messages, popovers, tooltips, chips, tags and social links.',
+  },
+  {
+    href: '/components/base',
+    title: 'Base',
+    description: 'Typography, icons, grid, layout, menus and other foundational atoms.',
+  },
+];
+---
+
+<BaseLayout
+  title="CivicTheme — Components"
+  description="Reference of every ported CivicTheme component variant, light and dark."
+  image="/og/home.png"
+>
+  <div class="ct-basic-content">
+    <h1>Components</h1>
+    <p>
+      One page per component family. Every documented variant renders with the exact props captured from the upstream
+      Storybook stories, in both light and dark theme, followed by the Astro tag to copy into content.
+    </p>
+    <ul class="components-index__list">
+      {
+        families.map((family) => (
+          <li class="components-index__item">
+            <Heading level={2} content={family.title} />
+            <p>{family.description}</p>
+            <Link theme="light" url={family.href} text={`View ${family.title} →`} />
+          </li>
+        ))
+      }
+    </ul>
+    <p>
+      <Link theme="light" url="/components/behaviours" text="Behaviours smoke page (JS init, not site content) →" />
+    </p>
+  </div>
+
+  <style>
+    .components-index__list {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(16rem, 1fr));
+      gap: 1.5rem;
+      list-style: none;
+      margin: 0;
+      padding: 0;
+    }
+
+    .components-index__item {
+      border: 1px solid #d8d8d8;
+      padding: 1.25rem;
+    }
+  </style>
+</BaseLayout>

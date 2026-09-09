@@ -1,0 +1,438 @@
+---
+/**
+ * Base reference page (Task 17): typography, icons, grid, layout, menus
+ * and the other foundational atoms/molecules that don't belong to a more
+ * specific family — base layer (Icon, Grid, Layout, Menu, Item List,
+ * Datetime, Text Icon), generic content atoms (Heading, Link, Button,
+ * Image, Paragraph, Content Link, Video, Iframe) and generic content
+ * molecules (Attachment, Basic Content, Figure, Map, Video Player).
+ *
+ * `Icon` also renders all 59 symbols in a grid — its single captured story
+ * only exercises one (`account`) — using `icons`' own key list, the same
+ * source `Icon.astro` renders from.
+ */
+import BaseLayout from '@/layouts/BaseLayout.astro';
+import ComponentDemoBlock from '@/components/ComponentDemoBlock.astro';
+import Heading from '@civictheme/atoms/Heading.astro';
+import Icon from '@civictheme/base/Icon.astro';
+import Grid from '@civictheme/base/Grid.astro';
+import Layout from '@civictheme/base/Layout.astro';
+import Menu from '@civictheme/base/Menu.astro';
+import ItemList from '@civictheme/base/ItemList.astro';
+import Datetime from '@civictheme/base/Datetime.astro';
+import TextIcon from '@civictheme/base/TextIcon.astro';
+import Link from '@civictheme/atoms/Link.astro';
+import Button from '@civictheme/atoms/Button.astro';
+import Image from '@civictheme/atoms/Image.astro';
+import Paragraph from '@civictheme/atoms/Paragraph.astro';
+import ContentLink from '@civictheme/atoms/ContentLink.astro';
+import Video from '@civictheme/atoms/Video.astro';
+import Iframe from '@civictheme/atoms/Iframe.astro';
+import Attachment from '@civictheme/molecules/Attachment.astro';
+import BasicContent from '@civictheme/molecules/BasicContent.astro';
+import Figure from '@civictheme/molecules/Figure.astro';
+import Map from '@civictheme/molecules/Map.astro';
+import VideoPlayer from '@civictheme/molecules/VideoPlayer.astro';
+import { icons } from '@civictheme/base/icons';
+import { storiesFor, propsFor, componentTagName } from '@/lib/component-demos';
+
+const iconStories = storiesFor('00-base/icon');
+const iconSymbols = Object.keys(icons);
+const layoutStories = storiesFor('00-base/layout');
+const menuStories = storiesFor('00-base/menu');
+const itemListStories = storiesFor('00-base/item-list');
+const datetimeStories = storiesFor('00-base/datetime');
+const textIconStories = storiesFor('00-base/text-icon');
+const headingStories = storiesFor('01-atoms/heading');
+const linkStories = storiesFor('01-atoms/link');
+const buttonStories = storiesFor('01-atoms/button');
+const imageStories = storiesFor('01-atoms/image');
+const paragraphStories = storiesFor('01-atoms/paragraph');
+const contentLinkStories = storiesFor('01-atoms/content-link');
+const videoStories = storiesFor('01-atoms/video');
+const iframeStories = storiesFor('01-atoms/iframe');
+const attachmentStories = storiesFor('02-molecules/attachment');
+const basicContentStories = storiesFor('02-molecules/basic-content');
+const figureStories = storiesFor('02-molecules/figure');
+const mapStories = storiesFor('02-molecules/map');
+const videoPlayerStories = storiesFor('02-molecules/video-player');
+
+const gridProps = {
+  items: ['<div>Column 1</div>', '<div>Column 2</div>', '<div>Column 3</div>'],
+  templateColumnCount: 3,
+};
+---
+
+<BaseLayout
+  title="CivicTheme — Base"
+  description="Typography, icons, grid, layout, menus and the other foundational components."
+  image="/og/home.png"
+>
+  <div class="ct-basic-content">
+    <h1>Base</h1>
+    <p>Typography, icons, grid, layout, menus and the other foundational atoms and molecules.</p>
+  </div>
+
+  <h2 class="ct-basic-content">Icon</h2>
+  {
+    iconStories.map((fixture) => {
+      const props = propsFor(fixture);
+      return (
+        <ComponentDemoBlock
+          heading={fixture.name}
+          tag={componentTagName(fixture.component)}
+          props={props}
+          theme={fixture.theme}
+        >
+          <Icon {...props} />
+        </ComponentDemoBlock>
+      );
+    })
+  }
+  <section class="ct-component-demo">
+    <Heading level={3} content="All icon symbols" />
+    <ul class="components-icon-grid">
+      {
+        iconSymbols.map((symbol) => (
+          <li>
+            <Icon symbol={symbol} size="regular" />
+            <span>{symbol}</span>
+          </li>
+        ))
+      }
+    </ul>
+    <pre class="ct-code">{'<Icon symbol="account" size="regular" />'}</pre>
+  </section>
+
+  <h2 class="ct-basic-content">Grid</h2>
+  <ComponentDemoBlock heading="Grid (3 columns)" tag="Grid" props={gridProps} theme="light">
+    <Grid items={gridProps.items} templateColumnCount={gridProps.templateColumnCount} />
+  </ComponentDemoBlock>
+
+  <h2 class="ct-basic-content">Layout</h2>
+  {
+    layoutStories.map((fixture) => {
+      const props = propsFor(fixture);
+      return (
+        <ComponentDemoBlock
+          heading={fixture.name}
+          tag={componentTagName(fixture.component)}
+          props={props}
+          theme={fixture.theme}
+        >
+          <Layout {...props} />
+        </ComponentDemoBlock>
+      );
+    })
+  }
+
+  <h2 class="ct-basic-content">Menu</h2>
+  {
+    menuStories.map((fixture) => {
+      const props = propsFor(fixture);
+      return (
+        <ComponentDemoBlock
+          heading={fixture.name}
+          tag={componentTagName(fixture.component)}
+          props={props}
+          theme={fixture.theme}
+        >
+          <Menu {...props} />
+        </ComponentDemoBlock>
+      );
+    })
+  }
+
+  <h2 class="ct-basic-content">Item list</h2>
+  {
+    itemListStories.map((fixture) => {
+      const props = propsFor(fixture);
+      return (
+        <ComponentDemoBlock
+          heading={fixture.name}
+          tag={componentTagName(fixture.component)}
+          props={props}
+          theme={fixture.theme}
+        >
+          <ItemList {...props} />
+        </ComponentDemoBlock>
+      );
+    })
+  }
+
+  <h2 class="ct-basic-content">Datetime</h2>
+  {
+    datetimeStories.map((fixture) => {
+      const props = propsFor(fixture);
+      return (
+        <ComponentDemoBlock
+          heading={fixture.name}
+          tag={componentTagName(fixture.component)}
+          props={props}
+          theme={fixture.theme}
+        >
+          <Datetime {...props} />
+        </ComponentDemoBlock>
+      );
+    })
+  }
+
+  <h2 class="ct-basic-content">Text icon</h2>
+  {
+    textIconStories.map((fixture) => {
+      const props = propsFor(fixture);
+      return (
+        <ComponentDemoBlock
+          heading={fixture.name}
+          tag={componentTagName(fixture.component)}
+          props={props}
+          theme={fixture.theme}
+        >
+          <TextIcon {...props} />
+        </ComponentDemoBlock>
+      );
+    })
+  }
+
+  <h2 class="ct-basic-content">Heading</h2>
+  {
+    headingStories.map((fixture) => {
+      const props = propsFor(fixture);
+      return (
+        <ComponentDemoBlock
+          heading={fixture.name}
+          tag={componentTagName(fixture.component)}
+          props={props}
+          theme={fixture.theme}
+        >
+          <Heading {...props} />
+        </ComponentDemoBlock>
+      );
+    })
+  }
+
+  <h2 class="ct-basic-content">Link</h2>
+  {
+    linkStories.map((fixture) => {
+      const props = propsFor(fixture);
+      return (
+        <ComponentDemoBlock
+          heading={fixture.name}
+          tag={componentTagName(fixture.component)}
+          props={props}
+          theme={fixture.theme}
+        >
+          <Link {...props} />
+        </ComponentDemoBlock>
+      );
+    })
+  }
+
+  <h2 class="ct-basic-content">Button</h2>
+  {
+    buttonStories.map((fixture) => {
+      const props = propsFor(fixture);
+      return (
+        <ComponentDemoBlock
+          heading={fixture.name}
+          tag={componentTagName(fixture.component)}
+          props={props}
+          theme={fixture.theme}
+        >
+          <Button {...props} />
+        </ComponentDemoBlock>
+      );
+    })
+  }
+
+  <h2 class="ct-basic-content">Image</h2>
+  {
+    imageStories.map((fixture) => {
+      const props = propsFor(fixture);
+      return (
+        <ComponentDemoBlock
+          heading={fixture.name}
+          tag={componentTagName(fixture.component)}
+          props={props}
+          theme={fixture.theme}
+        >
+          <Image {...props} />
+        </ComponentDemoBlock>
+      );
+    })
+  }
+
+  <h2 class="ct-basic-content">Paragraph</h2>
+  {
+    paragraphStories.map((fixture) => {
+      const props = propsFor(fixture);
+      return (
+        <ComponentDemoBlock
+          heading={fixture.name}
+          tag={componentTagName(fixture.component)}
+          props={props}
+          theme={fixture.theme}
+        >
+          <Paragraph {...props} />
+        </ComponentDemoBlock>
+      );
+    })
+  }
+
+  <h2 class="ct-basic-content">Content link</h2>
+  {
+    contentLinkStories.map((fixture) => {
+      const props = propsFor(fixture);
+      return (
+        <ComponentDemoBlock
+          heading={fixture.name}
+          tag={componentTagName(fixture.component)}
+          props={props}
+          theme={fixture.theme}
+        >
+          <ContentLink {...props} />
+        </ComponentDemoBlock>
+      );
+    })
+  }
+
+  <h2 class="ct-basic-content">Video</h2>
+  {
+    videoStories.map((fixture) => {
+      const props = propsFor(fixture);
+      return (
+        <ComponentDemoBlock
+          heading={fixture.name}
+          tag={componentTagName(fixture.component)}
+          props={props}
+          theme={fixture.theme}
+        >
+          <Video {...props} />
+        </ComponentDemoBlock>
+      );
+    })
+  }
+
+  <h2 class="ct-basic-content">Iframe</h2>
+  {
+    iframeStories.map((fixture) => {
+      const props = propsFor(fixture);
+      return (
+        <ComponentDemoBlock
+          heading={fixture.name}
+          tag={componentTagName(fixture.component)}
+          props={props}
+          theme={fixture.theme}
+        >
+          <Iframe {...props} />
+        </ComponentDemoBlock>
+      );
+    })
+  }
+
+  <h2 class="ct-basic-content">Attachment</h2>
+  {
+    attachmentStories.map((fixture) => {
+      const props = propsFor(fixture);
+      return (
+        <ComponentDemoBlock
+          heading={fixture.name}
+          tag={componentTagName(fixture.component)}
+          props={props}
+          theme={fixture.theme}
+        >
+          <Attachment {...props} />
+        </ComponentDemoBlock>
+      );
+    })
+  }
+
+  <h2 class="ct-basic-content">Basic content</h2>
+  {
+    basicContentStories.map((fixture) => {
+      const props = propsFor(fixture);
+      return (
+        <ComponentDemoBlock
+          heading={fixture.name}
+          tag={componentTagName(fixture.component)}
+          props={props}
+          theme={fixture.theme}
+        >
+          <BasicContent {...props} />
+        </ComponentDemoBlock>
+      );
+    })
+  }
+
+  <h2 class="ct-basic-content">Figure</h2>
+  {
+    figureStories.map((fixture) => {
+      const props = propsFor(fixture);
+      return (
+        <ComponentDemoBlock
+          heading={fixture.name}
+          tag={componentTagName(fixture.component)}
+          props={props}
+          theme={fixture.theme}
+        >
+          <Figure {...props} />
+        </ComponentDemoBlock>
+      );
+    })
+  }
+
+  <h2 class="ct-basic-content">Map</h2>
+  {
+    mapStories.map((fixture) => {
+      const props = propsFor(fixture);
+      return (
+        <ComponentDemoBlock
+          heading={fixture.name}
+          tag={componentTagName(fixture.component)}
+          props={props}
+          theme={fixture.theme}
+        >
+          <Map {...props} />
+        </ComponentDemoBlock>
+      );
+    })
+  }
+
+  <h2 class="ct-basic-content">Video player</h2>
+  {
+    videoPlayerStories.map((fixture) => {
+      const props = propsFor(fixture);
+      return (
+        <ComponentDemoBlock
+          heading={fixture.name}
+          tag={componentTagName(fixture.component)}
+          props={props}
+          theme={fixture.theme}
+        >
+          <VideoPlayer {...props} />
+        </ComponentDemoBlock>
+      );
+    })
+  }
+
+  <style>
+    .components-icon-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(6rem, 1fr));
+      gap: 1rem;
+      list-style: none;
+      margin: 0 0 1rem;
+      padding: 0;
+    }
+
+    .components-icon-grid li {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 0.25rem;
+      font-size: 0.7rem;
+      text-align: center;
+      word-break: break-word;
+    }
+  </style>
+</BaseLayout>
