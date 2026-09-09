@@ -13,7 +13,11 @@
  * - dropdownColumnsFill: Whether to fill columns.
  * - isAnimated: Whether to use animation for transitions.
  * - items: Menu items (see `Menu.astro`'s `MenuItem`).
- * - title: Navigation title.
+ * - title: Navigation title. Documented as a Slot upstream — also has a
+ *   same-named Astro slot that TAKES PRECEDENCE over the string prop when
+ *   present (Task 14c); its wrapper `{% if %}` gate widens to
+ *   `Boolean(title) || Astro.slots.has('title')`. Routes the string-prop
+ *   branch through `Heading`, so a slot bypasses that wrapper.
  * - class: Additional CSS classes.
  * - ...rest: Additional HTML attributes, spread onto the root element.
  *
@@ -122,14 +126,21 @@ const menuItems = items.map((item) => {
   if (!isDropdownType) return { ...item, below: undefined };
   return { ...item, attributes: collapsibleAttrs(), class: dropdownModifierClass() };
 });
+
+const hasTitleSlot = Astro.slots.has('title');
+const hasTitle = Boolean(title) || hasTitleSlot;
 ---
 
 {
   menuItems.length > 0 && (
     <div class={classes} {...rest}>
-      {title && (
+      {hasTitle && (
         <Fragment>
-          <Heading theme={theme} level={2} content={title} class="ct-navigation__title" />{' '}
+          {hasTitleSlot ? (
+            <slot name="title" />
+          ) : (
+            <Heading theme={theme} level={2} content={title} class="ct-navigation__title" />
+          )}{' '}
         </Fragment>
       )}
       <nav class="ct-navigation__items" aria-label={name || undefined}>

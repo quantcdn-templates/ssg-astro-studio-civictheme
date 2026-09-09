@@ -1,6 +1,6 @@
-import { describe } from 'vitest';
+import { describe, it, expect } from 'vitest';
 import MobileNavigation from '@civictheme/organisms/MobileNavigation.astro';
-import { parityCase, expectAllKeysCovered } from '../harness';
+import { parityCase, expectAllKeysCovered, renderNormalised } from '../harness';
 
 const meta = { layer: '03-organisms', name: 'mobile-navigation' };
 
@@ -67,4 +67,26 @@ describe('MobileNavigation', () => {
   parityCase(meta, EMPTY_KEY, MobileNavigation, {});
 
   expectAllKeysCovered(meta, [REQUIRED_KEY, ALL_KEY, MISSING_KEY, TOP_ONLY_KEY, BOTTOM_ONLY_KEY, EMPTY_KEY]);
+
+  // Task 14c: `contentTop`/`contentBottom` also have Astro slots that take
+  // precedence over the string props.
+  describe('slot vs string-prop parity', () => {
+    it('contentTop: slot renders identically to the string prop', async () => {
+      const viaProp = await renderNormalised(MobileNavigation, { contentTop: 'Top content' });
+      const viaSlot = await renderNormalised(MobileNavigation, {}, { contentTop: 'Top content' });
+      expect(viaSlot).toBe(viaProp);
+    });
+
+    it('contentBottom: slot renders identically to the string prop', async () => {
+      const viaProp = await renderNormalised(MobileNavigation, { contentBottom: 'Bottom content' });
+      const viaSlot = await renderNormalised(MobileNavigation, {}, { contentBottom: 'Bottom content' });
+      expect(viaSlot).toBe(viaProp);
+    });
+
+    it('a slot alone (no string prop) still opens its wrapper markup', async () => {
+      const html = await renderNormalised(MobileNavigation, {}, { contentTop: 'Live Top' });
+      expect(html).toContain('ct-mobile-navigation__content_top');
+      expect(html).toContain('Live Top');
+    });
+  });
 });

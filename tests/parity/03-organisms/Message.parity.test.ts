@@ -1,6 +1,6 @@
-import { describe } from 'vitest';
+import { describe, it, expect } from 'vitest';
 import Message from '@civictheme/organisms/Message.astro';
-import { parityCase, expectAllKeysCovered } from '../harness';
+import { parityCase, expectAllKeysCovered, renderNormalised } from '../harness';
 
 const meta = { layer: '03-organisms', name: 'message' };
 
@@ -86,4 +86,33 @@ describe('Message', () => {
     VS2_KEY,
     EMPTY_KEY,
   ]);
+
+  // Task 14c: `title`/`content` also have Astro slots that take precedence
+  // over the string props.
+  describe('slot vs string-prop parity', () => {
+    it('title: slot renders identically to the string prop', async () => {
+      const viaProp = await renderNormalised(Message, { title: 'Message Title' });
+      const viaSlot = await renderNormalised(Message, {}, { title: 'Message Title' });
+      expect(viaSlot).toBe(viaProp);
+    });
+
+    it('content: slot renders identically to the string prop', async () => {
+      const viaProp = await renderNormalised(Message, { content: 'Some content.' });
+      const viaSlot = await renderNormalised(
+        Message,
+        {},
+        {
+          content:
+            '<div class="ct-message__content ct-paragraph ct-paragraph--regular ct-theme-light">Some content.</div>',
+        }
+      );
+      expect(viaSlot).toBe(viaProp);
+    });
+
+    it('a title slot alone (no string prop) still renders the message', async () => {
+      const html = await renderNormalised(Message, {}, { title: 'Live Title' });
+      expect(html).toContain('ct-message__title');
+      expect(html).toContain('Live Title');
+    });
+  });
 });

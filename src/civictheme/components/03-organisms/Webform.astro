@@ -8,7 +8,9 @@
  * - withBackground: Whether to display with a background.
  * - referencedWebform: Rendered webform HTML (rendered with `set:html`,
  *   documented as a Slot upstream — see this project's autoescape-off
- *   convention).
+ *   convention). Also has a same-named Astro slot that TAKES PRECEDENCE
+ *   over the string prop when present (Task 14c); the root render gate
+ *   widens to `Boolean(referencedWebform) || Astro.slots.has('referencedWebform')`.
  * - class: Additional CSS classes.
  * - ...rest: Additional HTML attributes, spread onto the root element.
  */
@@ -36,14 +38,19 @@ const verticalSpacingClass = ['top', 'bottom', 'both'].includes(verticalSpacing 
   : '';
 const withBackgroundClass = withBackground ? 'ct-webform--with-background' : '';
 const classes = `ct-webform ${themeClass} ${verticalSpacingClass} ${withBackgroundClass} ${className}`;
+
+const hasReferencedWebformSlot = Astro.slots.has('referencedWebform');
+const hasReferencedWebform = Boolean(referencedWebform) || hasReferencedWebformSlot;
 ---
 
 {
-  referencedWebform && (
+  hasReferencedWebform && (
     <div class={classes} {...rest}>
       <div class="container">
         <div class="row">
-          <div class="col-xxs-12" set:html={referencedWebform} />
+          <div class="col-xxs-12">
+            {hasReferencedWebformSlot ? <slot name="referencedWebform" /> : <Fragment set:html={referencedWebform} />}
+          </div>
         </div>
       </div>
     </div>

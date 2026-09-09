@@ -20,6 +20,12 @@
  * - content: Content text.
  * - contentBottom: Bottom slide content.
  *
+ * Each also now has a same-named Astro slot that TAKES PRECEDENCE over the
+ * string prop when present (Task 14c); their wrapper `{% if %}` gates
+ * widen to `Boolean(prop) || Astro.slots.has('prop')`. `title`/`content`
+ * route the string-prop branch through `Heading`/`Paragraph`, so a slot
+ * bypasses those wrappers and renders the caller's markup directly.
+ *
  * Note: `slide.twig:56`'s `image is not empty` is Twig's `empty` test on an
  * OBJECT (property-count check), not `.url` truthiness specifically — same
  * semantics as the Banner/Promo review fixes (see PORTING.md): an object
@@ -126,6 +132,15 @@ function dateContentMarkup(): string {
   html += '</span>';
   return html;
 }
+
+const hasContentTopSlot = Astro.slots.has('contentTop');
+const hasTitleSlot = Astro.slots.has('title');
+const hasContentSlot = Astro.slots.has('content');
+const hasContentBottomSlot = Astro.slots.has('contentBottom');
+const hasContentTop = Boolean(contentTop) || hasContentTopSlot;
+const hasTitle = Boolean(title) || hasTitleSlot;
+const hasContent = Boolean(content) || hasContentSlot;
+const hasContentBottom = Boolean(contentBottom) || hasContentBottomSlot;
 ---
 
 <div class={classes} role="group" aria-roledescription="slide" data-slider-slide="" {...rest}>
@@ -144,9 +159,11 @@ function dateContentMarkup(): string {
     <div class="col-xxs-12 col-m-5 col-m-offset-1 ct-flex-align-self-center">
       <div class="ct-slide__inner">
         {
-          contentTop && (
+          hasContentTop && (
             <Fragment>
-              <div class="ct-slide__content-top" set:html={contentTop} />{' '}
+              <div class="ct-slide__content-top">
+                {hasContentTopSlot ? <slot name="contentTop" /> : <Fragment set:html={contentTop} />}
+              </div>{' '}
             </Fragment>
           )
         }
@@ -158,9 +175,13 @@ function dateContentMarkup(): string {
           )
         }
         {
-          title && (
+          hasTitle && (
             <Fragment>
-              <Heading theme={theme} content={title} level={level} class="ct-slide__title" data-toc-exclude="" />{' '}
+              {hasTitleSlot ? (
+                <slot name="title" />
+              ) : (
+                <Heading theme={theme} content={title} level={level} class="ct-slide__title" data-toc-exclude="" />
+              )}{' '}
             </Fragment>
           )
         }
@@ -180,9 +201,13 @@ function dateContentMarkup(): string {
           )
         }
         {
-          content && (
+          hasContent && (
             <Fragment>
-              <Paragraph theme={theme} content={content} class="ct-slide__content" />{' '}
+              {hasContentSlot ? (
+                <slot name="content" />
+              ) : (
+                <Paragraph theme={theme} content={content} class="ct-slide__content" />
+              )}{' '}
             </Fragment>
           )
         }
@@ -209,7 +234,13 @@ function dateContentMarkup(): string {
             </ul>
           )
         }
-        {contentBottom && <div class="ct-slide__content-bottom" set:html={contentBottom} />}
+        {
+          hasContentBottom && (
+            <div class="ct-slide__content-bottom">
+              {hasContentBottomSlot ? <slot name="contentBottom" /> : <Fragment set:html={contentBottom} />}
+            </div>
+          )
+        }
       </div>
     </div>
   </div>

@@ -1,6 +1,6 @@
-import { describe } from 'vitest';
+import { describe, it, expect } from 'vitest';
 import Webform from '@civictheme/organisms/Webform.astro';
-import { parityCase, expectAllKeysCovered } from '../harness';
+import { parityCase, expectAllKeysCovered, renderNormalised } from '../harness';
 
 const meta = { layer: '03-organisms', name: 'webform' };
 
@@ -36,4 +36,20 @@ describe('Webform', () => {
   });
 
   expectAllKeysCovered(meta, [REQUIRED_KEY, ALL_KEY, NO_EXTRA_KEY, EMPTY_KEY]);
+
+  // Task 14c: `referencedWebform` also has an Astro slot that takes
+  // precedence over the string prop.
+  describe('slot vs string-prop parity', () => {
+    it('referencedWebform: slot renders identically to the string prop', async () => {
+      const viaProp = await renderNormalised(Webform, { referencedWebform: '<form>Webform HTML</form>' });
+      const viaSlot = await renderNormalised(Webform, {}, { referencedWebform: '<form>Webform HTML</form>' });
+      expect(viaSlot).toBe(viaProp);
+    });
+
+    it('a slot alone (no string prop) still renders the component', async () => {
+      const html = await renderNormalised(Webform, {}, { referencedWebform: 'Live webform' });
+      expect(html).toContain('ct-webform');
+      expect(html).toContain('Live webform');
+    });
+  });
 });

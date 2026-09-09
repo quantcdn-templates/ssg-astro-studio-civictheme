@@ -12,7 +12,11 @@
  *   (not just empty), matching `{% if has_aria %}` upstream.
  * - title / content: Documented as Slots upstream, but every upstream
  *   test passes plain string props — ported as `string` props, rendered
- *   with `set:html` per this project's autoescape convention.
+ *   with `set:html` per this project's autoescape convention. Each also
+ *   now has a same-named Astro slot that TAKES PRECEDENCE over the string
+ *   prop when present (Task 14c); the root render gate widens to
+ *   `hasTitle || hasContent`. `content` routes the string-prop branch
+ *   through `Paragraph`, so a slot bypasses that wrapper.
  * - class: Additional CSS classes.
  * - ...rest: Additional HTML attributes, spread onto the root element.
  *
@@ -74,10 +78,15 @@ const classes = [
 
 const icon = ICONS[type];
 const role = type === 'error' ? 'alert' : 'contentinfo';
+
+const hasTitleSlot = Astro.slots.has('title');
+const hasContentSlot = Astro.slots.has('content');
+const hasTitle = Boolean(title) || hasTitleSlot;
+const hasContent = Boolean(content) || hasContentSlot;
 ---
 
 {
-  (title || content) && (
+  (hasTitle || hasContent) && (
     <div class={classes} {...(hasAria ? { role, 'aria-label': type, 'aria-live': 'assertive' } : {})} {...rest}>
       <div class="ct-message__inner">
         {icon && (
@@ -88,12 +97,19 @@ const role = type === 'error' ? 'alert' : 'contentinfo';
           </Fragment>
         )}
         <div class="ct-message__inner-wrapper">
-          {title && (
+          {hasTitle && (
             <Fragment>
-              <div class="ct-message__title" set:html={title} />{' '}
+              <div class="ct-message__title">
+                {hasTitleSlot ? <slot name="title" /> : <Fragment set:html={title} />}
+              </div>{' '}
             </Fragment>
           )}
-          {content && <Paragraph theme={theme} content={content} class="ct-message__content" />}
+          {hasContent &&
+            (hasContentSlot ? (
+              <slot name="content" />
+            ) : (
+              content && <Paragraph theme={theme} content={content} class="ct-message__content" />
+            ))}
         </div>
       </div>
     </div>

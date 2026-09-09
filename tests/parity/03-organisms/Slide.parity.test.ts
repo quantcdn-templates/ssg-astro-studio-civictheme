@@ -147,4 +147,49 @@ describe('Slide', () => {
     expect(html).toContain('additional-class');
     expect(html).toContain('data-test="true"');
   });
+
+  // Task 14c: every Slot-documented prop also has an Astro slot that takes
+  // precedence over the string prop.
+  describe('slot vs string-prop parity', () => {
+    it('contentTop: slot renders identically to the string prop', async () => {
+      const viaProp = await renderNormalised(Slide, { contentTop: 'Top content' });
+      const viaSlot = await renderNormalised(Slide, {}, { contentTop: 'Top content' });
+      expect(viaSlot).toBe(viaProp);
+    });
+
+    it('title: slot renders identically to the string prop', async () => {
+      const viaProp = await renderNormalised(Slide, { title: 'Slide Title' });
+      const viaSlot = await renderNormalised(
+        Slide,
+        {},
+        { title: '<h3 class="ct-heading ct-slide__title ct-theme-light" data-toc-exclude="">Slide Title</h3>' }
+      );
+      expect(viaSlot).toBe(viaProp);
+    });
+
+    it('content: slot renders identically to the string prop', async () => {
+      const viaProp = await renderNormalised(Slide, { content: 'Some content.' });
+      const viaSlot = await renderNormalised(
+        Slide,
+        {},
+        {
+          content:
+            '<div class="ct-paragraph ct-paragraph--regular ct-slide__content ct-theme-light">Some content.</div>',
+        }
+      );
+      expect(viaSlot).toBe(viaProp);
+    });
+
+    it('contentBottom: slot renders identically to the string prop', async () => {
+      const viaProp = await renderNormalised(Slide, { contentBottom: 'Bottom content' });
+      const viaSlot = await renderNormalised(Slide, {}, { contentBottom: 'Bottom content' });
+      expect(viaSlot).toBe(viaProp);
+    });
+
+    it('a slot alone (no string prop) still opens its wrapper markup', async () => {
+      const html = await renderNormalised(Slide, {}, { contentTop: 'Live Top' });
+      expect(html).toContain('ct-slide__content-top');
+      expect(html).toContain('Live Top');
+    });
+  });
 });

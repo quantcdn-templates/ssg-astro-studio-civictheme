@@ -8,6 +8,9 @@
  * - contentTop / contentBottom: Documented as Slots upstream, but every
  *   upstream test passes plain string props — ported as `string` props,
  *   rendered with `set:html` per this project's autoescape convention.
+ *   Each also now has a same-named Astro slot that TAKES PRECEDENCE over
+ *   the string prop when present (Task 14c); their wrapper `{% if %}`
+ *   gates widen to `Boolean(prop) || Astro.slots.has('prop')`.
  * - class: Additional CSS classes.
  * - ...rest: Additional HTML attributes, spread onto the root element.
  *
@@ -41,16 +44,22 @@ const { theme = 'light', topMenu, bottomMenu, contentTop, contentBottom, class: 
 const classes = ['ct-mobile-navigation', `ct-theme-${theme}`, className].filter(Boolean).join(' ');
 const hasTopMenu = Boolean(topMenu && topMenu.length > 0);
 const hasBottomMenu = Boolean(bottomMenu && bottomMenu.length > 0);
+const hasContentTopSlot = Astro.slots.has('contentTop');
+const hasContentBottomSlot = Astro.slots.has('contentBottom');
+const hasContentTop = Boolean(contentTop) || hasContentTopSlot;
+const hasContentBottom = Boolean(contentBottom) || hasContentBottomSlot;
 ---
 
 <div class={classes} data-flyout data-flyout-direction="right" data-flyout-focus=".ct-link" {...rest}>
   <div data-flyout-panel class="ct-mobile-navigation__panel">
     <MobileNavigationClose theme={theme} />
     {
-      contentTop && (
+      hasContentTop && (
         <Fragment>
           {' '}
-          <div class="ct-mobile-navigation__content_top" set:html={contentTop} />
+          <div class="ct-mobile-navigation__content_top">
+            {hasContentTopSlot ? <slot name="contentTop" /> : <Fragment set:html={contentTop} />}
+          </div>
         </Fragment>
       )
     }
@@ -75,10 +84,12 @@ const hasBottomMenu = Boolean(bottomMenu && bottomMenu.length > 0);
       )
     }
     {
-      contentBottom && (
+      hasContentBottom && (
         <Fragment>
           {' '}
-          <div class="ct-mobile-navigation__content_bottom" set:html={contentBottom} />
+          <div class="ct-mobile-navigation__content_bottom">
+            {hasContentBottomSlot ? <slot name="contentBottom" /> : <Fragment set:html={contentBottom} />}
+          </div>
         </Fragment>
       )
     }

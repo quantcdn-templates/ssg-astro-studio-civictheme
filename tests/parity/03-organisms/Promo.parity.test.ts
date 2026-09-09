@@ -81,4 +81,53 @@ describe('Promo', () => {
     const html = await renderNormalised(Promo, { title: 'T', content: 'C', link: {} });
     expect(html).not.toContain('ct-promo__links');
   });
+
+  // Task 14c: every Slot-documented prop also has an Astro slot that takes
+  // precedence over the string prop.
+  describe('slot vs string-prop parity', () => {
+    it('contentTop: slot renders identically to the string prop', async () => {
+      const viaProp = await renderNormalised(Promo, { contentTop: 'Top content' });
+      const viaSlot = await renderNormalised(Promo, {}, { contentTop: 'Top content' });
+      expect(viaSlot).toBe(viaProp);
+    });
+
+    it('title: slot renders identically to the string prop', async () => {
+      const viaProp = await renderNormalised(Promo, { title: 'Promo Title' });
+      const viaSlot = await renderNormalised(
+        Promo,
+        {},
+        { title: '<h4 class="ct-heading ct-promo__title ct-theme-light">Promo Title</h4>' }
+      );
+      expect(viaSlot).toBe(viaProp);
+    });
+
+    it('content: slot renders identically to the string prop', async () => {
+      const viaProp = await renderNormalised(Promo, { content: 'Some content.' });
+      const viaSlot = await renderNormalised(
+        Promo,
+        {},
+        {
+          content:
+            '<div class="ct-paragraph ct-paragraph--regular ct-promo__content ct-theme-light">Some content.</div>',
+        }
+      );
+      expect(viaSlot).toBe(viaProp);
+    });
+
+    it('contentBottom: slot renders identically to the string prop', async () => {
+      const viaProp = await renderNormalised(Promo, { contentBottom: 'Bottom content' });
+      const viaSlot = await renderNormalised(Promo, {}, { contentBottom: 'Bottom content' });
+      expect(viaSlot).toBe(viaProp);
+    });
+
+    // `contentTop`/`contentBottom` are nested inside the outer
+    // `(title || content)` gate upstream too — a `contentTop` slot alone,
+    // with neither `title` nor `content`, renders nothing, matching the
+    // pre-existing string-prop behaviour exactly.
+    it('a title slot alone (no string prop) still opens the outer wrapper', async () => {
+      const html = await renderNormalised(Promo, {}, { title: 'Live Title' });
+      expect(html).toContain('ct-promo__inner');
+      expect(html).toContain('Live Title');
+    });
+  });
 });

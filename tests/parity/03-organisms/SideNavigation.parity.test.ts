@@ -1,6 +1,6 @@
-import { describe } from 'vitest';
+import { describe, it, expect } from 'vitest';
 import SideNavigation from '@civictheme/organisms/SideNavigation.astro';
-import { parityCase, expectAllKeysCovered } from '../harness';
+import { parityCase, expectAllKeysCovered, renderNormalised } from '../harness';
 
 const meta = { layer: '03-organisms', name: 'side-navigation' };
 
@@ -44,4 +44,20 @@ describe('SideNavigation', () => {
   });
 
   expectAllKeysCovered(meta, [REQUIRED_KEY, ALL_KEY, MISSING_KEY, EMPTY_KEY]);
+
+  // Task 14c: `title` also has an Astro slot that takes precedence over
+  // the string prop.
+  describe('slot vs string-prop parity', () => {
+    const items = [{ title: 'Home', url: '/' }];
+
+    it('title: slot renders identically to the string prop', async () => {
+      const viaProp = await renderNormalised(SideNavigation, { items, title: 'Nav Title' });
+      const viaSlot = await renderNormalised(
+        SideNavigation,
+        { items },
+        { title: '<h2 class="ct-heading ct-side-navigation__title ct-theme-light">Nav Title</h2>' }
+      );
+      expect(viaSlot).toBe(viaProp);
+    });
+  });
 });

@@ -17,6 +17,13 @@
  * - title: Title text.
  * - content: Main content text.
  * - contentBottom: Bottom promo content.
+ *
+ * Each also now has a same-named Astro slot that TAKES PRECEDENCE over the
+ * string prop when present (Task 14c); every wrapper `{% if %}` gate
+ * (root included, via `title`/`content`) widens to
+ * `Boolean(prop) || Astro.slots.has('prop')`. `title`/`content` route the
+ * string-prop branch through `Heading`/`Paragraph`, so a slot bypasses
+ * those wrappers and renders the caller's markup directly.
  */
 import Heading from '@civictheme/atoms/Heading.astro';
 import Paragraph from '@civictheme/atoms/Paragraph.astro';
@@ -72,22 +79,43 @@ const contained = isContained === undefined ? true : isContained;
 // Banner/Promo `is not empty` review-fix semantics already documented in
 // PORTING.md, just reached via a different Twig operator.
 const hasLink = Object.keys(link ?? {}).length > 0;
+
+const hasContentTopSlot = Astro.slots.has('contentTop');
+const hasTitleSlot = Astro.slots.has('title');
+const hasContentSlot = Astro.slots.has('content');
+const hasContentBottomSlot = Astro.slots.has('contentBottom');
+const hasContentTop = Boolean(contentTop) || hasContentTopSlot;
+const hasTitle = Boolean(title) || hasTitleSlot;
+const hasContent = Boolean(content) || hasContentSlot;
+const hasContentBottom = Boolean(contentBottom) || hasContentBottomSlot;
 ---
 
 {
-  (title || content) &&
+  (hasTitle || hasContent) &&
     (() => {
       const inner = (
         <Fragment>
-          {contentTop && (
+          {hasContentTop && (
             <Fragment>
-              <div class="ct-promo__content-top" set:html={contentTop} />{' '}
+              <div class="ct-promo__content-top">
+                {hasContentTopSlot ? <slot name="contentTop" /> : <Fragment set:html={contentTop} />}
+              </div>{' '}
             </Fragment>
           )}
           <div class="ct-promo__wrapper">
             <div class="ct-promo__inner">
-              {title && <Heading content={title} level={4} theme={theme} class="ct-promo__title" />}{' '}
-              {content && <Paragraph theme={theme} content={content} class="ct-promo__content" />}
+              {hasTitle &&
+                (hasTitleSlot ? (
+                  <slot name="title" />
+                ) : (
+                  title && <Heading content={title} level={4} theme={theme} class="ct-promo__title" />
+                ))}{' '}
+              {hasContent &&
+                (hasContentSlot ? (
+                  <slot name="content" />
+                ) : (
+                  content && <Paragraph theme={theme} content={content} class="ct-promo__content" />
+                ))}
             </div>{' '}
             {hasLink && (
               <div class="ct-promo__links">
@@ -105,7 +133,11 @@ const hasLink = Object.keys(link ?? {}).length > 0;
               </div>
             )}
           </div>{' '}
-          {contentBottom && <div class="ct-promo__content-bottom" set:html={contentBottom} />}
+          {hasContentBottom && (
+            <div class="ct-promo__content-bottom">
+              {hasContentBottomSlot ? <slot name="contentBottom" /> : <Fragment set:html={contentBottom} />}
+            </div>
+          )}
         </Fragment>
       );
 

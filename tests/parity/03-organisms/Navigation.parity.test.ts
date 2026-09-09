@@ -111,4 +111,20 @@ describe('Navigation', () => {
     expect(html).not.toContain('container');
     expect(html).toContain('Consulting');
   });
+
+  // Task 14c: `title` also has an Astro slot that takes precedence over
+  // the string prop.
+  describe('slot vs string-prop parity', () => {
+    const items = [{ title: 'Home', url: '/' }];
+
+    it('title: slot renders identically to the string prop', async () => {
+      const viaProp = await renderNormalised(Navigation, { items, title: 'Nav Title' });
+      const viaSlot = await renderNormalised(
+        Navigation,
+        { items },
+        { title: '<h2 class="ct-heading ct-navigation__title ct-theme-light">Nav Title</h2>' }
+      );
+      expect(viaSlot).toBe(viaProp);
+    });
+  });
 });

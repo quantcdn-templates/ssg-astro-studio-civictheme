@@ -13,7 +13,12 @@
  * - contentTop / title / content / contentBottom: Documented as Slots
  *   upstream, but every upstream test passes plain string props — ported
  *   as `string` props, rendered with `set:html` per this project's
- *   autoescape convention.
+ *   autoescape convention. Each also now has a same-named Astro slot that
+ *   TAKES PRECEDENCE over the string prop when present (Task 14c); their
+ *   wrapper `{% if %}` gates widen to
+ *   `Boolean(prop) || Astro.slots.has('prop')`. `title`/`content` route
+ *   the string-prop branch through `Heading`/`Paragraph`, so a slot
+ *   bypasses those wrappers and renders the caller's markup directly.
  * - class: Additional CSS classes.
  * - ...rest: Additional HTML attributes, spread onto the root element.
  *
@@ -88,6 +93,15 @@ const classes = [
 const hasImage = Boolean(image?.url);
 const tagItems = tags ?? [];
 const linkItems = links ?? [];
+
+const hasContentTopSlot = Astro.slots.has('contentTop');
+const hasTitleSlot = Astro.slots.has('title');
+const hasContentSlot = Astro.slots.has('content');
+const hasContentBottomSlot = Astro.slots.has('contentBottom');
+const hasContentTop = Boolean(contentTop) || hasContentTopSlot;
+const hasTitle = Boolean(title) || hasTitleSlot;
+const hasContent = Boolean(content) || hasContentSlot;
+const hasContentBottom = Boolean(contentBottom) || hasContentBottomSlot;
 ---
 
 <div class={classes} {...rest}>
@@ -96,9 +110,11 @@ const linkItems = links ?? [];
       <div class="col-xxs-12 col-m-5 col-m-offset-1 ct-flex-align-self-center">
         <div class="ct-campaign__inner">
           {
-            contentTop && (
+            hasContentTop && (
               <Fragment>
-                <div class="ct-campaign__content-top" set:html={contentTop} />{' '}
+                <div class="ct-campaign__content-top">
+                  {hasContentTopSlot ? <slot name="contentTop" /> : <Fragment set:html={contentTop} />}
+                </div>{' '}
               </Fragment>
             )
           }
@@ -110,9 +126,13 @@ const linkItems = links ?? [];
             )
           }
           {
-            title && (
+            hasTitle && (
               <Fragment>
-                <Heading theme={theme} content={title} level={2} class="ct-campaign__title" />{' '}
+                {hasTitleSlot ? (
+                  <slot name="title" />
+                ) : (
+                  <Heading theme={theme} content={title} level={2} class="ct-campaign__title" />
+                )}{' '}
               </Fragment>
             )
           }
@@ -124,9 +144,13 @@ const linkItems = links ?? [];
             )
           }
           {
-            content && (
+            hasContent && (
               <Fragment>
-                <Paragraph theme={theme} content={content} class="ct-campaign__content" size="large" />{' '}
+                {hasContentSlot ? (
+                  <slot name="content" />
+                ) : (
+                  <Paragraph theme={theme} content={content} class="ct-campaign__content" size="large" />
+                )}{' '}
               </Fragment>
             )
           }
@@ -153,10 +177,12 @@ const linkItems = links ?? [];
             )
           }
           {
-            contentBottom && (
+            hasContentBottom && (
               <Fragment>
                 {' '}
-                <div class="ct-campaign__content-bottom" set:html={contentBottom} />
+                <div class="ct-campaign__content-bottom">
+                  {hasContentBottomSlot ? <slot name="contentBottom" /> : <Fragment set:html={contentBottom} />}
+                </div>
               </Fragment>
             )
           }

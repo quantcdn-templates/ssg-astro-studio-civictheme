@@ -19,6 +19,14 @@
  * - title: Slider title.
  * - contentBottom: Bottom content.
  *
+ * Each also now has a same-named Astro slot that TAKES PRECEDENCE over the
+ * string prop when present (Task 14c); their wrapper `{% if %}` gates
+ * widen to `Boolean(prop) || Astro.slots.has('prop')`. `title` routes the
+ * string-prop branch through `Heading`, so a slot bypasses that wrapper.
+ * `slides` is NOT slotted: it is not documented as a Slot upstream (it is
+ * a plain "Props:" entry — pre-rendered slide markup supplied by the
+ * caller, same treatment as before).
+ *
  * Note: the progress-indicator `<Tag>`'s content is the literal string
  * `'Slide 1'` regardless of slide count — `slider.js`'s vendored behaviour
  * updates it at runtime (`data-slider-progress`); this is not a bug, it
@@ -62,6 +70,13 @@ const verticalSpacingClass = ['top', 'bottom', 'both'].includes(verticalSpacing 
   ? `ct-vertical-spacing-inset--${verticalSpacing}`
   : '';
 const classes = `ct-slider ${themeClass} ${withBackgroundClass} ${verticalSpacingClass} ${className}`;
+
+const hasContentTopSlot = Astro.slots.has('contentTop');
+const hasTitleSlot = Astro.slots.has('title');
+const hasContentBottomSlot = Astro.slots.has('contentBottom');
+const hasContentTop = Boolean(contentTop) || hasContentTopSlot;
+const hasTitle = Boolean(title) || hasTitleSlot;
+const hasContentBottom = Boolean(contentBottom) || hasContentBottomSlot;
 ---
 
 {
@@ -70,15 +85,21 @@ const classes = `ct-slider ${themeClass} ${withBackgroundClass} ${verticalSpacin
       <div class="container">
         <div class="row">
           <div class="col-xxs-12">
-            {contentTop && (
+            {hasContentTop && (
               <Fragment>
-                <div class="ct-slider__content__top" set:html={contentTop} />{' '}
+                <div class="ct-slider__content__top">
+                  {hasContentTopSlot ? <slot name="contentTop" /> : <Fragment set:html={contentTop} />}
+                </div>{' '}
               </Fragment>
             )}
             <div class="ct-slider__container" data-slider="">
-              {title && (
+              {hasTitle && (
                 <Fragment>
-                  <Heading theme={theme} content={title} level={2} class="ct-slider__title" />{' '}
+                  {hasTitleSlot ? (
+                    <slot name="title" />
+                  ) : (
+                    <Heading theme={theme} content={title} level={2} class="ct-slider__title" />
+                  )}{' '}
                 </Fragment>
               )}
               <div class="ct-slider__slides" data-slider-panel="">
@@ -114,7 +135,11 @@ const classes = `ct-slider ${themeClass} ${withBackgroundClass} ${verticalSpacin
                 />
               </div>
             </div>{' '}
-            {contentBottom && <div class="ct-slider__content__bottom" set:html={contentBottom} />}
+            {hasContentBottom && (
+              <div class="ct-slider__content__bottom">
+                {hasContentBottomSlot ? <slot name="contentBottom" /> : <Fragment set:html={contentBottom} />}
+              </div>
+            )}
           </div>
         </div>
       </div>

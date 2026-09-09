@@ -1,6 +1,6 @@
-import { describe } from 'vitest';
+import { describe, it, expect } from 'vitest';
 import Alert from '@civictheme/organisms/Alert.astro';
-import { parityCase, expectAllKeysCovered } from '../harness';
+import { parityCase, expectAllKeysCovered, renderNormalised } from '../harness';
 
 const meta = { layer: '03-organisms', name: 'alert' };
 
@@ -34,4 +34,26 @@ describe('Alert', () => {
   });
 
   expectAllKeysCovered(meta, [REQUIRED_KEY, OPTIONAL_KEY, EMPTY_KEY, ICON_KEY]);
+
+  // Task 14c: `title`/`description` also have Astro slots that take
+  // precedence over the string props.
+  describe('slot vs string-prop parity', () => {
+    it('title: slot renders identically to the string prop', async () => {
+      const viaProp = await renderNormalised(Alert, { title: 'Alert Title', description: 'x' });
+      const viaSlot = await renderNormalised(Alert, { description: 'x' }, { title: 'Alert Title' });
+      expect(viaSlot).toBe(viaProp);
+    });
+
+    it('description: slot renders identically to the string prop', async () => {
+      const viaProp = await renderNormalised(Alert, { description: 'Alert description' });
+      const viaSlot = await renderNormalised(Alert, {}, { description: 'Alert description' });
+      expect(viaSlot).toBe(viaProp);
+    });
+
+    it('a description slot alone (no string prop) still renders the alert', async () => {
+      const html = await renderNormalised(Alert, {}, { description: 'Live description' });
+      expect(html).toContain('ct-alert__summary');
+      expect(html).toContain('Live description');
+    });
+  });
 });

@@ -8,7 +8,10 @@
  * - id: Unique identifier for the alert.
  * - title / description: Documented as Slots upstream, but every upstream
  *   test passes plain string props — ported as `string` props, rendered
- *   with `set:html` per this project's autoescape convention.
+ *   with `set:html` per this project's autoescape convention. Each also
+ *   now has a same-named Astro slot that TAKES PRECEDENCE over the string
+ *   prop when present (Task 14c); the root render gate widens to
+ *   `Boolean(description) || Astro.slots.has('description')`.
  * - class: Additional CSS classes.
  * - ...rest: Additional HTML attributes, spread onto the root element.
  *
@@ -54,10 +57,14 @@ const type = (['information', 'error', 'warning', 'success'] as const).includes(
 
 const classes = ['ct-alert', `ct-theme-${theme}`, `ct-alert--${type}`, className].filter(Boolean).join(' ');
 const icon = ICONS[type];
+
+const hasTitleSlot = Astro.slots.has('title');
+const hasDescriptionSlot = Astro.slots.has('description');
+const hasDescription = Boolean(description) || hasDescriptionSlot;
 ---
 
 {
-  description && (
+  hasDescription && (
     <div
       class={classes}
       data-alert-id={id ?? ''}
@@ -76,10 +83,10 @@ const icon = ICONS[type];
                 </span>{' '}
               </Fragment>
             )}
-            <Fragment set:html={title} />
+            {hasTitleSlot ? <slot name="title" /> : <Fragment set:html={title} />}
           </div>{' '}
           <div class="ct-alert__summary col-xxs-12 col-m-8 col-l-9">
-            <Fragment set:html={description} />{' '}
+            {hasDescriptionSlot ? <slot name="description" /> : <Fragment set:html={description} />}{' '}
             <Button
               kind="button"
               theme={theme}

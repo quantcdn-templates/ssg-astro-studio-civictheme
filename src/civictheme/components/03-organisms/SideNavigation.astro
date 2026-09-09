@@ -6,7 +6,11 @@
  * - theme: Theme variation (light or dark).
  * - verticalSpacing: Navigation vertical spacing (top, bottom, or both).
  * - items: Menu items (see `Menu.astro`'s `MenuItem`).
- * - title: Navigation title.
+ * - title: Navigation title. Documented as a Slot upstream — also has a
+ *   same-named Astro slot that TAKES PRECEDENCE over the string prop when
+ *   present (Task 14c); its wrapper `{% if %}` gate widens to
+ *   `Boolean(title) || Astro.slots.has('title')`. Routes the string-prop
+ *   branch through `Heading`, so a slot bypasses that wrapper.
  * - class: Additional CSS classes.
  * - ...rest: Additional HTML attributes, spread onto the root element.
  */
@@ -38,15 +42,22 @@ const verticalSpacingClass = ['top', 'bottom', 'both'].includes(verticalSpacing 
   ? `ct-vertical-spacing-inset--${verticalSpacing}`
   : '';
 const classes = `ct-side-navigation ${themeClass} ${verticalSpacingClass} ${className}`;
+
+const hasTitleSlot = Astro.slots.has('title');
+const hasTitle = Boolean(title) || hasTitleSlot;
 ---
 
 {
   items.length > 0 && (
     <div class={classes} {...rest}>
       <SkipLink theme={theme} url="#main-content" />{' '}
-      {title && (
+      {hasTitle && (
         <Fragment>
-          <Heading content={title} level={2} theme={theme} class="ct-side-navigation__title" />{' '}
+          {hasTitleSlot ? (
+            <slot name="title" />
+          ) : (
+            <Heading content={title} level={2} theme={theme} class="ct-side-navigation__title" />
+          )}{' '}
         </Fragment>
       )}
       <Menu theme={theme} items={items} class="ct-side-navigation__menu" isCollapsible={true} />
