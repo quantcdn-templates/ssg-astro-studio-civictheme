@@ -75,4 +75,25 @@ describe('astro build', () => {
     expect(news).not.toContain('Draft Heritage Strategy Under Internal Review');
     expect(news).toContain('Annual Budget for 2026 Adopted');
   });
+  it('emits the ten CivicTheme demo pages', () => {
+    const pages = [
+      'dist/index.html',
+      'dist/about-us.html',
+      'dist/contact-us.html',
+      'dist/individuals.html',
+      'dist/businesses.html',
+      'dist/government.html',
+      'dist/community-engagement.html',
+      'dist/news-and-events.html',
+      'dist/subscribe.html',
+      'dist/civictheme-60-second-series.html',
+    ];
+    for (const page of pages) {
+      expect(existsSync(join(root, page))).toBe(true);
+    }
+  });
+  it('renders the callout component on the government demo page', () => {
+    const government = readFileSync(join(root, 'dist/government.html'), 'utf8');
+    expect(government).toContain('ct-callout');
+  });
 });
