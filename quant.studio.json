@@ -1,0 +1,266 @@
+{
+  "_components": {
+    "groups": [
+      {
+        "id": "content",
+        "label": "Content"
+      },
+      {
+        "id": "listings",
+        "label": "Listings"
+      },
+      {
+        "id": "media",
+        "label": "Media"
+      },
+      {
+        "id": "layout",
+        "label": "Layout"
+      }
+    ],
+    "imports": "none",
+    "items": [
+      {
+        "path": "src/civictheme/components/02-molecules/Callout.astro",
+        "group": "content",
+        "description": "Highlighted message with optional links.",
+        "defaults": {
+          "title": "Callout title",
+          "content": "Callout text."
+        }
+      },
+      {
+        "path": "src/civictheme/components/03-organisms/Promo.astro",
+        "group": "content",
+        "description": "Call-to-action band with a link.",
+        "defaults": {
+          "title": "Promo title",
+          "content": "Promo text.",
+          "link": {
+            "text": "Find out more",
+            "url": "/"
+          }
+        }
+      },
+      {
+        "path": "src/civictheme/components/03-organisms/Campaign.astro",
+        "group": "content",
+        "description": "Image and text campaign block.",
+        "defaults": {
+          "title": "Campaign title",
+          "content": "Campaign text."
+        }
+      },
+      {
+        "path": "src/civictheme/components/02-molecules/NextStep.astro",
+        "group": "content",
+        "description": "Next step call-out.",
+        "defaults": {
+          "title": "Next step",
+          "content": "What to do next.",
+          "link": {
+            "url": "/"
+          }
+        }
+      },
+      {
+        "path": "src/civictheme/components/02-molecules/Accordion.astro",
+        "group": "content",
+        "description": "Expandable panels.",
+        "defaults": {
+          "panels": [
+            {
+              "title": "Panel 1",
+              "content": "Panel text."
+            }
+          ]
+        }
+      },
+      {
+        "path": "src/civictheme/components/02-molecules/Tabs.astro",
+        "group": "content",
+        "description": "Tabbed panels.",
+        "defaults": {
+          "panels": [
+            {
+              "id": "tab-1",
+              "title": "Tab 1",
+              "content": "Tab text."
+            }
+          ]
+        }
+      },
+      {
+        "path": "src/civictheme/components/02-molecules/BasicContent.astro",
+        "group": "content",
+        "description": "Rich text block.",
+        "defaults": {
+          "content": "<p>Rich text.</p>"
+        }
+      },
+      {
+        "path": "src/civictheme/components/02-molecules/TableOfContents.astro",
+        "group": "content",
+        "description": "In-page navigation built from headings.",
+        "defaults": {
+          "title": "On this page",
+          "scopeSelector": ".ct-basic-content"
+        }
+      },
+      {
+        "path": "src/civictheme/components/01-atoms/Table.astro",
+        "group": "content",
+        "description": "Data table.",
+        "defaults": {
+          "header": [
+            "Column 1",
+            "Column 2"
+          ],
+          "rows": [
+            [
+              "Cell",
+              "Cell"
+            ]
+          ]
+        }
+      },
+      {
+        "path": "src/civictheme/components/03-organisms/Webform.astro",
+        "group": "content",
+        "description": "Form wrapper (form markup goes in the referencedWebform slot)."
+      },
+      {
+        "path": "src/components/ManualList.astro",
+        "group": "listings",
+        "description": "Chosen entries from one collection.",
+        "defaults": {
+          "collection": "news",
+          "slugs": [],
+          "title": "Related"
+        }
+      },
+      {
+        "path": "src/components/ListingAuto.astro",
+        "group": "listings",
+        "description": "Latest entries from one collection.",
+        "defaults": {
+          "collection": "news",
+          "limit": 3,
+          "title": "Latest news"
+        }
+      },
+      {
+        "path": "src/civictheme/components/03-organisms/Slider.astro",
+        "group": "listings",
+        "description": "Carousel of slides."
+      },
+      {
+        "path": "src/civictheme/components/02-molecules/PromoCard.astro",
+        "group": "listings",
+        "defaults": {
+          "title": "Card title",
+          "summary": "Card summary.",
+          "link": {
+            "url": "/"
+          }
+        }
+      },
+      {
+        "path": "src/civictheme/components/02-molecules/NavigationCard.astro",
+        "group": "listings",
+        "defaults": {
+          "title": "Card title",
+          "summary": "Card summary.",
+          "link": {
+            "text": "Read more",
+            "url": "/"
+          }
+        }
+      },
+      {
+        "path": "src/civictheme/components/02-molecules/SubjectCard.astro",
+        "group": "listings",
+        "defaults": {
+          "title": "Subject",
+          "link": {
+            "url": "/"
+          }
+        }
+      },
+      {
+        "path": "src/civictheme/components/02-molecules/Attachment.astro",
+        "group": "media",
+        "description": "Downloadable file.",
+        "defaults": {
+          "title": "Attachments",
+          "files": []
+        }
+      },
+      {
+        "path": "src/civictheme/components/02-molecules/Figure.astro",
+        "group": "media",
+        "description": "Image with caption.",
+        "defaults": {
+          "url": "/civictheme/demo/demo1.jpg",
+          "alt": "",
+          "caption": "Caption"
+        }
+      },
+      {
+        "path": "src/civictheme/components/02-molecules/Map.astro",
+        "group": "media",
+        "description": "Embedded map.",
+        "defaults": {
+          "url": "https://maps.google.com/maps?q=Melbourne&output=embed",
+          "address": "Melbourne"
+        }
+      },
+      {
+        "path": "src/civictheme/components/02-molecules/VideoPlayer.astro",
+        "group": "media",
+        "description": "Video embed."
+      },
+      {
+        "path": "src/civictheme/components/01-atoms/Iframe.astro",
+        "group": "media",
+        "description": "Embedded frame.",
+        "defaults": {
+          "url": "https://example.com"
+        }
+      },
+      {
+        "path": "src/civictheme/components/00-base/Grid.astro",
+        "group": "layout",
+        "description": "Column grid; put cards inside.",
+        "defaults": {
+          "templateColumnCount": 2
+        }
+      },
+      {
+        "path": "src/civictheme/components/01-atoms/Heading.astro",
+        "group": "layout",
+        "defaults": {
+          "content": "Heading",
+          "level": 2
+        }
+      },
+      {
+        "path": "src/civictheme/components/01-atoms/Paragraph.astro",
+        "group": "layout",
+        "defaults": {
+          "content": "Paragraph text."
+        }
+      },
+      {
+        "path": "src/civictheme/components/01-atoms/Button.astro",
+        "group": "layout",
+        "defaults": {
+          "text": "Button",
+          "url": "/",
+          "kind": "link",
+          "type": "primary"
+        }
+      }
+    ]
+  }
+}

@@ -256,7 +256,7 @@ preview shows `[object Object]` for aliased components and bare MDX component ta
 
 ### Inserting components
 
-Studio's **Insert** button lists the components in `quant/studio.json`, grouped as
+Studio's **Insert** button lists the components in the `_components` key of `quant.studio.json`, grouped as
 Content, Listings, Media and Layout, with a form for each component's props and sensible
 defaults. Inserted tags render through the MDX components map (`src/components/MdxComponents.ts`),
 so the manifest sets `"imports": "none"`. Blocks can be reordered by dragging them in the
