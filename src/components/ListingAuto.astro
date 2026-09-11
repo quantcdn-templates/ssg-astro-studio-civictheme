@@ -25,6 +25,8 @@ interface Props {
   entries?: CollectionEntry<CardCollection>[];
   page?: Pick<Page, 'currentPage' | 'lastPage'>;
   pageBase?: string;
+  /** Passed through to `List`: inset vertical spacing (`top`, `bottom` or `both`). */
+  verticalSpacing?: 'top' | 'bottom' | 'both';
 }
 
 const {
@@ -38,6 +40,7 @@ const {
   entries: providedEntries,
   page,
   pageBase,
+  verticalSpacing,
 } = Astro.props;
 const entries = providedEntries ?? (await listPublished(collection, { topics, limit, sort }));
 ---
@@ -50,4 +53,5 @@ const entries = providedEntries ?? (await listPublished(collection, { topics, li
   columns={columns}
   page={page}
   pageBase={pageBase}
+  verticalSpacing={verticalSpacing}
 />

@@ -14,11 +14,20 @@ interface Props {
   title?: string;
   theme?: 'light' | 'dark';
   columns?: 2 | 3 | 4;
+  /** Passed through to `List`: inset vertical spacing (`top`, `bottom` or `both`). */
+  verticalSpacing?: 'top' | 'bottom' | 'both';
 }
 
-const { collection, slugs, title, theme = 'light', columns = 3 } = Astro.props;
+const { collection, slugs, title, theme = 'light', columns = 3, verticalSpacing } = Astro.props;
 const fetched = await Promise.all(slugs.map((slug) => getEntry(collection, slug)));
 const entries = fetched.filter((entry): entry is NonNullable<typeof entry> => Boolean(entry) && !entry?.data.draft);
 ---
 
-<ListingGrid collection={collection} entries={entries} title={title} theme={theme} columns={columns} />
+<ListingGrid
+  collection={collection}
+  entries={entries}
+  title={title}
+  theme={theme}
+  columns={columns}
+  verticalSpacing={verticalSpacing}
+/>
