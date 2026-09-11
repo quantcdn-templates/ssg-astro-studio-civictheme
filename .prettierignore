@@ -8,3 +8,7 @@ src/civictheme/components/00-base/icons.ts
 docs/
 tests/story-parity/fixtures
 src/data/component-demos
+
+# Quant Studio rewrites this file (PHP pretty-print, 4-space indent) when an
+# author uses "Make insertable", so Prettier must not own its formatting.
+quant.studio.json
