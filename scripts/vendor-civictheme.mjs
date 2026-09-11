@@ -158,10 +158,11 @@ writeFileSync(
 // video fixtures for VideoPlayer stories), over the ~5 MB "vendor everything" budget,
 // so only the files actually referenced by `tests/story-parity/fixtures/args/**/*.json`
 // are copied — found by scanning those fixtures for `demo/(images|videos)/<file>`.
-// A referenced file that doesn't exist upstream (e.g. `demo7.jpg`, only ever shipped
-// under the SDC package's own static demo assets, never the twig one this template
-// vendors from) is skipped with a warning rather than failing the vendor run.
+// A referenced file missing from the twig package's demo assets is taken from the SDC
+// package's (`packages/sdc/.storybook/static/demo/`) — `demo7.jpg` ships only there.
+// A file found in neither is skipped with a warning rather than failing the vendor run.
 const storybookDemoDir = join(twig, '.storybook/static/demo');
+const sdcDemoDir = join(uikit, 'packages/sdc/.storybook/static/demo');
 const storyFixturesDir = join(root, 'tests/story-parity/fixtures/args');
 if (existsSync(storybookDemoDir) && existsSync(storyFixturesDir)) {
   const referenced = new Set();
@@ -174,9 +175,11 @@ if (existsSync(storybookDemoDir) && existsSync(storyFixturesDir)) {
   let copiedDemo = 0;
   for (const rel of [...referenced].sort()) {
     const relInDemo = rel.replace(/^demo\//, ''); // e.g. `images/demo1.jpg`
-    const src = join(storybookDemoDir, relInDemo);
-    if (!existsSync(src)) {
-      console.warn(`warning: story fixtures reference ${rel}, not found under ${storybookDemoDir} — skipped`);
+    const src = [storybookDemoDir, sdcDemoDir].map((dir) => join(dir, relInDemo)).find((p) => existsSync(p));
+    if (!src) {
+      console.warn(
+        `warning: story fixtures reference ${rel}, not found under ${storybookDemoDir} or ${sdcDemoDir} — skipped`
+      );
       continue;
     }
     const dest = join(demoDest, relInDemo);
