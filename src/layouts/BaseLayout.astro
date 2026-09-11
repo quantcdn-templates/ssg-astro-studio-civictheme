@@ -18,6 +18,7 @@ import SiteAlerts from '@/components/SiteAlerts.astro';
 import SiteHeader from '@/components/SiteHeader.astro';
 import SiteFooter from '@/components/SiteFooter.astro';
 import { cleanPath } from '@/lib/url';
+import { siteSettings } from '@/lib/content';
 
 interface Props {
   title: string;
@@ -37,6 +38,8 @@ const { title, description = '', image, theme = 'light' } = Astro.props;
 const site = Astro.site ?? new URL('https://example.com');
 const canonical = new URL(cleanPath(Astro.url.pathname), site).href;
 const ogImage = new URL(image, site).href;
+const { favicon = '/favicon.svg' } = await siteSettings();
+const faviconType = favicon.endsWith('.svg') ? 'image/svg+xml' : undefined;
 ---
 
 <!doctype html>
@@ -47,6 +50,7 @@ const ogImage = new URL(image, site).href;
     <title>{title}</title>
     {description && <meta name="description" content={description} />}
     <link rel="canonical" href={canonical} />
+    <link rel="icon" href={favicon} type={faviconType} />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <meta property="og:type" content="website" />

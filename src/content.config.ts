@@ -95,6 +95,8 @@ const settings = defineCollection({
     tagline: z.string().default(''),
     logoLight: z.string(),
     logoDark: z.string(),
+    /** Site icon path; defaults to `/favicon.svg`. */
+    favicon: z.string().optional(),
     footerText: z.string().default(''),
     acknowledgement: z.string().default(''),
     social: z.array(z.object({ platform: z.string(), url: z.string() })).default([]),

@@ -49,6 +49,12 @@ describe('astro build', () => {
     expect(index).toContain('content="https://example.com/"');
     expect(events).toContain('content="https://example.com/events"');
   });
+  it('links the favicon from the site settings on every page', () => {
+    const index = readFileSync(join(root, 'dist/index.html'), 'utf8');
+    const events = readFileSync(join(root, 'dist/events.html'), 'utf8');
+    expect(index).toContain('<link rel="icon" href="/favicon.svg" type="image/svg+xml">');
+    expect(events).toContain('<link rel="icon" href="/favicon.svg" type="image/svg+xml">');
+  });
   it('excludes the behaviours smoke page from the sitemap', () => {
     const sitemap = readFileSync(join(root, 'dist/sitemap-0.xml'), 'utf8');
     expect(sitemap).toContain('https://example.com/events');
