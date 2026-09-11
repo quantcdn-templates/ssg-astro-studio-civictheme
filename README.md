@@ -39,7 +39,7 @@ only: string, enum, boolean, coerced date, number, string array):
 | `publications` | MDX    | `title`, `summary`, `date`, `image`, `topics[]`, `fileUrl`, `fileFormat` (`pdf`/`docx`/`xlsx`/`other`), `fileSize`, `draft`                                                          |
 | `alerts`       | JSON   | `title`, `message`, `type` (`information`/`warning`/`error`/`success`), `startDate`, `endDate`, `dismissible`, `active`                                                              |
 | `navigation`   | JSON   | one file per menu (`primary`, `secondary`, `footer`); flat rows `{ label, url, parent? }`                                                                                            |
-| `settings`     | JSON   | `name`, `tagline`, `logoLight`, `logoDark`, `footerText`, `acknowledgement`, `social[]` (`{ platform, url }`), `theme`                                                               |
+| `settings`     | JSON   | `name`, `tagline`, `logoLight`, `logoDark`, `footerText`, `acknowledgement`, `social[]` (`{ platform, url }`), `theme`, `search` (see [Search](#search))                             |
 
 A `pages` entry's filename is its slug (`government.mdx` → `/government`), except `index.mdx`,
 which is the home page. Set `section` (e.g. `audiences`, `about`) on pages that should share a
@@ -195,7 +195,9 @@ oracles:
 Accessibility is checked with axe-core across every reference page, every `/components/<family>`
 page, and the paginated listing/detail pages — 38 assertions (37 pages plus one summary
 assertion), zero serious/critical violations. Every page assertion also checks the route
-returns HTTP 200, so a missing page cannot pass as a clean scan.
+returns HTTP 200, so a missing page cannot pass as a clean scan. `tests/e2e/search.spec.ts` also
+scans each state of the search page (not set up, results, no results, error) against a mocked
+search API, and fails on any axe violation.
 A handful of selectors are excluded with a documented reason (vendored markup gaps that the
 markup-fidelity rule forbids fixing inside the component) — see the comment block at the top of
 `tests/e2e/a11y.spec.ts`.
@@ -223,6 +225,37 @@ init exactly once per page, safely; a client-side route swap would run it again 
 and attach duplicate listeners. See `PORTING.md` for the upstream change (exported
 initialisers, added guards) that would be needed to make view transitions safe.
 
+## Search
+
+`/search` is a native search page on Quant AI Search. It keeps the
+CivicTheme search form (a plain GET form, `?q=`) and renders results as CivicTheme `Snippet`s in
+a `List`.
+
+When the project is connected to Quant Studio, Studio provisions a Quant AI Search site for each
+environment, indexes every page on publish, and passes the site's ID to the build as
+`PUBLIC_QUANT_SEARCH_SITE_ID`. The ID is injected per environment and must never be committed.
+With it set, the page's script (`src/lib/quant-search-dom.ts`) reads `q` from the URL (two
+characters or more), sends `POST /v1/public/sites/<site ID>/search` to
+`https://ai-search.quantcdn.io` with no API key, and shows the results, a results count in an
+`aria-live` region, a "No results" state or an error message. Set `PUBLIC_QUANT_SEARCH_API_URL`
+to point at another Quant AI Search origin (for example a staging one).
+
+`src/content/settings/site.json` has a `search` object:
+
+| Field          | Default | Meaning                                  |
+| -------------- | ------- | ---------------------------------------- |
+| `enabled`      | `true`  | Set `false` to turn the search page off. |
+| `resultsLimit` | `10`    | Results per search (1–100).              |
+| `placeholder`  | —       | Placeholder text for the search field.   |
+
+With no site ID, or with `enabled: false`, the page makes no request and shows a "Search is not
+set up for this site yet." Callout under the form. A site deployed outside Studio (for example
+with the included GitHub Action) is not indexed on publish: set `PUBLIC_QUANT_SEARCH_SITE_ID` at
+build time and let the Quant AI Search crawler index the site.
+
+`quant.studio.json` carries `"_search": { "native": "/search" }` so Studio can tell that this
+template ships its own search page.
+
 ## Known limitations
 
 | Component                     | Limitation                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                |
@@ -230,7 +263,6 @@ initialisers, added guards) that would be needed to make view transitions safe.
 | `Table`                       | Drupal's `{ attributes, cols }` row/footer shape is not supported — only the two legacy footer shapes and plain-string rows/cells are ported (no upstream snapshot exercises the Drupal shape).                                                                                                                                                                                                                                                                                                                                           |
 | `Slider`                      | The root `aria-label` always reads the `title` prop (falling back to `'Slider'`); a `title` passed only as a slot does not reach it.                                                                                                                                                                                                                                                                                                                                                                                                      |
 | `Alert`                       | Alerts are rendered at build time, so there is no `data-alert-endpoint` and no polling: `SiteAlerts.astro` supplies the `data-component-name="ct-alerts"` wrapper `alert.js` initialises on, and the dismiss listener comes from the shim in `src/civictheme/js/civictheme.js` (`alert.js` attaches its own only to fetched alerts). A dismissal is remembered in the `ct-alert-hide` cookie exactly as upstream does, and re-applied on the next page load — so a dismissed alert can flash briefly before the module script removes it. |
-| Search                        | `/search` is a static placeholder: it ships the CivicTheme search form markup with `action="/search"` and no backend, since the template ships no search index.                                                                                                                                                                                                                                                                                                                                                                           |
 | `ListingAuto` / `ListingGrid` | Do not pass a `verticalSpacing` prop through to the underlying `List`, even though `List` supports one.                                                                                                                                                                                                                                                                                                                                                                                                                                   |
 | Demo forms                    | The contact and subscribe forms are static demos: `method="get"` with `action="#"`, no backend. Point them at a form handler before using them.                                                                                                                                                                                                                                                                                                                                                                                           |
 | Favicon                       | `public/favicon.svg` is a plain placeholder mark, not a real organisation logo — replace it (and the referenced logos in `src/content/settings/`) for a production site.                                                                                                                                                                                                                                                                                                                                                                  |

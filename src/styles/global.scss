@@ -14,3 +14,9 @@ $ct-assets-directory: '/civictheme/';
 @import '../civictheme/scss/index';
 
 // Site overrides go below this line.
+
+// The native search page toggles its states with the `hidden` attribute. Keep
+// a component's own `display` rule from overriding it.
+[data-quant-search] [hidden] {
+  display: none !important;
+}

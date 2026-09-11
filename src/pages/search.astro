@@ -1,20 +1,43 @@
 ---
 /**
- * Static search placeholder.
+ * Native search page on Quant AI Search.
  *
- * The template ships no search backend, so this page presents the CivicTheme
- * search form markup (a `Field` with a text control plus a submit `Button`)
- * and points the reader at the section listings. A Studio project wires the
- * form's `action` to its own search service.
+ * Quant Studio provisions one AI Search site per environment and passes its
+ * ID to the build as `PUBLIC_QUANT_SEARCH_SITE_ID` (in a VFS-only
+ * `/.env.local`, never committed). With that ID, and `search.enabled` left on
+ * in `src/content/settings/site.json`, the client script
+ * (`src/lib/quant-search-dom.ts`) reads `?q=` from the URL and queries the
+ * public search endpoint. Without it, the page makes no request and shows a
+ * Callout instead. The GET form works either way.
+ *
+ * The build-time values are handed to the script as data attributes on the
+ * `[data-quant-search]` root, because Studio's browser runtime bundles
+ * hoisted scripts as a plain IIFE with no `import.meta.env`.
+ *
+ * Results render as CivicTheme `Snippet`s inside a `List`: the `<template>`
+ * below holds one real `Snippet.astro` row, which the script clones and fills
+ * with `textContent`.
  */
 import BaseLayout from '@/layouts/BaseLayout.astro';
 import PageBanner from '@/components/PageBanner.astro';
 import Field from '@civictheme/molecules/Field.astro';
 import Button from '@civictheme/atoms/Button.astro';
+import Heading from '@civictheme/atoms/Heading.astro';
 import Callout from '@civictheme/molecules/Callout.astro';
+import Snippet from '@civictheme/molecules/Snippet.astro';
+import List from '@civictheme/organisms/List.astro';
+import Message from '@civictheme/organisms/Message.astro';
+import { siteSettings } from '@/lib/content';
+import { DEFAULT_API_ORIGIN, clampLimit, isConfigured } from '@/lib/quant-search';
 
 const title = 'Search';
 const summary = 'Search this site.';
+
+const { search } = await siteSettings();
+const siteId = (import.meta.env.PUBLIC_QUANT_SEARCH_SITE_ID ?? '').trim();
+const apiOrigin = import.meta.env.PUBLIC_QUANT_SEARCH_API_URL || DEFAULT_API_ORIGIN;
+const limit = clampLimit(search.resultsLimit);
+const configured = isConfigured({ siteId, enabled: search.enabled });
 ---
 
 <BaseLayout title={title} description={summary} image="/og/search.png">
@@ -27,31 +50,83 @@ const summary = 'Search this site.';
     ]}
     backgroundImage="/civictheme/backgrounds/civictheme_background_4.png"
   />
-  <div class="ct-page container ct-vertical-spacing-inset--both">
-    <div class="row">
-      <div class="col-xxs-12 col-m-8">
-        <form class="ct-search-form" role="search" action="/search" method="get">
-          <Field
-            type="textfield"
-            title="Search"
-            label="Search"
-            name="q"
-            id="search-query"
-            placeholder="Enter a search term"
+  <div
+    data-quant-search
+    data-site-id={siteId}
+    data-api-origin={apiOrigin}
+    data-limit={limit}
+    data-enabled={String(search.enabled)}
+  >
+    <div class="ct-page container ct-vertical-spacing-inset--both">
+      <div class="row">
+        <div class="col-xxs-12 col-m-8">
+          <form class="ct-search-form" role="search" action="/search" method="get">
+            <Field
+              type="textfield"
+              title="Search"
+              label="Search"
+              name="q"
+              id="search-query"
+              placeholder={search.placeholder ?? 'Enter a search term'}
+            />
+            <Button kind="button" type="primary" text="Search" />
+          </form>
+          <div data-search-ui hidden={!configured}>
+            <p class="ct-paragraph ct-theme-light ct-search-status" role="status" data-search-status></p>
+            <Message
+              type="error"
+              hasAria={false}
+              title="Search failed"
+              content="Search is not available right now. Try again later."
+              verticalSpacing="top"
+              hidden
+              data-search-error
+            />
+          </div>
+          <Callout
+            title="Search is not set up for this site yet."
+            content="<p>Browse the news, events and publications listings instead.</p>"
+            links={[
+              { text: 'News', url: '/news' },
+              { text: 'Events', url: '/events' },
+              { text: 'Publications', url: '/publications' },
+            ]}
+            verticalSpacing="both"
+            hidden={configured}
+            data-search-unconfigured
           />
-          <Button kind="button" type="primary" text="Search" />
-        </form>
-        <Callout
-          title="No search backend is configured"
-          content="<p>This template ships the CivicTheme search markup only. Connect the form to your own search service, or browse the news, events and publications listings.</p>"
-          links={[
-            { text: 'News', url: '/news' },
-            { text: 'Events', url: '/events' },
-            { text: 'Publications', url: '/publications' },
-          ]}
-          verticalSpacing="both"
-        />
+        </div>
       </div>
     </div>
+    <List class="ct-search-results" hidden data-search-results>
+      <Fragment slot="title">
+        <Heading
+          content="Search results"
+          level={2}
+          class="ct-list__title"
+          id="search-results-heading"
+          tabindex="-1"
+          data-search-heading
+        />
+      </Fragment>
+      <Fragment slot="rows">
+        <div class="container">
+          <div class="row row--equal-heights-content row--vertically-spaced" data-search-rows></div>
+        </div>
+      </Fragment>
+    </List>
+    <template data-search-template>
+      <div class="col-xxs-12 col-m-12">
+        <Snippet title="Result title" summary="Result summary" link={{ url: '/' }} />
+      </div>
+    </template>
   </div>
 </BaseLayout>
+
+<script>
+  import { initQuantSearch } from '@/lib/quant-search-dom';
+
+  document.querySelectorAll<HTMLElement>('[data-quant-search]').forEach((root) => {
+    void initQuantSearch(root);
+  });
+</script>

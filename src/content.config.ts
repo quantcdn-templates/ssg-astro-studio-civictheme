@@ -99,6 +99,14 @@ const settings = defineCollection({
     acknowledgement: z.string().default(''),
     social: z.array(z.object({ platform: z.string(), url: z.string() })).default([]),
     theme,
+    /** The native `/search` page (see `src/pages/search.astro`). */
+    search: z
+      .object({
+        enabled: z.boolean().default(true),
+        resultsLimit: z.number().int().min(1).max(100).default(10),
+        placeholder: z.string().optional(),
+      })
+      .default({ enabled: true, resultsLimit: 10 }),
   }),
 });
 export const collections = { pages, events, news, publications, alerts, navigation, settings };

@@ -9,5 +9,10 @@
     { "platform": "facebook", "url": "https://facebook.com/example" },
     { "platform": "twitter", "url": "https://twitter.com/example" }
   ],
-  "theme": "light"
+  "theme": "light",
+  "search": {
+    "enabled": true,
+    "resultsLimit": 10,
+    "placeholder": "Enter a search term"
+  }
 }
