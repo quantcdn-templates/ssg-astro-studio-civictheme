@@ -50,6 +50,34 @@ test.describe('CivicTheme site alerts', () => {
     await alert.locator('[data-alert-dismiss-trigger]').click();
     await expect(alert).toHaveCount(0);
   });
+
+  // The inline head script in `BaseLayout.astro` hides cookie-dismissed
+  // alerts before paint. With the module script blocked, only that inline
+  // script can be hiding the alert.
+  test('a dismissed alert stays hidden on the next page without the module script', async ({ page }) => {
+    await page.goto('/');
+    const alert = page.locator('[data-component-name="ct-alerts"] [data-component-name="ct-alert"]').first();
+    await alert.locator('[data-alert-dismiss-trigger]').click();
+    await expect(alert).toHaveCount(0);
+
+    await page.route('**/_astro/*.js', (route) => route.abort());
+    await page.goto('/about-us');
+    await expect(alert).toHaveCount(1);
+    await expect(alert).toBeHidden();
+  });
+
+  test('an alert whose content changed since its dismissal shows again', async ({ page, context }) => {
+    await page.goto('/');
+    const alert = page.locator('[data-component-name="ct-alerts"] [data-component-name="ct-alert"]').first();
+    const id = await alert.getAttribute('data-alert-id');
+    // A hash that matches no current markup: the alert was dismissed, then edited.
+    await context.addCookies([
+      { name: 'ct-alert-hide', value: JSON.stringify({ [id!]: 1 }), url: page.url(), sameSite: 'Strict' },
+    ]);
+    await page.goto('/about-us');
+    await expect(alert).toBeVisible();
+    await expect(page.locator('#ct-alert-prehide')).toHaveCount(0);
+  });
 });
 
 test.describe('CivicTheme behaviours', () => {

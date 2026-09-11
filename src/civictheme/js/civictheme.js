@@ -99,3 +99,8 @@ document.querySelectorAll('[data-component-name="ct-alerts"]').forEach((containe
     }
   });
 });
+
+// The inline head script in `BaseLayout.astro` hid every alert id in the
+// cookie before first paint. The matching alerts are removed above, so drop
+// that style: an alert whose content changed since its dismissal shows again.
+document.getElementById('ct-alert-prehide')?.remove();

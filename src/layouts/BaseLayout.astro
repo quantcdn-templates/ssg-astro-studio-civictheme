@@ -10,6 +10,13 @@
  *
  * Fonts: CivicTheme's own SCSS `@import`s Lexend and Public Sans from Google
  * Fonts, so the head only adds the two preconnects.
+ *
+ * Dismissed alerts: the inline head script hides every alert id in the
+ * `ct-alert-hide` cookie before first paint, so a dismissed alert does not
+ * flash in and out. The shim in `src/civictheme/js/civictheme.js` then
+ * removes the matching alerts and that style, so an alert whose content
+ * changed since it was dismissed shows again, as upstream's hash check
+ * intends.
  */
 import '@/styles/global.scss';
 import SkipLink from '@civictheme/organisms/SkipLink.astro';
@@ -63,6 +70,25 @@ const faviconType = favicon.endsWith('.svg') ? 'image/svg+xml' : undefined;
     <meta name="twitter:description" content={description} />
     <meta name="twitter:image" content={ogImage} />
     <link rel="sitemap" href="/sitemap-index.xml" />
+    <script is:inline>
+      (function () {
+        var match = document.cookie.match(/(?:^|;\s*)ct-alert-hide=([^;]*)/);
+        if (!match || !window.CSS || !CSS.escape) return;
+        try {
+          var ids = Object.keys(JSON.parse(match[1]) || {});
+          if (ids.length === 0) return;
+          var style = document.createElement('style');
+          style.id = 'ct-alert-prehide';
+          style.textContent =
+            ids
+              .map(function (id) {
+                return '[data-component-name="ct-alert"][data-alert-id="' + CSS.escape(id) + '"]';
+              })
+              .join(',') + '{display:none!important}';
+          document.head.appendChild(style);
+        } catch (e) {}
+      })();
+    </script>
   </head>
   <body class={`ct-theme-${theme}`}>
     <SkipLink theme={theme} url="#main-content" />
