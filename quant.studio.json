@@ -156,7 +156,10 @@
       {
         "path": "src/civictheme/components/03-organisms/Webform.astro",
         "group": "content",
-        "description": "Form wrapper (form markup goes in the referencedWebform slot)."
+        "description": "Form wrapper (form markup goes in the referencedWebform slot).",
+        "defaults": {
+          "referencedWebform": "<form class='ct-webform__form'><div class='ct-field ct-field--text'><label class='ct-field__label' for='webform-name'>Name</label><input class='ct-field__widget ct-input' type='text' id='webform-name' name='name'></div><div class='ct-field ct-field--email'><label class='ct-field__label' for='webform-email'>Email</label><input class='ct-field__widget ct-input' type='email' id='webform-email' name='email'></div><input type='submit' class='ct-button ct-theme-light ct-button--primary ct-button--submit ct-button--regular' data-component-name='button' value='Submit'></form>"
+        }
       },
       {
         "path": "src/components/ManualList.astro",
@@ -185,7 +188,11 @@
       {
         "path": "src/civictheme/components/03-organisms/Slider.astro",
         "group": "listings",
-        "description": "Carousel of slides."
+        "description": "Carousel of slides.",
+        "defaults": {
+          "title": "Slider title",
+          "slides": "<div class='ct-slide ct-theme-light' role='group' aria-roledescription='slide' data-slider-slide=''><div class='row ct-slide__row'><div class='col-xxs-12 col-m-5 first first-m'><div class='ct-slide__image'><img class='ct-image ct-theme-light' src='/civictheme/demo/images/demo1.jpg' alt=''></div></div> <div class='col-xxs-12 col-m-5 col-m-offset-1 ct-flex-align-self-center'><div class='ct-slide__inner'><h3 class='ct-heading ct-theme-light ct-slide__title' data-toc-exclude=''>Slide one</h3> <div class='ct-paragraph ct-theme-light ct-paragraph--regular ct-slide__content'>Text for the first slide.</div></div></div></div></div> <div class='ct-slide ct-theme-light' role='group' aria-roledescription='slide' data-slider-slide=''><div class='row ct-slide__row'><div class='col-xxs-12 col-m-5 first first-m'><div class='ct-slide__image'><img class='ct-image ct-theme-light' src='/civictheme/demo/images/demo2.jpg' alt=''></div></div> <div class='col-xxs-12 col-m-5 col-m-offset-1 ct-flex-align-self-center'><div class='ct-slide__inner'><h3 class='ct-heading ct-theme-light ct-slide__title' data-toc-exclude=''>Slide two</h3> <div class='ct-paragraph ct-theme-light ct-paragraph--regular ct-slide__content'>Text for the second slide.</div></div></div></div></div> <div class='ct-slide ct-theme-light' role='group' aria-roledescription='slide' data-slider-slide=''><div class='row ct-slide__row'><div class='col-xxs-12 col-m-5 first first-m'><div class='ct-slide__image'><img class='ct-image ct-theme-light' src='/civictheme/demo/images/demo4.jpg' alt=''></div></div> <div class='col-xxs-12 col-m-5 col-m-offset-1 ct-flex-align-self-center'><div class='ct-slide__inner'><h3 class='ct-heading ct-theme-light ct-slide__title' data-toc-exclude=''>Slide three</h3> <div class='ct-paragraph ct-theme-light ct-paragraph--regular ct-slide__content'>Text for the third slide.</div></div></div></div></div>"
+        }
       },
       {
         "path": "src/civictheme/components/02-molecules/PromoCard.astro",
@@ -237,7 +244,15 @@
         "description": "Downloadable file.",
         "defaults": {
           "title": "Attachments",
-          "files": []
+          "files": [
+            {
+              "name": "Annual report 2025",
+              "ext": "PDF",
+              "size": "1 KB",
+              "url": "/documents/annual-report-2025.pdf",
+              "icon": "download-file"
+            }
+          ]
         }
       },
       {
@@ -262,7 +277,21 @@
       {
         "path": "src/civictheme/components/02-molecules/VideoPlayer.astro",
         "group": "media",
-        "description": "Video embed."
+        "description": "Video embed.",
+        "defaults": {
+          "title": "Demo video",
+          "poster": "/civictheme/demo/videos/demo_poster.png",
+          "sources": [
+            {
+              "url": "/civictheme/demo/videos/demo.mp4",
+              "type": "video/mp4"
+            },
+            {
+              "url": "/civictheme/demo/videos/demo.webm",
+              "type": "video/webm"
+            }
+          ]
+        }
       },
       {
         "path": "src/civictheme/components/01-atoms/Iframe.astro",
@@ -277,7 +306,11 @@
         "group": "layout",
         "description": "Column grid; put cards inside.",
         "defaults": {
-          "templateColumnCount": 2
+          "templateColumnCount": 2,
+          "items": [
+            "<p class='ct-paragraph ct-theme-light ct-paragraph--regular'>Grid item one.</p>",
+            "<p class='ct-paragraph ct-theme-light ct-paragraph--regular'>Grid item two.</p>"
+          ]
         },
         "props": {
           "templateColumnCount": {
