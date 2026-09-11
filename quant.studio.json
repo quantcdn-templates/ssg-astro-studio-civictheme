@@ -164,7 +164,11 @@
         "description": "Chosen entries from one collection.",
         "defaults": {
           "collection": "news",
-          "slugs": [],
+          "slugs": [
+            "budget-2026-adopted",
+            "new-library-hours",
+            "youth-grants-open"
+          ],
           "title": "Related"
         }
       },
