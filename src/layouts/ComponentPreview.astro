@@ -6,7 +6,9 @@
  * route, so the page layout and `global.scss` are already around it. This
  * layout adds only the theme surface: a `ct-theme-light` or `ct-theme-dark`
  * stage, like the `/components` demo stages. Studio passes the theme chosen
- * with the editor's theme switch (`_preview.themes`).
+ * with the editor's theme switch (`_preview.themes`). CivicTheme declares no
+ * `themes`: its components set their own `theme` prop, so a switch that
+ * changed only the stage would mislead. The stage is then light.
  *
  * The stage rules are `is:inline`: Studio imports this layout from the
  * preview body (MDX), and the runtime does not collect the scoped CSS of a

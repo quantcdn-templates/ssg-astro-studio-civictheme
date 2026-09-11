@@ -332,10 +332,6 @@
     "native": "/search"
   },
   "_preview": {
-    "layout": "src/layouts/ComponentPreview.astro",
-    "themes": [
-      "light",
-      "dark"
-    ]
+    "layout": "src/layouts/ComponentPreview.astro"
   }
 }

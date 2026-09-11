@@ -88,8 +88,10 @@ describe('quant.studio.json component-editor hints', () => {
     }
   });
 
-  it('declares the component preview layout and its themes', () => {
-    expect(manifest._preview).toEqual({ layout: 'src/layouts/ComponentPreview.astro', themes: ['light', 'dark'] });
+  // No `themes`: CivicTheme components set their own `theme` prop, so a
+  // switch that changes only the stage would mislead the author.
+  it('declares the component preview layout and no theme switch', () => {
+    expect(manifest._preview).toEqual({ layout: 'src/layouts/ComponentPreview.astro' });
     expect(existsSync(join(root, manifest._preview.layout))).toBe(true);
   });
 });
