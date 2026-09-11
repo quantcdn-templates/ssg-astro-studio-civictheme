@@ -19,6 +19,35 @@
       }
     ],
     "imports": "none",
+    "props": {
+      "icon": {
+        "widget": "icon"
+      },
+      "modifierClass": {
+        "group": "advanced"
+      },
+      "summary": {
+        "widget": "textarea"
+      },
+      "content": {
+        "widget": "textarea"
+      },
+      "contentTop": {
+        "widget": "textarea"
+      },
+      "contentMiddle": {
+        "widget": "textarea"
+      },
+      "contentBottom": {
+        "widget": "textarea"
+      },
+      "imageOver": {
+        "widget": "textarea"
+      }
+    },
+    "icons": {
+      "source": "src/civictheme/components/00-base/icons.ts"
+    },
     "items": [
       {
         "path": "src/civictheme/components/02-molecules/Callout.astro",
@@ -175,6 +204,17 @@
             "text": "Read more",
             "url": "/"
           }
+        },
+        "props": {
+          "image": {
+            "label": "Image"
+          },
+          "link": {
+            "label": "Link"
+          },
+          "summary": {
+            "label": "Summary"
+          }
         }
       },
       {
@@ -234,6 +274,20 @@
         "description": "Column grid; put cards inside.",
         "defaults": {
           "templateColumnCount": 2
+        },
+        "props": {
+          "templateColumnCount": {
+            "label": "Columns",
+            "help": "How many cards sit side by side on a wide screen.",
+            "options": [
+              1,
+              2,
+              3,
+              4,
+              6,
+              12
+            ]
+          }
         }
       },
       {
@@ -259,6 +313,17 @@
           "url": "/",
           "kind": "link",
           "type": "primary"
+        },
+        "props": {
+          "text": {
+            "label": "Button text"
+          },
+          "url": {
+            "label": "Link"
+          },
+          "iconPlacement": {
+            "label": "Icon position"
+          }
         }
       }
     ]
