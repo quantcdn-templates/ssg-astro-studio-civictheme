@@ -241,7 +241,7 @@
         "group": "media",
         "description": "Image with caption.",
         "defaults": {
-          "url": "/civictheme/demo/demo1.jpg",
+          "url": "/civictheme/demo/images/demo1.jpg",
           "alt": "",
           "caption": "Caption"
         }
