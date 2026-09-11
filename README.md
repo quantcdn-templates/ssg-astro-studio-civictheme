@@ -104,8 +104,8 @@ equivalent for a fixed set of `slugs`):
 Plain Markdown prose works for a `content` paragraph; `<Grid>` with `PromoCard`/
 `NavigationCard`/`SubjectCard` children (each wrapped in a `col-xxs-12 col-m-<n>` div — `Grid`'s
 default slot expects pre-wrapped columns) covers a manual card list not backed by a collection
-— the CivicTheme `manual_list` paragraph type; `<Webform>` renders a static HTML form
-(`action="#"`), since the template ships no backend.
+— the CivicTheme `manual_list` paragraph type; `<Webform>` wraps an HTML form you write in its
+`referencedWebform` slot (see [Forms](#forms) for how the demo forms submit on Quant).
 
 **Autoescape note**: every Slot-documented prop (`title`, `content`, `summary`, `caption`, …)
 is rendered with `set:html` to keep fidelity with upstream, which documents these as
@@ -256,6 +256,31 @@ build time and let the Quant AI Search crawler index the site.
 `quant.studio.json` carries `"_search": { "native": "/search" }` so Studio can tell that this
 template ships its own search page.
 
+## Forms
+
+The contact (`/contact-us`) and subscribe (`/subscribe`) forms submit to Quant Forms. Each form
+posts to its own page (`method="post"`, `action="/contact-us"`), and `forms/forms.json` holds the
+Quant Forms configuration for both routes. Studio syncs that file to the environment's CDN on
+every publish, and its Forms screen edits it.
+
+Each manifest entry sets:
+
+- `mandatory_fields`: the CDN rejects a submission with any of these empty.
+- `honeypot_fields: ["website"]`: each form has a visually hidden `website` field that people
+  leave empty. The CDN rejects a submission that fills it.
+- `success_message`, `error_message_mandatory`, `error_message_generic`: short CivicTheme
+  `Message` markup (the API allows 256 characters each).
+
+On Quant, the CDN answers the POST with the same page and writes the message into
+`<div tabindex="-1" id="quant-form-result"></div>` above the form. The CDN matches the literal
+text `id="quant-form-result">`, so keep `id` as that element's last attribute. A small script
+(`src/lib/quant-form-result.ts`) moves focus to the message. Submissions are stored per
+environment on the CDN and are viewed in Studio's Forms screen.
+
+No notification targets are committed. To get an email or a Slack message for each
+submission, add them in Studio's Forms screen for each environment (they are stored in the
+manifest as `config.notifications.email.to` and `config.notifications.slack.webhook`).
+
 ## Known limitations
 
 | Component                     | Limitation                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                |
@@ -264,7 +289,7 @@ template ships its own search page.
 | `Slider`                      | The root `aria-label` always reads the `title` prop (falling back to `'Slider'`); a `title` passed only as a slot does not reach it.                                                                                                                                                                                                                                                                                                                                                                                                      |
 | `Alert`                       | Alerts are rendered at build time, so there is no `data-alert-endpoint` and no polling: `SiteAlerts.astro` supplies the `data-component-name="ct-alerts"` wrapper `alert.js` initialises on, and the dismiss listener comes from the shim in `src/civictheme/js/civictheme.js` (`alert.js` attaches its own only to fetched alerts). A dismissal is remembered in the `ct-alert-hide` cookie exactly as upstream does, and re-applied on the next page load — so a dismissed alert can flash briefly before the module script removes it. |
 | `ListingAuto` / `ListingGrid` | Do not pass a `verticalSpacing` prop through to the underlying `List`, even though `List` supports one.                                                                                                                                                                                                                                                                                                                                                                                                                                   |
-| Demo forms                    | The contact and subscribe forms are static demos: `method="get"` with `action="#"`, no backend. Point them at a form handler before using them.                                                                                                                                                                                                                                                                                                                                                                                           |
+| Demo forms                    | Outside Quant the forms have no backend: the POST goes to the static host, which usually answers 404 or 405 (`astro preview` answers 404). Point `action` at your own form handler to use them elsewhere. Saving a form in Studio's Forms screen rewrites its manifest entry without the three CivicTheme messages, so the CDN falls back to its plain-text defaults.                                                                                                                                                                     |
 | Favicon                       | `public/favicon.svg` is a plain placeholder mark, not a real organisation logo — replace it (and the referenced logos in `src/content/settings/`) for a production site.                                                                                                                                                                                                                                                                                                                                                                  |
 | Community Engagement          | `/community-engagement` is built and reachable by URL but deliberately absent from the primary menu, matching the Drupal demo site's own menu structure.                                                                                                                                                                                                                                                                                                                                                                                  |
 | `demo7.jpg`                   | The cards and lists reference pages (`/components/cards`, `/components/lists`) request `/civictheme/demo/images/demo7.jpg`, which 404s: the upstream twig package's demo fixtures reference that image but do not ship it. The affected cards render without their image.                                                                                                                                                                                                                                                                 |

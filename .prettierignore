@@ -12,3 +12,7 @@ src/data/component-demos
 # Quant Studio rewrites this file (PHP pretty-print, 4-space indent) when an
 # author uses "Make insertable", so Prettier must not own its formatting.
 quant.studio.json
+
+# Quant Studio's Forms screen rewrites the Quant Forms manifest the same way
+# (PHP pretty-print, 4-space indent).
+forms/forms.json

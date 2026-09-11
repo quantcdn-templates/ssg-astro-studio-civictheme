@@ -1,0 +1,37 @@
+[
+    {
+        "route": "/contact-us",
+        "enabled": true,
+        "config": {
+            "target_url": "/contact-us",
+            "mandatory_fields": [
+                "name",
+                "email",
+                "message"
+            ],
+            "honeypot_fields": [
+                "website"
+            ],
+            "success_message": "<div class=\"ct-message ct-theme-light ct-message--success\"><div class=\"ct-message__inner\"><div class=\"ct-message__inner-wrapper\"><div class=\"ct-message__title\">Thank you. We have received your message.</div></div></div></div>",
+            "error_message_mandatory": "<div class=\"ct-message ct-theme-light ct-message--error\"><div class=\"ct-message__inner\"><div class=\"ct-message__inner-wrapper\"><div class=\"ct-message__title\">Some required fields are empty. Fill them in and try again.</div></div></div></div>",
+            "error_message_generic": "<div class=\"ct-message ct-theme-light ct-message--error\"><div class=\"ct-message__inner\"><div class=\"ct-message__inner-wrapper\"><div class=\"ct-message__title\">We could not send your submission. Reload the page and try again.</div></div></div></div>"
+        }
+    },
+    {
+        "route": "/subscribe",
+        "enabled": true,
+        "config": {
+            "target_url": "/subscribe",
+            "mandatory_fields": [
+                "name",
+                "email"
+            ],
+            "honeypot_fields": [
+                "website"
+            ],
+            "success_message": "<div class=\"ct-message ct-theme-light ct-message--success\"><div class=\"ct-message__inner\"><div class=\"ct-message__inner-wrapper\"><div class=\"ct-message__title\">Thank you. We have received your subscription.</div></div></div></div>",
+            "error_message_mandatory": "<div class=\"ct-message ct-theme-light ct-message--error\"><div class=\"ct-message__inner\"><div class=\"ct-message__inner-wrapper\"><div class=\"ct-message__title\">Some required fields are empty. Fill them in and try again.</div></div></div></div>",
+            "error_message_generic": "<div class=\"ct-message ct-theme-light ct-message--error\"><div class=\"ct-message__inner\"><div class=\"ct-message__inner-wrapper\"><div class=\"ct-message__title\">We could not send your submission. Reload the page and try again.</div></div></div></div>"
+        }
+    }
+]

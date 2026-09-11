@@ -19,7 +19,8 @@ Your organisation by email.
 
 <Webform>
   <Fragment slot="referencedWebform">
-    <form action="#" method="get" class="ct-webform__form">
+    <div tabindex="-1" id="quant-form-result"></div>
+    <form action="/subscribe" method="post" class="ct-webform__form">
       <div class="ct-field ct-field--text">
         <label class="ct-field__label" for="subscribe-name">
           Name
@@ -37,6 +38,10 @@ Your organisation by email.
           What are you interested in?
         </label>
         <textarea class="ct-field__widget ct-textarea" id="subscribe-message" name="message" rows="4"></textarea>
+      </div>
+      <div class="ct-visually-hidden" aria-hidden="true">
+        <label for="subscribe-website">Leave this field empty</label>
+        <input type="text" id="subscribe-website" name="website" tabindex="-1" autocomplete="off" />
       </div>
       <Button text="Subscribe" kind="submit" type="primary" />
     </form>
