@@ -228,20 +228,36 @@ initialisers, added guards) that would be needed to make view transitions safe.
 
 ## Search
 
-`/search` is a native search page on Quant AI Search. It keeps the
-CivicTheme search form (a plain GET form, `?q=`) and renders results as CivicTheme `Snippet`s in
-a `List`.
+`/search` is a native search page on Quant AI Search. It keeps the CivicTheme search form (a
+plain GET form, `?q=`) and renders results as a list of CivicTheme `Snippet`s in a `List`.
 
-When the project is connected to Quant Studio, Studio provisions a Quant AI Search site for each
-environment, indexes every page on publish, and passes the site's ID to the build as
-`PUBLIC_QUANT_SEARCH_SITE_ID`. The ID is injected per environment and must never be committed.
-With it set, the page's script (`src/lib/quant-search-dom.ts`) reads `q` from the URL (two
-characters or more), sends `POST /v1/public/sites/<site ID>/search` to
-`https://ai-search.quantcdn.io` with no API key, and shows the results, a results count in an
-`aria-live` region, a "No results" state or an error message. Set `PUBLIC_QUANT_SEARCH_API_URL`
-to point at another Quant AI Search origin (for example a staging one).
+### Turning it on in Quant Studio
 
-`src/content/settings/site.json` has a `search` object:
+Studio creates a Quant AI Search site for an environment only when an author clicks **Enable
+search** on the Search screen. From then on, every publish indexes the rendered pages, and Studio
+passes the site's ID to the build as `PUBLIC_QUANT_SEARCH_SITE_ID`. The ID is injected per
+environment and must never be committed.
+
+Today the same click also starts Studio's search wiring agent. In the full-page (`search_page`)
+mode that agent scaffolds a `/search` page with Quant's hosted widget, which can overwrite
+`src/pages/search.astro`. Until the portal recognises this template's native page (the
+`_search` key below), reject or revert that wiring commit and keep the native page.
+
+`quant.studio.json` carries `"_search": { "native": "/search" }`. This is the key the portal
+reads to detect that the template ships its own search page.
+
+### How the page works
+
+With a site ID set, the page's script (`src/lib/quant-search-dom.ts`) reads `q` from the URL
+(three characters or more, as in Quant's own widget), sends
+`POST /v1/public/sites/<site ID>/search` to `https://ai-search.quantcdn.io` with no API key,
+and shows the results, a results count in a `role="status"` region, a "No results" state or an
+error message. Result links are limited to this site's paths and to absolute `http(s)` URLs; a
+result with any other URL shows its title without a link. Set `PUBLIC_QUANT_SEARCH_API_URL` to
+point at another Quant AI Search origin (for example a staging one).
+
+`src/content/settings/site.json` has a `search` object (set it in Code view for now; see
+[Known limitations](#known-limitations)):
 
 | Field          | Default | Meaning                                  |
 | -------------- | ------- | ---------------------------------------- |
@@ -250,12 +266,13 @@ to point at another Quant AI Search origin (for example a staging one).
 | `placeholder`  | —       | Placeholder text for the search field.   |
 
 With no site ID, or with `enabled: false`, the page makes no request and shows a "Search is not
-set up for this site yet." Callout under the form. A site deployed outside Studio (for example
-with the included GitHub Action) is not indexed on publish: set `PUBLIC_QUANT_SEARCH_SITE_ID` at
-build time and let the Quant AI Search crawler index the site.
+set up for this site yet." Callout under the form.
 
-`quant.studio.json` carries `"_search": { "native": "/search" }` so Studio can tell that this
-template ships its own search page.
+### Sites deployed outside Studio
+
+A site deployed outside Studio (for example with the included GitHub Action) is not indexed on
+publish. Set `PUBLIC_QUANT_SEARCH_SITE_ID` at build time, and use the Quant AI Search crawler to
+index the site.
 
 ## Forms
 
@@ -284,12 +301,13 @@ manifest as `config.notifications.email.to` and `config.notifications.slack.webh
 
 ## Known limitations
 
-| Component  | Limitation                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      |
-| ---------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `Table`    | Drupal's `{ attributes, cols }` row/footer shape is not supported — only the two legacy footer shapes and plain-string rows/cells are ported (no upstream snapshot exercises the Drupal shape).                                                                                                                                                                                                                                                                                                                                                                                                 |
-| `Alert`    | Alerts are rendered at build time, so there is no `data-alert-endpoint` and no polling: `SiteAlerts.astro` supplies the `data-component-name="ct-alerts"` wrapper `alert.js` initialises on, and the dismiss listener comes from the shim in `src/civictheme/js/civictheme.js` (`alert.js` attaches its own only to fetched alerts). A dismissal is remembered in the `ct-alert-hide` cookie exactly as upstream does, and re-applied on the next page load. An inline head script in `BaseLayout.astro` hides the dismissed alert ids before first paint, so a dismissed alert does not flash. |
-| Demo forms | Outside Quant the forms have no backend: the POST goes to the static host, which usually answers 404 or 405 (`astro preview` answers 404). Point `action` at your own form handler to use them elsewhere. Saving a form in Studio's Forms screen rewrites its manifest entry without the three CivicTheme messages, so the CDN falls back to its plain-text defaults.                                                                                                                                                                                                                           |
-| Favicon    | `public/favicon.svg` is a plain placeholder mark, not a real organisation logo. Replace it, or set `favicon` in `src/content/settings/site.json` to another path, and replace the referenced logos for a production site.                                                                                                                                                                                                                                                                                                                                                                       |
+| Component     | Limitation                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      |
+| ------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `Table`       | Drupal's `{ attributes, cols }` row/footer shape is not supported — only the two legacy footer shapes and plain-string rows/cells are ported (no upstream snapshot exercises the Drupal shape).                                                                                                                                                                                                                                                                                                                                                                                                 |
+| `Alert`       | Alerts are rendered at build time, so there is no `data-alert-endpoint` and no polling: `SiteAlerts.astro` supplies the `data-component-name="ct-alerts"` wrapper `alert.js` initialises on, and the dismiss listener comes from the shim in `src/civictheme/js/civictheme.js` (`alert.js` attaches its own only to fetched alerts). A dismissal is remembered in the `ct-alert-hide` cookie exactly as upstream does, and re-applied on the next page load. An inline head script in `BaseLayout.astro` hides the dismissed alert ids before first paint, so a dismissed alert does not flash. |
+| Demo forms    | Outside Quant the forms have no backend: the POST goes to the static host, which usually answers 404 or 405 (`astro preview` answers 404). Point `action` at your own form handler to use them elsewhere. Saving a form in Studio's Forms screen rewrites its manifest entry without the three CivicTheme messages, so the CDN falls back to its plain-text defaults.                                                                                                                                                                                                                           |
+| Site settings | Studio's settings form flattens nested objects in `src/content/settings/site.json`, so the `search.*` settings (and the existing `social` list) do not edit correctly there. Set them in Code view for now.                                                                                                                                                                                                                                                                                                                                                                                     |
+| Favicon       | `public/favicon.svg` is a plain placeholder mark, not a real organisation logo. Replace it, or set `favicon` in `src/content/settings/site.json` to another path, and replace the referenced logos for a production site.                                                                                                                                                                                                                                                                                                                                                                       |
 
 ## Editing with Quant Studio
 
