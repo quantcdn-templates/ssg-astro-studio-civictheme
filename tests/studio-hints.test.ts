@@ -79,13 +79,35 @@ describe('quant.studio.json component-editor hints', () => {
     const items = (manifest._components.items as Array<{ path: string; props?: Record<string, Hint> }>).filter(
       (i) => i.props
     );
-    expect(items.map((i) => i.path.split('/').pop())).toEqual(['NavigationCard.astro', 'Grid.astro', 'Button.astro']);
+    expect(items.map((i) => i.path.split('/').pop())).toEqual([
+      'ListingAuto.astro',
+      'NavigationCard.astro',
+      'Grid.astro',
+      'Button.astro',
+    ]);
     for (const item of items) {
       const props = propsInterface(item.path);
       for (const name of Object.keys(item.props!)) {
         expect(props, `${item.path}: prop ${name}`).toMatch(new RegExp(`\\n\\s*${name}\\??:`));
       }
     }
+  });
+
+  // A paginated route passes these; an author who sets them by hand replaces
+  // the fetched entries with a raw JSON array.
+  it('hides the ListingAuto props that only a paginated route passes', () => {
+    const item = manifest._components.items.find((i: { path: string }) => i.path.endsWith('/ListingAuto.astro'));
+    for (const name of ['entries', 'page', 'pageBase']) {
+      expect(item.props?.[name], `ListingAuto.${name}`).toEqual({ widget: 'hidden' });
+    }
+  });
+
+  // NavigationCard never renders `link.text`: the title is the link text.
+  it('does not offer a NavigationCard link text that the card never renders', () => {
+    const item = manifest._components.items.find((i: { path: string }) => i.path.endsWith('/NavigationCard.astro'));
+    expect(readFileSync(join(root, item.path), 'utf8')).not.toMatch(/link\??\.text/);
+    expect(item.defaults.link).not.toHaveProperty('text');
+    expect(item.props.link.help).toMatch(/title is the link text/i);
   });
 
   // No `themes`: CivicTheme components set their own `theme` prop, so a

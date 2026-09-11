@@ -183,6 +183,17 @@
           "collection": "news",
           "limit": 3,
           "title": "Latest news"
+        },
+        "props": {
+          "entries": {
+            "widget": "hidden"
+          },
+          "page": {
+            "widget": "hidden"
+          },
+          "pageBase": {
+            "widget": "hidden"
+          }
         }
       },
       {
@@ -212,7 +223,6 @@
           "title": "Card title",
           "summary": "Card summary.",
           "link": {
-            "text": "Read more",
             "url": "/"
           }
         },
@@ -221,7 +231,8 @@
             "label": "Image"
           },
           "link": {
-            "label": "Link"
+            "label": "Link",
+            "help": "The card title is the link text. Only the address is used."
           },
           "summary": {
             "label": "Summary"
