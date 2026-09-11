@@ -330,5 +330,12 @@
   },
   "_search": {
     "native": "/search"
+  },
+  "_preview": {
+    "layout": "src/layouts/ComponentPreview.astro",
+    "themes": [
+      "light",
+      "dark"
+    ]
   }
 }

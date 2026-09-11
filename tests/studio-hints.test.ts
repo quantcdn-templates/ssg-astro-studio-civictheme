@@ -87,4 +87,9 @@ describe('quant.studio.json component-editor hints', () => {
       }
     }
   });
+
+  it('declares the component preview layout and its themes', () => {
+    expect(manifest._preview).toEqual({ layout: 'src/layouts/ComponentPreview.astro', themes: ['light', 'dark'] });
+    expect(existsSync(join(root, manifest._preview.layout))).toBe(true);
+  });
 });

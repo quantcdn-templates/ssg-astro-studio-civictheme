@@ -1,0 +1,32 @@
+---
+/**
+ * Studio component editor preview layout (quant.studio.json `_preview.layout`).
+ *
+ * Studio renders one component inside this layout through the page's own
+ * route, so the page layout and `global.scss` are already around it. This
+ * layout adds only the theme surface: a `ct-theme-light` or `ct-theme-dark`
+ * stage, like the `/components` demo stages. Studio passes the theme chosen
+ * with the editor's theme switch (`_preview.themes`).
+ */
+interface Props {
+  /** The editor's theme switch: `light` or `dark`. Anything else is light. */
+  theme?: string;
+}
+
+const { theme } = Astro.props;
+const resolved = theme === 'dark' ? 'dark' : 'light';
+---
+
+<div class:list={['ct-component-preview', `ct-theme-${resolved}`]} data-theme={resolved}>
+  <slot />
+</div>
+
+<style>
+  .ct-component-preview {
+    padding: 1.5rem;
+  }
+
+  .ct-component-preview.ct-theme-dark {
+    background: #12172b;
+  }
+</style>
