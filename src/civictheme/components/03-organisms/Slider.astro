@@ -82,12 +82,18 @@ const hasContentBottom = Boolean(contentBottom) || hasContentBottomSlot;
 
 // The root `aria-label` reads the title as plain text. A `title` slot is
 // rendered once here — printed below via `set:html` — and its text (tags
-// stripped, the escaper's entities decoded) takes precedence over the prop.
-const ENTITIES: Record<string, string> = { '&amp;': '&', '&lt;': '<', '&gt;': '>', '&quot;': '"', '&#39;': "'" };
+// stripped, named and numeric entities decoded) takes precedence over the prop.
+const ENTITIES: Record<string, string> = { amp: '&', lt: '<', gt: '>', quot: '"', apos: "'", nbsp: ' ' };
+const codePoint = (ref: string) => (/^#x/i.test(ref) ? parseInt(ref.slice(2), 16) : parseInt(ref.slice(1), 10));
+const decodeEntity = (entity: string, ref: string) => {
+  if (!ref.startsWith('#')) return ENTITIES[ref.toLowerCase()] ?? entity;
+  const code = codePoint(ref);
+  return code > 0 && code <= 0x10ffff ? String.fromCodePoint(code) : entity;
+};
 const textOf = (html: string) =>
   html
     .replace(/<[^>]*>/g, ' ')
-    .replace(/&(?:amp|lt|gt|quot|#39);/g, (entity) => ENTITIES[entity] ?? entity)
+    .replace(/&(#x[0-9a-f]+|#[0-9]+|[a-z]+);/gi, decodeEntity)
     .replace(/\s+/g, ' ')
     .trim();
 const titleSlotHtml = hasTitleSlot ? await Astro.slots.render('title') : '';

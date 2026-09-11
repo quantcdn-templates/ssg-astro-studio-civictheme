@@ -88,6 +88,15 @@ describe('Slider', () => {
       expect(html).toContain('<em>events</em>');
     });
 
+    it('title: the slot label decodes numeric entities and &nbsp;', async () => {
+      const html = await renderNormalised(
+        Slider,
+        { slides },
+        { title: '<h2 class="ct-heading">Don&#8217;t&nbsp;miss &#x2014; &#39;now&#39;</h2>' }
+      );
+      expect(html).toContain('aria-label="Don’t miss — \'now\'"');
+    });
+
     it('title: with neither slot nor prop the root label is "Slider"', async () => {
       expect(await renderNormalised(Slider, { slides })).toMatch(/aria-label="Slider"/);
     });
