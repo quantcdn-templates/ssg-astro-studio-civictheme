@@ -24,6 +24,16 @@ describe('ComponentPreview layout', () => {
     expect(html).toContain('data-theme="dark"');
   });
 
+  // Studio imports this layout from the preview body (MDX), and the runtime
+  // does not collect the scoped CSS of a component an MDX body imports: the
+  // stage rules must travel in the HTML.
+  it('carries its own stage styles in the rendered HTML', async () => {
+    const html = await render({ theme: 'dark' });
+    expect(html).toMatch(/<style>[^<]*\.ct-component-preview\s*\{\s*padding:\s*1\.5rem;?\s*\}/);
+    expect(html).toMatch(/<style>[^<]*\.ct-component-preview\.ct-theme-dark\s*\{\s*background:\s*#12172b;?\s*\}/);
+    expect(html.trimStart()).toMatch(/^<div class="ct-component-preview /);
+  });
+
   it('falls back to light for an unknown theme', async () => {
     expect(await render({ theme: 'sepia' })).toContain('ct-theme-light');
   });
