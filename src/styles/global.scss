@@ -15,6 +15,13 @@ $ct-assets-directory: '/civictheme/';
 
 // Site overrides go below this line.
 
+// PageLayout/DetailLayout wrap the whole MDX body, components included, in
+// .ct-basic-content. Its prose img margins are for bare Markdown images only.
+.ct-basic-content .ct-image {
+  margin-top: 0;
+  margin-bottom: 0;
+}
+
 // The native search page toggles its states with the `hidden` attribute. Keep
 // a component's own `display` rule from overriding it.
 [data-quant-search] [hidden] {
