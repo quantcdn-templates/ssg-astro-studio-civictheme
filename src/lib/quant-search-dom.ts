@@ -10,7 +10,8 @@
  *
  * Results are cloned from a `<template>` that the real `Snippet.astro`
  * renders at build time, and every API value is written with `textContent`
- * or as an `href` that `safeUrl` has checked — never as HTML.
+ * or as an `href` that `safeUrl` has checked — never as HTML. A result whose
+ * URL `safeUrl` rejected renders its title as plain text, with no link.
  */
 import {
   clampLimit,
@@ -68,13 +69,24 @@ export function collectElements(root: HTMLElement): SearchElements {
   };
 }
 
-/** Writes one result into a cloned Snippet. */
-export function fillSnippet(node: Element, result: SearchResult): void {
+/** Delay between the count update and the heading focus, so the `role="status"` count is announced first. */
+export const FOCUS_DELAY_MS = 100;
+
+function fillTitle(node: Element, result: SearchResult): void {
   const link = node.querySelector('.ct-snippet__title-link');
-  if (link) {
+  if (link && result.url) {
     link.textContent = result.title;
     link.setAttribute('href', result.url);
+    return;
   }
+  // Rejected URL: the title as text, as `Snippet` renders a title with no link.
+  const title = node.querySelector('.ct-snippet__title');
+  if (title) title.textContent = result.title;
+}
+
+/** Writes one result into a cloned Snippet. */
+export function fillSnippet(node: Element, result: SearchResult): void {
+  fillTitle(node, result);
   const summary = node.querySelector('.ct-snippet__summary');
   if (summary && result.summary) summary.textContent = result.summary;
   else summary?.remove();
@@ -110,8 +122,16 @@ export function applyState(els: SearchElements, state: SearchState): void {
   setHidden(els.error, state.kind !== 'error');
 }
 
-/** Sends one query and maps the outcome to a state. Network and HTTP errors become the error state. */
-export async function fetchState(config: SearchConfig, query: string, fetchImpl: FetchLike): Promise<SearchState> {
+/**
+ * Sends one query and maps the outcome to a state. Network and HTTP errors
+ * become the error state. `origin` is the page's `location.origin`.
+ */
+export async function fetchState(
+  config: SearchConfig,
+  query: string,
+  fetchImpl: FetchLike,
+  origin: string
+): Promise<SearchState> {
   try {
     const response = await fetchImpl(searchEndpoint(config.apiOrigin, config.siteId), {
       method: 'POST',
@@ -119,7 +139,7 @@ export async function fetchState(config: SearchConfig, query: string, fetchImpl:
       body: requestBody(query, config.limit),
     });
     if (!response.ok) return { kind: 'error', query };
-    return stateFromResults(query, parseResults(await response.json()));
+    return stateFromResults(query, parseResults(await response.json(), origin));
   } catch {
     return { kind: 'error', query };
   }
@@ -133,12 +153,13 @@ function initialState(query: string): SearchState | null {
 
 /**
  * Runs the page: shows the Callout when search is off, otherwise searches for
- * `?q=` and moves focus to the results heading once results render.
+ * `?q=`. Once results render, focus moves to the results heading
+ * `FOCUS_DELAY_MS` after the status count updates.
  */
 export async function initQuantSearch(
   root: HTMLElement,
   fetchImpl: FetchLike = (input, init) => fetch(input, init),
-  search: string = window.location.search
+  location: Pick<Location, 'search' | 'origin'> = window.location
 ): Promise<SearchState | null> {
   const els = collectElements(root);
   const config = readConfig(root);
@@ -149,7 +170,7 @@ export async function initQuantSearch(
   setHidden(els.unconfigured, true);
   setHidden(els.ui, false);
 
-  const query = readQuery(search);
+  const query = readQuery(location.search);
   if (els.input) els.input.value = query;
   const early = initialState(query);
   if (early) {
@@ -158,8 +179,9 @@ export async function initQuantSearch(
   }
 
   applyState(els, { kind: 'loading', query });
-  const state = await fetchState(config, query, fetchImpl);
+  const state = await fetchState(config, query, fetchImpl, location.origin);
   applyState(els, state);
-  if (state.kind === 'results') els.heading?.focus();
+  const heading = els.heading;
+  if (state.kind === 'results' && heading) setTimeout(() => heading.focus(), FOCUS_DELAY_MS);
   return state;
 }

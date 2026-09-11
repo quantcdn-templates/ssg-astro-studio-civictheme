@@ -31,6 +31,8 @@ const fixture = {
       snippet: 'Tour the <b>council</b> chambers.',
       score: 0.72,
     },
+    // Resolves off-site from a relative path, so it renders with no link.
+    { url: '/\\evil.example/x', title: 'Off-site result', snippet: 'Not linked.', score: 0.5 },
   ],
 };
 
@@ -79,23 +81,36 @@ test.describe('native search page', () => {
     await expectNoAxeViolations(page);
   });
 
-  test('results: renders Snippets, announces the count and focuses the heading', async ({ page }) => {
+  test('results: renders a Snippet list, announces the count, then focuses the heading', async ({ page }) => {
     await withSiteId(page);
     const bodies = await mockApi(page, { json: fixture });
     await page.goto('/search?q=library');
 
     const status = page.locator('[data-search-status]');
-    await expect(status).toHaveText('Showing 2 results for “library”');
+    await expect(status).toHaveText('Showing 3 results for “library”');
     await expect(status).toHaveAttribute('role', 'status');
     await expect(page.getByText('Search is not set up for this site yet.')).toBeHidden();
 
+    // A real list, so screen readers can count the results.
+    await expect(page.locator('ul[data-search-rows] > li')).toHaveCount(3);
+    await expect(
+      page
+        .getByRole('list')
+        .filter({ has: page.locator('.ct-snippet') })
+        .getByRole('listitem')
+    ).toHaveCount(3);
+
     const links = page.locator('[data-search-rows] .ct-snippet__title-link');
     await expect(links).toHaveCount(2);
+    const offSite = page.locator('[data-search-rows] > li').nth(2).locator('.ct-snippet__title');
+    await expect(offSite).toHaveText('Off-site result');
+    await expect(offSite.locator('a')).toHaveCount(0);
     await expect(links.first()).toHaveAttribute('href', '/news/new-library-hours');
     await expect(links.nth(1)).toHaveText('Open day');
     await expect(page.locator('[data-search-rows] img')).toHaveCount(0);
     expect(await page.evaluate(() => (window as { __xss?: number }).__xss)).toBeUndefined();
 
+    // Focus moves to the heading shortly (FOCUS_DELAY_MS) after the count updates.
     await expect(page.locator('[data-search-heading]')).toBeFocused();
     await expect(page.locator('input[name="q"]')).toHaveValue('library');
     expect(JSON.parse(bodies[0]!)).toEqual({ query: 'library', limit: 10 });

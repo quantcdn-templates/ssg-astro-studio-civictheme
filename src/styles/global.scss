@@ -27,3 +27,10 @@ $ct-assets-directory: '/civictheme/';
 [data-quant-search] [hidden] {
   display: none !important;
 }
+
+// The results list is a `.row` `<ul>`; `.row` already drops the bullets and
+// padding, so only the browser's block margins need removing.
+[data-quant-search] ul[data-search-rows] {
+  margin-top: 0;
+  margin-bottom: 0;
+}

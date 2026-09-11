@@ -15,8 +15,8 @@
  * `astro build` and Quant Studio's browser runtime.
  */
 
-/** Queries shorter than this make no request. */
-export const MIN_QUERY_LENGTH = 2;
+/** Queries shorter than this make no request (Quant's own widget uses 3). */
+export const MIN_QUERY_LENGTH = 3;
 
 /** Longest query sent to the API; longer input is cut to this length. */
 export const MAX_QUERY_LENGTH = 200;
@@ -38,6 +38,7 @@ export interface SearchConfig {
 }
 
 export interface SearchResult {
+  /** A checked link target, or `''` when the API URL was rejected (render the title as text). */
   url: string;
   title: string;
   summary: string;
@@ -85,15 +86,38 @@ export function requestBody(query: string, limit: number): string {
   return JSON.stringify({ query, limit: clampLimit(limit) });
 }
 
+const ABSOLUTE_HTTP = /^https?:\/\//i;
+
+function parseUrl(value: string, origin: string): URL | null {
+  try {
+    return new URL(value, origin);
+  } catch {
+    return null;
+  }
+}
+
+function isAllowed(url: URL, absolute: boolean, origin: string): boolean {
+  if (url.protocol !== 'http:' && url.protocol !== 'https:') return false;
+  return absolute || url.origin === parseUrl(origin, origin)?.origin;
+}
+
 /**
- * Only `http:`/`https:` URLs and site-relative paths are linked; anything
- * else (`javascript:`, `data:`, protocol-relative) becomes `#`.
+ * A link target for an API URL, or `''` to render no link.
+ *
+ * The value is parsed against `origin` (the page's `location.origin`). Only
+ * `http:`/`https:` results are linked. An absolute `http(s)://` URL may point
+ * at any host; anything else must resolve on this site, so a path the URL
+ * parser turns into another host (`//evil.example`, `/\evil.example/x`, a
+ * tab inside the slashes) is rejected, as are `javascript:` and `data:`.
+ * Same-site results come back as a path; absolute ones as a full URL.
  */
-export function safeUrl(value: unknown): string {
-  if (typeof value !== 'string' || value.trim() === '') return '#';
-  const url = value.trim();
-  if (url.startsWith('/') && !url.startsWith('//')) return url;
-  return /^https?:\/\//i.test(url) ? url : '#';
+export function safeUrl(value: unknown, origin: string): string {
+  if (typeof value !== 'string' || value.trim() === '') return '';
+  const raw = value.trim();
+  const absolute = ABSOLUTE_HTTP.test(raw);
+  const url = parseUrl(raw, origin);
+  if (!url || !isAllowed(url, absolute, origin)) return '';
+  return absolute ? url.href : `${url.pathname}${url.search}${url.hash}`;
 }
 
 /** Plain text from an API string: tags removed and whitespace collapsed. The DOM still sets it as `textContent`. */
@@ -110,21 +134,24 @@ function summaryOf(item: Record<string, unknown>): string {
   return plainText(metadata.summary) || plainText(item.snippet);
 }
 
-function toResult(item: unknown): SearchResult | null {
+function toResult(item: unknown, origin: string): SearchResult | null {
   if (!item || typeof item !== 'object') return null;
   const record = item as Record<string, unknown>;
   return {
-    url: safeUrl(record.url),
+    url: safeUrl(record.url, origin),
     title: plainText(record.title) || 'Untitled page',
     summary: summaryOf(record),
   };
 }
 
-/** Normalises a search API response into display-ready results; a malformed body yields `[]`. */
-export function parseResults(body: unknown): SearchResult[] {
+/**
+ * Normalises a search API response into display-ready results; a malformed
+ * body yields `[]`. `origin` is the page's `location.origin` (see `safeUrl`).
+ */
+export function parseResults(body: unknown, origin: string): SearchResult[] {
   const results = (body as { results?: unknown } | null)?.results;
   if (!Array.isArray(results)) return [];
-  return results.map(toResult).filter((result): result is SearchResult => result !== null);
+  return results.map((item) => toResult(item, origin)).filter((result): result is SearchResult => result !== null);
 }
 
 /** The state that follows a completed response. */

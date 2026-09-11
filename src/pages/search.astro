@@ -14,9 +14,10 @@
  * `[data-quant-search]` root, because Studio's browser runtime bundles
  * hoisted scripts as a plain IIFE with no `import.meta.env`.
  *
- * Results render as CivicTheme `Snippet`s inside a `List`: the `<template>`
- * below holds one real `Snippet.astro` row, which the script clones and fills
- * with `textContent`.
+ * Results render as CivicTheme `Snippet`s inside a `List`, as a `<ul>` so
+ * screen readers can count them: the `<template>` below holds one real
+ * `Snippet.astro` `<li>`, which the script clones and fills with
+ * `textContent`.
  */
 import BaseLayout from '@/layouts/BaseLayout.astro';
 import PageBanner from '@/components/PageBanner.astro';
@@ -111,14 +112,14 @@ const configured = isConfigured({ siteId, enabled: search.enabled });
       </Fragment>
       <Fragment slot="rows">
         <div class="container">
-          <div class="row row--equal-heights-content row--vertically-spaced" data-search-rows></div>
+          <ul class="row row--equal-heights-content row--vertically-spaced" data-search-rows></ul>
         </div>
       </Fragment>
     </List>
     <template data-search-template>
-      <div class="col-xxs-12 col-m-12">
+      <li class="col-xxs-12 col-m-12">
         <Snippet title="Result title" summary="Result summary" link={{ url: '/' }} />
-      </div>
+      </li>
     </template>
   </div>
 </BaseLayout>
