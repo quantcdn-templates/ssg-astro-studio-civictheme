@@ -77,6 +77,21 @@ describe('Slider', () => {
       expect(viaSlot).toBe(viaProp);
     });
 
+    it('title: a slot alone labels the root with its text, tags stripped', async () => {
+      const html = await renderNormalised(
+        Slider,
+        { slides },
+        { title: '<h2 class="ct-heading ct-slider__title ct-theme-light">News &amp; <em>events</em></h2>' }
+      );
+      // The normaliser decodes entities, so a double-escaped label would read "News &amp; events".
+      expect(html).toContain('aria-label="News & events"');
+      expect(html).toContain('<em>events</em>');
+    });
+
+    it('title: with neither slot nor prop the root label is "Slider"', async () => {
+      expect(await renderNormalised(Slider, { slides })).toMatch(/aria-label="Slider"/);
+    });
+
     it('a slot alone (no string prop) still opens its wrapper markup', async () => {
       const html = await renderNormalised(Slider, { slides }, { contentTop: 'Live Top' });
       expect(html).toContain('ct-slider__content__top');

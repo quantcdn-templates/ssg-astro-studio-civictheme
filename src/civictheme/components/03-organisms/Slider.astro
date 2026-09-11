@@ -23,6 +23,8 @@
  * string prop when present (Task 14c); their wrapper `{% if %}` gates
  * widen to `Boolean(prop) || Astro.slots.has('prop')`. `title` routes the
  * string-prop branch through `Heading`, so a slot bypasses that wrapper.
+ * The root `aria-label` uses the `title` slot's text (tags stripped) when
+ * the slot is present, then the `title` prop, then `'Slider'`.
  * `slides` is NOT slotted: it is not documented as a Slot upstream (it is
  * a plain "Props:" entry — pre-rendered slide markup supplied by the
  * caller, same treatment as before).
@@ -77,11 +79,24 @@ const hasContentBottomSlot = Astro.slots.has('contentBottom');
 const hasContentTop = Boolean(contentTop) || hasContentTopSlot;
 const hasTitle = Boolean(title) || hasTitleSlot;
 const hasContentBottom = Boolean(contentBottom) || hasContentBottomSlot;
+
+// The root `aria-label` reads the title as plain text. A `title` slot is
+// rendered once here — printed below via `set:html` — and its text (tags
+// stripped, the escaper's entities decoded) takes precedence over the prop.
+const ENTITIES: Record<string, string> = { '&amp;': '&', '&lt;': '<', '&gt;': '>', '&quot;': '"', '&#39;': "'" };
+const textOf = (html: string) =>
+  html
+    .replace(/<[^>]*>/g, ' ')
+    .replace(/&(?:amp|lt|gt|quot|#39);/g, (entity) => ENTITIES[entity] ?? entity)
+    .replace(/\s+/g, ' ')
+    .trim();
+const titleSlotHtml = hasTitleSlot ? await Astro.slots.render('title') : '';
+const ariaLabel = textOf(titleSlotHtml) || title || 'Slider';
 ---
 
 {
   slides && (
-    <div role="region" aria-label={title || 'Slider'} aria-roledescription="carousel" class={classes} {...rest}>
+    <div role="region" aria-label={ariaLabel} aria-roledescription="carousel" class={classes} {...rest}>
       <div class="container">
         <div class="row">
           <div class="col-xxs-12">
@@ -96,7 +111,7 @@ const hasContentBottom = Boolean(contentBottom) || hasContentBottomSlot;
               {hasTitle && (
                 <Fragment>
                   {hasTitleSlot ? (
-                    <slot name="title" />
+                    <Fragment set:html={titleSlotHtml} />
                   ) : (
                     <Heading theme={theme} content={title} level={2} class="ct-slider__title" />
                   )}{' '}
