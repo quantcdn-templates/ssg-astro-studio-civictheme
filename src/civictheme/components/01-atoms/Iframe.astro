@@ -15,6 +15,11 @@
  * Note: unlike the other atoms, upstream's iframe.twig has no `{% if %}`
  * guard around the root element — it always renders, even with an empty
  * `url`. This port matches that (no gating on `url`).
+ *
+ * Deviation from upstream: MDX editors can set `url` and extra attributes,
+ * so only an absolute `https:` URL becomes `src` (http:, javascript:, data:,
+ * protocol-relative and unparseable values render no `src`), and `...rest`
+ * cannot add event handlers (`on*`) or override `src` / `srcdoc`.
  */
 interface Props {
   theme?: 'light' | 'dark';
@@ -50,7 +55,19 @@ const classes = [
 ]
   .filter(Boolean)
   .join(' ');
+
+function httpsOnly(value: unknown): string | undefined {
+  if (typeof value !== 'string') return undefined;
+  try {
+    return new URL(value).protocol === 'https:' ? value : undefined;
+  } catch {
+    return undefined;
+  }
+}
+
+const BLOCKED_ATTRIBUTE = /^(on|srcdoc$|src$)/i;
+const attributes = Object.fromEntries(Object.entries(rest).filter(([name]) => !BLOCKED_ATTRIBUTE.test(name)));
+const src = httpsOnly(url);
 ---
 
-<iframe class={classes} src={url || undefined} width={width || undefined} height={height || undefined} {...rest}
-></iframe>
+<iframe class={classes} src={src} width={width || undefined} height={height || undefined} {...attributes}></iframe>
