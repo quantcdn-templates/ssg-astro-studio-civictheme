@@ -82,7 +82,7 @@ const bannerProps = {
   hasContent ? (
     <Banner {...bannerProps}>
       <Fragment slot="content">
-        {tagItems.length > 0 && <TagList theme={theme} tags={tagItems} />}
+        {tagItems.length > 0 && <TagList theme={theme} tags={tagItems} verticalSpacing="bottom" />}
         {summary && <Paragraph theme={theme} content={summary} />}
       </Fragment>
     </Banner>
