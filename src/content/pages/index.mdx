@@ -13,9 +13,9 @@ draft: false
 order: 0
 ---
 
-<ListingAuto collection="news" title="Latest news" limit={3} />
+<ListingAuto collection="news" title="Latest news" limit={3} verticalSpacing="both" />
 
-<ListingAuto collection="events" title="Upcoming events" limit={3} />
+<ListingAuto collection="events" title="Upcoming events" limit={3} verticalSpacing="both" />
 
 <div class="ct-vertical-spacing-inset--bottom">
   <Grid templateColumnCount={4}>
@@ -45,12 +45,12 @@ order: 0
     </div>
     <div class="col-xxs-12 col-m-3">
       <SubjectCard
-        title="Link text"
+        title="CivicTheme in 60 seconds"
         image={{
           url: '/images/demo/demo-govcms-visual-white-paper.jpg',
           alt: 'Computer and devices displaying a website',
         }}
-        link={{ url: '/' }}
+        link={{ url: '/civictheme-60-second-series' }}
       />
     </div>
   </Grid>
