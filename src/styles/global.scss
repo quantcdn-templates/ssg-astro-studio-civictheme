@@ -41,6 +41,28 @@ $ct-assets-directory: '/civictheme/';
   }
 }
 
+// Colour fallback for browsers without `@scope` (Firefox before 146, Chrome and
+// Edge before 118, Safari before 17.4). These browsers drop the whole block
+// above, so the body text shows in the browser default colours. The rules
+// below set only the content colours, on the wrapper and on its classless
+// prose children. `:where()` gives every selector zero specificity, so the
+// component rules and the scoped rules above still win in newer browsers.
+@each $theme in light, dark {
+  :where(.page-content.ct-theme-#{$theme}) {
+    color: var(--ct-basic-content-#{$theme}-base-color);
+
+    @for $level from 1 through 6 {
+      > :where(h#{$level}:not([class])) {
+        color: var(--ct-basic-content-#{$theme}-heading-#{$level}-color);
+      }
+    }
+
+    > :where(p, ul, ol, dl, blockquote, table):where(:not([class])) :where(a:not([class])) {
+      color: var(--ct-content-link-#{$theme}-color);
+    }
+  }
+}
+
 // basic-content.scss spaces these components when they sit in the content.
 .page-content .ct-table,
 .page-content .ct-video-player {
