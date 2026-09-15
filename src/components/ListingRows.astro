@@ -96,7 +96,7 @@ const cards = entries.map(toViewModel);
 ---
 
 <div class="container">
-  <Grid useContainer={false}>
+  <Grid useContainer={false} rowClass="row--equal-heights-content row--vertically-spaced">
     {
       cards.length === 0 ? (
         <div class="col-xxs-12">
