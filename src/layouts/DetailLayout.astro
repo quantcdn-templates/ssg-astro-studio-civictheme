@@ -84,15 +84,22 @@ const tagItems = topics.map((topic) => ({ content: topic }));
     <div class="row">
       <div class="col-xxs-12 col-m-8">
         <div class="ct-vertical-spacing-inset--both">
-          {/* .page-content, not .ct-basic-content: see the page body block in global.scss. */}
-          <div class={`page-content ct-theme-${theme}`}>
-            <slot />
-            {
-              registrationUrl && (
-                <Button theme={theme} kind="link" type="primary" text="Register" url={registrationUrl} />
-              )
-            }
-            {files.length > 0 && <Attachment theme={theme} title="Download" files={files} withBackground />}
+          {
+            // The plain div keeps .page-content a last child. The vendored
+            // content rule `:scope:last-child p:last-child` then removes the
+            // margin below the last paragraph, and the tags stay 48px away.
+          }
+          <div>
+            {/* .page-content, not .ct-basic-content: see the page body block in global.scss. */}
+            <div class={`page-content ct-theme-${theme}`}>
+              <slot />
+              {
+                registrationUrl && (
+                  <Button theme={theme} kind="link" type="primary" text="Register" url={registrationUrl} />
+                )
+              }
+              {files.length > 0 && <Attachment theme={theme} title="Download" files={files} withBackground />}
+            </div>
           </div>
           {
             // Topics follow the content, outside it, as Drupal's node.inc adds
