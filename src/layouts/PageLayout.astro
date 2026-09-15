@@ -64,7 +64,7 @@ const lastUpdated = data.updated
               />
             )
           }
-          <div class="ct-basic-content">
+          <div class={`ct-basic-content ct-theme-${data.theme}`}>
             <slot />
             {data.showLastUpdated && lastUpdated && <Paragraph theme={data.theme} content={lastUpdated} />}
           </div>
