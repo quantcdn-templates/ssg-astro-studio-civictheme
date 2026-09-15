@@ -22,6 +22,12 @@ const pages = defineCollection({
     bannerTheme: z.enum(['light', 'dark']).default('dark'),
     showBreadcrumb: z.boolean().default(true),
     showLastUpdated: z.boolean().default(false),
+    /**
+     * Show CivicTheme's automatic table of contents (built from the body's
+     * H2 headings) above the body, like Drupal's `field_c_n_show_toc`.
+     */
+    showToc: z.boolean().default(false),
+    tocTitle: z.string().default('On this page'),
     topics: z.array(z.string()).default([]),
     section: z.string().optional(),
     draft: z.boolean().default(false),

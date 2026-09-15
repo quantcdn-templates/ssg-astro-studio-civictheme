@@ -9,6 +9,7 @@ import BaseLayout from './BaseLayout.astro';
 import PageBanner from '@/components/PageBanner.astro';
 import SideNavigation from '@civictheme/organisms/SideNavigation.astro';
 import Paragraph from '@civictheme/atoms/Paragraph.astro';
+import TableOfContents from '@civictheme/molecules/TableOfContents.astro';
 import { breadcrumbForPage, sectionNav, entryUrl } from '@/lib/content';
 import { ogImagePath } from '@/lib/url';
 
@@ -48,9 +49,25 @@ const lastUpdated = data.updated
         )
       }
       <div class={sideItems.length > 0 ? 'col-xxs-12 col-m-9' : 'col-xxs-12'}>
-        <div class="ct-basic-content ct-vertical-spacing-inset--both">
-          <slot />
-          {data.showLastUpdated && lastUpdated && <Paragraph theme={data.theme} content={lastUpdated} />}
+        <div class="ct-vertical-spacing-inset--both">
+          {
+            // CivicTheme renders the table of contents before the content, as
+            // a sibling (Drupal node.inc, the Storybook story). Inside
+            // .ct-basic-content the content typography overrides its styles.
+            data.showToc && (
+              <TableOfContents
+                theme={data.theme}
+                title={data.tocTitle}
+                anchorSelector="h2"
+                scopeSelector=".ct-basic-content"
+                position="before"
+              />
+            )
+          }
+          <div class="ct-basic-content">
+            <slot />
+            {data.showLastUpdated && lastUpdated && <Paragraph theme={data.theme} content={lastUpdated} />}
+          </div>
         </div>
       </div>
     </div>
