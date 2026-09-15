@@ -15,11 +15,40 @@ $ct-assets-directory: '/civictheme/';
 
 // Site overrides go below this line.
 
-// PageLayout/DetailLayout wrap the whole MDX body, components included, in
-// .ct-basic-content. Its prose img margins are for bare Markdown images only.
-.ct-basic-content .ct-image {
-  margin-top: 0;
-  margin-bottom: 0;
+// Page body typography.
+//
+// PageLayout and DetailLayout render the whole MDX body, prose and CivicTheme
+// components together, in one `.page-content` wrapper. CivicTheme's content
+// styles (`.ct-basic-content h2`, `.ct-basic-content a:not(.ct-button)…`) have
+// a higher specificity than most component rules. Inside `.ct-basic-content`
+// they underline card titles and restyle component headings and lists.
+// CivicTheme itself never puts components inside basic content (Drupal renders
+// paragraphs next to the body field), so it has no guard for this.
+//
+// This block applies the same vendored content mixins to the prose only. The
+// `@scope` limit stops them at the first element with a `ct-` class, so every
+// component keeps its own styles. The vendored SCSS stays unchanged. The body
+// element and Studio's hidden `data-qb` block markers stay unchanged too.
+@scope (.page-content) to (:scope [class^='ct-'], :scope [class*=' ct-']) {
+  :scope {
+    @include ct-content();
+  }
+
+  @each $theme in light, dark {
+    :scope.ct-theme-#{$theme} {
+      @include ct-content-theme($theme);
+    }
+  }
+}
+
+// basic-content.scss spaces these components when they sit in the content.
+.page-content .ct-table,
+.page-content .ct-video-player {
+  margin-bottom: var(--ct-basic-content-vertical-spacing);
+
+  &:last-child {
+    margin-bottom: 0;
+  }
 }
 
 // The native search page toggles its states with the `hidden` attribute. Keep

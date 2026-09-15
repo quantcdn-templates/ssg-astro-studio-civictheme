@@ -59,12 +59,13 @@ const lastUpdated = data.updated
                 theme={data.theme}
                 title={data.tocTitle}
                 anchorSelector="h2"
-                scopeSelector=".ct-basic-content"
+                scopeSelector=".page-content"
                 position="before"
               />
             )
           }
-          <div class={`ct-basic-content ct-theme-${data.theme}`}>
+          {/* .page-content, not .ct-basic-content: see the page body block in global.scss. */}
+          <div class={`page-content ct-theme-${data.theme}`}>
             <slot />
             {data.showLastUpdated && lastUpdated && <Paragraph theme={data.theme} content={lastUpdated} />}
           </div>

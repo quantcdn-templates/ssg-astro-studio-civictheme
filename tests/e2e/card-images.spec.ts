@@ -3,16 +3,17 @@ import { test, expect } from '@playwright/test';
 /**
  * Card images inside MDX pages.
  *
- * `PageLayout`/`DetailLayout` wrap the whole MDX body in `.ct-basic-content`,
+ * `PageLayout`/`DetailLayout` wrap the whole MDX body in `.page-content`,
  * whose prose rule gives every `img` a large vertical margin
  * (`scss/00-base/mixins/_content.scss`). That margin pushed NavigationCard's
  * absolutely positioned image down over the card title, and added a band
- * above and below PromoCard images. `src/styles/global.scss` takes the margin
- * off `.ct-image` (the Image atom); bare Markdown images keep it.
+ * above and below PromoCard images. The `@scope` limit in
+ * `src/styles/global.scss` keeps the prose rules off CivicTheme components;
+ * bare Markdown images keep the margin.
  */
 test('NavigationCard images sit at the top of their wrapper and clear the title', async ({ page }) => {
   await page.goto('/civictheme-60-second-series');
-  const cards = await page.locator('.ct-basic-content .ct-navigation-card--with-image').evaluateAll((nodes) =>
+  const cards = await page.locator('.page-content .ct-navigation-card--with-image').evaluateAll((nodes) =>
     nodes.map((card) => {
       const box = (selector: string) => card.querySelector(selector)!.getBoundingClientRect().toJSON() as DOMRect;
       return {
@@ -34,7 +35,7 @@ test('NavigationCard images sit at the top of their wrapper and clear the title'
 
 test('PromoCard images inside basic content have no vertical margin', async ({ page }) => {
   await page.goto('/');
-  const image = page.locator('.ct-basic-content .ct-promo-card__image img.ct-image').first();
+  const image = page.locator('.page-content .ct-promo-card__image img.ct-image').first();
   await expect(image).toBeVisible();
   const margins = await image.evaluate((el) => {
     const style = getComputedStyle(el);

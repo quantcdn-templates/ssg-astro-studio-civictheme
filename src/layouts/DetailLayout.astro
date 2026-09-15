@@ -83,7 +83,8 @@ const tagItems = topics.map((topic) => ({ content: topic }));
   <div class="ct-page container">
     <div class="row">
       <div class="col-xxs-12 col-m-8">
-        <div class={`ct-basic-content ct-theme-${theme} ct-vertical-spacing-inset--both`}>
+        {/* .page-content, not .ct-basic-content: see the page body block in global.scss. */}
+        <div class={`page-content ct-theme-${theme} ct-vertical-spacing-inset--both`}>
           <slot />
           {registrationUrl && <Button theme={theme} kind="link" type="primary" text="Register" url={registrationUrl} />}
           {files.length > 0 && <Attachment theme={theme} title="Download" files={files} withBackground />}

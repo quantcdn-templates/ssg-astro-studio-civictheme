@@ -133,7 +133,7 @@
         "description": "In-page navigation built from headings.",
         "defaults": {
           "title": "On this page",
-          "scopeSelector": ".ct-basic-content"
+          "scopeSelector": ".page-content"
         }
       },
       {
