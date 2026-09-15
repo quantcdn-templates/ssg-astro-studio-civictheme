@@ -102,8 +102,10 @@ const faviconType = favicon.endsWith('.svg') ? 'image/svg+xml' : undefined;
     <script>
       import '@/civictheme/js/civictheme.js';
       import { focusFormResult } from '@/lib/quant-form-result';
+      import { labelPageContentTables } from '@/lib/page-content-tables';
 
       focusFormResult(document);
+      labelPageContentTables(document);
     </script>
   </body>
 </html>
