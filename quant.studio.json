@@ -274,12 +274,6 @@
           "url": "/civictheme/demo/images/demo1.jpg",
           "alt": "",
           "caption": "Caption"
-        },
-        "props": {
-          "url": {
-            "widget": "image",
-            "label": "Image"
-          }
         }
       },
       {
@@ -308,12 +302,6 @@
               "type": "video/webm"
             }
           ]
-        },
-        "props": {
-          "poster": {
-            "widget": "image",
-            "label": "Poster image"
-          }
         }
       },
       {
