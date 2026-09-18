@@ -1,14 +1,15 @@
 /**
  * Clean public path for a built page.
  *
- * `astro.config.mjs` sets `build.format: 'file'`, so `Astro.url.pathname` is
- * the built FILE path (`/index.html`, `/events.html`, `/news/x.html`) while
- * the sitemap and every in-page link use the clean path (`/`, `/events`,
- * `/news/x`). Canonical, `og:url` and the OG image slug must match the
- * sitemap, so they all go through this helper.
+ * `astro.config.mjs` sets `build.format: 'directory'`, so `Astro.url.pathname`
+ * carries a trailing slash (`/events/`, `/news/x/`) while the sitemap and every
+ * in-page link use the clean path (`/`, `/events`, `/news/x`). Canonical,
+ * `og:url` and the OG image slug must match the sitemap, so they all go through
+ * this helper.
  *
- * Strips a trailing `index.html` first, then a trailing `.html`; `/` is
- * returned unchanged, and a path that never had `.html` passes through.
+ * Strips a trailing `index.html`, then a trailing `.html`, then a trailing
+ * slash; `/` is returned unchanged. The `.html` cases are kept so a path from
+ * an older `format: 'file'` build still normalises to the same address.
  */
 export function cleanPath(pathname: string): string {
   const withoutIndex = pathname.replace(/index\.html$/, '');

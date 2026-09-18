@@ -36,7 +36,9 @@ const referencePages = [
 // Every route under `/components/` — the ten families named in the task
 // brief plus the remaining ones so the whole section is covered.
 const componentPages = [
-  '/components/',
+  // No trailing slash: `astro.config.mjs` sets `trailingSlash: 'never'`, so
+  // `/components/` is not a served address.
+  '/components',
   '/components/banners',
   '/components/promo',
   '/components/campaign',

@@ -67,9 +67,9 @@ function listFiles(dir: string): string[] {
 const stories = listFiles(join(FIXTURES, 'args'))
   .filter((file) => file.endsWith('.json'))
   .map((file) => relative(join(FIXTURES, 'args'), file).replace(/\.json$/, ''))
-  // `build.format: 'file'` writes `<name>.html`, not `<name>/index.html`.
+  // `build.format: 'directory'` writes `<name>/index.html`.
   // A story with no ported component (04-templates/page) has no page at all.
-  .filter((name) => existsSync(join(process.cwd(), 'dist-story-parity/story-parity', `${name}.html`)))
+  .filter((name) => existsSync(join(process.cwd(), 'dist-story-parity/story-parity', name, 'index.html')))
   .sort();
 
 test.describe.configure({ mode: 'parallel' });

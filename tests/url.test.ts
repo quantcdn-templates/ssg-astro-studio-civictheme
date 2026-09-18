@@ -8,6 +8,11 @@ describe('cleanPath', () => {
     expect(cleanPath('/news/new-library-hours.html')).toBe('/news/new-library-hours');
   });
 
+  it('strips the trailing slash that build.format directory puts on the pathname', () => {
+    expect(cleanPath('/events/')).toBe('/events');
+    expect(cleanPath('/news/new-library-hours/')).toBe('/news/new-library-hours');
+  });
+
   it('leaves a path that has no .html suffix unchanged', () => {
     expect(cleanPath('/')).toBe('/');
     expect(cleanPath('/events')).toBe('/events');
@@ -20,5 +25,6 @@ describe('ogImagePath', () => {
     expect(ogImagePath('/')).toBe('/og/home.png');
     expect(ogImagePath('/about-us')).toBe('/og/about-us.png');
     expect(ogImagePath('/news/new-library-hours.html')).toBe('/og/news/new-library-hours.png');
+    expect(ogImagePath('/about-us/')).toBe('/og/about-us.png');
   });
 });
