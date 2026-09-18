@@ -11,6 +11,13 @@
  * Fonts: CivicTheme's own SCSS `@import`s Lexend and Public Sans from Google
  * Fonts, so the head only adds the two preconnects.
  *
+ * Page background: `ct-page` sits on the `<body>`, not on the centred content
+ * wrapper. CivicTheme's `.ct-page` rule (`scss/04-templates/page/page.scss`)
+ * paints the themed page background, and in Drupal `.ct-page` IS the
+ * full-width page element. On the body the background covers the whole
+ * viewport, so a `theme: dark` page renders dark-theme text on the dark page
+ * background instead of on the browser's white canvas.
+ *
  * Dismissed alerts: the inline head script hides every alert id in the
  * `ct-alert-hide` cookie before first paint, so a dismissed alert does not
  * flash in and out. The shim in `src/civictheme/js/civictheme.js` then
@@ -90,7 +97,7 @@ const faviconType = favicon.endsWith('.svg') ? 'image/svg+xml' : undefined;
       })();
     </script>
   </head>
-  <body class={`ct-theme-${theme}`}>
+  <body class={`ct-page ct-theme-${theme}`}>
     <SkipLink theme={theme} url="#main-content" />
     <SiteAlerts theme={theme} />
     <SiteHeader theme={theme} />

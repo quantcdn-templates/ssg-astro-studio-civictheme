@@ -76,6 +76,16 @@ describe('astro build', () => {
     expect(index).toContain('class="ct-footer');
     expect(index).toContain('class="ct-banner');
   });
+  it('carries the page theme on the body, so the themed page background is full-bleed', () => {
+    // CivicTheme paints the page background from `.ct-page` (scss/04-templates/
+    // page/page.scss). Without the class on the body, a `theme: dark` page put
+    // dark-theme text on the browser's white canvas.
+    const index = readFileSync(join(root, 'dist/index.html'), 'utf8');
+    expect(index).toContain('<body class="ct-page ct-theme-light">');
+    const css = builtCss();
+    expect(css).toContain('.ct-page.ct-theme-light{background-color:var(--ct-page-light-background-color)}');
+    expect(css).toContain('.ct-page.ct-theme-dark{background-color:var(--ct-page-dark-background-color)}');
+  });
   it('excludes draft news articles from the news listing', () => {
     const news = readFileSync(join(root, 'dist/news.html'), 'utf8');
     expect(news).not.toContain('Draft Heritage Strategy Under Internal Review');
