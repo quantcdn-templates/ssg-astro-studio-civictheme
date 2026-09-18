@@ -82,6 +82,8 @@ describe('quant.studio.json component-editor hints', () => {
     expect(items.map((i) => i.path.split('/').pop())).toEqual([
       'ListingAuto.astro',
       'NavigationCard.astro',
+      'Figure.astro',
+      'VideoPlayer.astro',
       'Grid.astro',
       'Button.astro',
     ]);
