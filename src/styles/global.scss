@@ -15,6 +15,18 @@ $ct-assets-directory: '/civictheme/';
 
 // Site overrides go below this line.
 
+// Browser default `body` margin reset.
+//
+// CivicTheme is a Drupal theme. Drupal's base CSS resets the body margin, so
+// the vendored SCSS never carries that reset. Without it the browser default
+// `margin: 8px` stays, `html` and `body` are transparent, and an 8 px white
+// band shows on all four sides of the page. The full-bleed bars (the alert,
+// the header) then stop 8 px short of each edge. The centred `.container`
+// widths are CivicTheme's own grid and stay unchanged.
+body {
+  margin: 0;
+}
+
 // Page body typography.
 //
 // PageLayout and DetailLayout render the whole MDX body, prose and CivicTheme
