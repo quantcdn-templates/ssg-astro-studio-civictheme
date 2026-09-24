@@ -51,6 +51,10 @@
     "items": [
       {
         "path": "src/civictheme/components/02-molecules/Callout.astro",
+        "tag": "Callout",
+        "roles": [
+          "callout"
+        ],
         "group": "content",
         "description": "Highlighted message with optional links.",
         "defaults": {
@@ -60,6 +64,10 @@
       },
       {
         "path": "src/civictheme/components/03-organisms/Promo.astro",
+        "tag": "Promo",
+        "roles": [
+          "cta"
+        ],
         "group": "content",
         "description": "Call-to-action band with a link.",
         "defaults": {
@@ -73,6 +81,11 @@
       },
       {
         "path": "src/civictheme/components/03-organisms/Campaign.astro",
+        "tag": "Campaign",
+        "roles": [
+          "campaign",
+          "banner"
+        ],
         "group": "content",
         "description": "Image and text campaign block.",
         "defaults": {
@@ -82,6 +95,11 @@
       },
       {
         "path": "src/civictheme/components/02-molecules/NextStep.astro",
+        "tag": "NextStep",
+        "roles": [
+          "next-step",
+          "cta"
+        ],
         "group": "content",
         "description": "Next step call-out.",
         "defaults": {
@@ -94,6 +112,10 @@
       },
       {
         "path": "src/civictheme/components/02-molecules/Accordion.astro",
+        "tag": "Accordion",
+        "roles": [
+          "accordion"
+        ],
         "group": "content",
         "description": "Expandable panels.",
         "defaults": {
@@ -107,6 +129,10 @@
       },
       {
         "path": "src/civictheme/components/02-molecules/Tabs.astro",
+        "tag": "Tabs",
+        "roles": [
+          "tabs"
+        ],
         "group": "content",
         "description": "Tabbed panels.",
         "defaults": {
@@ -121,6 +147,10 @@
       },
       {
         "path": "src/civictheme/components/02-molecules/BasicContent.astro",
+        "tag": "BasicContent",
+        "roles": [
+          "basic-content"
+        ],
         "group": "content",
         "description": "Rich text block.",
         "defaults": {
@@ -129,6 +159,10 @@
       },
       {
         "path": "src/civictheme/components/02-molecules/TableOfContents.astro",
+        "tag": "TableOfContents",
+        "roles": [
+          "toc"
+        ],
         "group": "content",
         "description": "In-page navigation built from headings.",
         "defaults": {
@@ -138,6 +172,10 @@
       },
       {
         "path": "src/civictheme/components/01-atoms/Table.astro",
+        "tag": "Table",
+        "roles": [
+          "table"
+        ],
         "group": "content",
         "description": "Data table.",
         "defaults": {
@@ -155,6 +193,10 @@
       },
       {
         "path": "src/civictheme/components/03-organisms/Webform.astro",
+        "tag": "Webform",
+        "roles": [
+          "form"
+        ],
         "group": "content",
         "description": "Form wrapper (form markup goes in the referencedWebform slot).",
         "defaults": {
@@ -163,6 +205,10 @@
       },
       {
         "path": "src/components/ManualList.astro",
+        "tag": "ManualList",
+        "roles": [
+          "listing"
+        ],
         "group": "listings",
         "description": "Chosen entries from one collection.",
         "defaults": {
@@ -177,6 +223,10 @@
       },
       {
         "path": "src/components/ListingAuto.astro",
+        "tag": "ListingAuto",
+        "roles": [
+          "listing"
+        ],
         "group": "listings",
         "description": "Latest entries from one collection.",
         "defaults": {
@@ -198,6 +248,10 @@
       },
       {
         "path": "src/civictheme/components/03-organisms/Slider.astro",
+        "tag": "Slider",
+        "roles": [
+          "slider"
+        ],
         "group": "listings",
         "description": "Carousel of slides.",
         "defaults": {
@@ -207,6 +261,10 @@
       },
       {
         "path": "src/civictheme/components/02-molecules/PromoCard.astro",
+        "tag": "PromoCard",
+        "roles": [
+          "card-grid"
+        ],
         "group": "listings",
         "defaults": {
           "title": "Card title",
@@ -218,6 +276,11 @@
       },
       {
         "path": "src/civictheme/components/02-molecules/NavigationCard.astro",
+        "tag": "NavigationCard",
+        "roles": [
+          "card-grid",
+          "navigation"
+        ],
         "group": "listings",
         "defaults": {
           "title": "Card title",
@@ -241,6 +304,10 @@
       },
       {
         "path": "src/civictheme/components/02-molecules/SubjectCard.astro",
+        "tag": "SubjectCard",
+        "roles": [
+          "card-grid"
+        ],
         "group": "listings",
         "defaults": {
           "title": "Subject",
@@ -251,6 +318,10 @@
       },
       {
         "path": "src/civictheme/components/02-molecules/Attachment.astro",
+        "tag": "Attachment",
+        "roles": [
+          "attachment"
+        ],
         "group": "media",
         "description": "Downloadable file.",
         "defaults": {
@@ -268,6 +339,10 @@
       },
       {
         "path": "src/civictheme/components/02-molecules/Figure.astro",
+        "tag": "Figure",
+        "roles": [
+          "figure"
+        ],
         "group": "media",
         "description": "Image with caption.",
         "defaults": {
@@ -278,6 +353,10 @@
       },
       {
         "path": "src/civictheme/components/02-molecules/Map.astro",
+        "tag": "Map",
+        "roles": [
+          "map"
+        ],
         "group": "media",
         "description": "Embedded map.",
         "defaults": {
@@ -287,6 +366,10 @@
       },
       {
         "path": "src/civictheme/components/02-molecules/VideoPlayer.astro",
+        "tag": "VideoPlayer",
+        "roles": [
+          "video"
+        ],
         "group": "media",
         "description": "Video embed.",
         "defaults": {
@@ -306,6 +389,10 @@
       },
       {
         "path": "src/civictheme/components/01-atoms/Iframe.astro",
+        "tag": "Iframe",
+        "roles": [
+          "embed"
+        ],
         "group": "media",
         "description": "Embedded frame.",
         "defaults": {
@@ -314,6 +401,10 @@
       },
       {
         "path": "src/civictheme/components/00-base/Grid.astro",
+        "tag": "Grid",
+        "roles": [
+          "card-grid"
+        ],
         "group": "layout",
         "description": "Column grid; put cards inside.",
         "defaults": {
@@ -340,6 +431,7 @@
       },
       {
         "path": "src/civictheme/components/01-atoms/Heading.astro",
+        "tag": "Heading",
         "group": "layout",
         "defaults": {
           "content": "Heading",
@@ -348,6 +440,7 @@
       },
       {
         "path": "src/civictheme/components/01-atoms/Paragraph.astro",
+        "tag": "Paragraph",
         "group": "layout",
         "defaults": {
           "content": "Paragraph text."
@@ -355,6 +448,7 @@
       },
       {
         "path": "src/civictheme/components/01-atoms/Button.astro",
+        "tag": "Button",
         "group": "layout",
         "defaults": {
           "text": "Button",
@@ -381,5 +475,44 @@
   },
   "_preview": {
     "layout": "src/layouts/ComponentPreview.astro"
+  },
+  "_migration": {
+    "collections": {
+      "page": "pages",
+      "article": "news",
+      "event": "events",
+      "document": "publications",
+      "alert": "alerts"
+    },
+    "body": {
+      "format": "mdx",
+      "componentsInBody": true
+    },
+    "theme": {
+      "file": "src/civictheme/scss/variables.base.scss",
+      "writer": "ct-brand-map"
+    },
+    "demoContent": [
+      "src/content/pages/about-us.mdx",
+      "src/content/pages/accessibility.mdx",
+      "src/content/pages/businesses.mdx",
+      "src/content/pages/civictheme-60-second-series.mdx",
+      "src/content/pages/community-engagement.mdx",
+      "src/content/pages/contact-us.mdx",
+      "src/content/pages/government.mdx",
+      "src/content/pages/individuals.mdx",
+      "src/content/pages/news-and-events.mdx",
+      "src/content/pages/privacy.mdx",
+      "src/content/pages/subscribe.mdx",
+      "src/content/news/*.mdx",
+      "src/content/events/*.mdx",
+      "src/content/publications/*.mdx",
+      "src/content/alerts/*.json"
+    ],
+    "media": "public/uploads",
+    "extensions": {
+      "components": "src/components",
+      "collections": true
+    }
   }
 }
