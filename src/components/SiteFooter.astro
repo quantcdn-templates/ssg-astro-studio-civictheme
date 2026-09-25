@@ -50,7 +50,7 @@ const year = new Date().getFullYear();
     <Navigation theme={theme} items={footerMenu} name="footer" type="none" title={site.name} />
   </Fragment>
   <Fragment slot="contentBottom1">
-    <div class="ct-footer__acknowledgement ct-text-regular">{site.acknowledgement}</div>
+    {site.acknowledgement && <div class="ct-footer__acknowledgement ct-text-regular">{site.acknowledgement}</div>}
   </Fragment>
   <Fragment slot="contentBottom2">
     <div class="copyright ct-text-regular">© {year} {site.name}</div>
