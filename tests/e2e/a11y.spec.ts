@@ -2,6 +2,7 @@ import fs from 'node:fs';
 import { test, expect } from '@playwright/test';
 import AxeBuilder from '@axe-core/playwright';
 import { EXCLUDE_ALWAYS } from './axe-excludes';
+import { demoPresent } from '../demo-content';
 
 /**
  * Accessibility pass (Task 18): axe-core over the reference pages and every
@@ -76,6 +77,32 @@ const otherPages = ['/accessibility', '/search', '/404.html'];
 const pages = [...referencePages, ...componentPages, ...listingAndDetailPages, ...otherPages];
 
 /**
+ * Pages above that are demo content a Studio migration deletes, mapped to
+ * the repo-relative file whose presence proves it — everything in
+ * `referencePages` except the home page (which stays present after
+ * migration, just with different content), `/accessibility`, and the three
+ * demo detail pages in `listingAndDetailPages`. The listing pages
+ * themselves (`/events`, `/news`, `/publications`), `/`, `/search`,
+ * `/404.html` and every `/components/*` page are generic — they exist,
+ * and must stay accessible, whatever content is in the collections.
+ */
+const demoContentPage: Record<string, string> = {
+  '/about-us': 'src/content/pages/about-us.mdx',
+  '/contact-us': 'src/content/pages/contact-us.mdx',
+  '/individuals': 'src/content/pages/individuals.mdx',
+  '/businesses': 'src/content/pages/businesses.mdx',
+  '/government': 'src/content/pages/government.mdx',
+  '/community-engagement': 'src/content/pages/community-engagement.mdx',
+  '/news-and-events': 'src/content/pages/news-and-events.mdx',
+  '/subscribe': 'src/content/pages/subscribe.mdx',
+  '/civictheme-60-second-series': 'src/content/pages/civictheme-60-second-series.mdx',
+  '/accessibility': 'src/content/pages/accessibility.mdx',
+  '/events/open-day': 'src/content/events/open-day.mdx',
+  '/news/budget-2026-adopted': 'src/content/news/budget-2026-adopted.mdx',
+  '/publications/annual-report-2025': 'src/content/publications/annual-report-2025.mdx',
+};
+
+/**
  * Per-page extra excludes, with why:
  *
  * - `/components/base`: the Video player demo embeds a REAL YouTube iframe
@@ -99,6 +126,9 @@ test.describe.configure({ mode: 'serial' });
 
 for (const path of pages) {
   test(`no serious/critical axe violations on ${path}`, async ({ page }) => {
+    const demoFile = demoContentPage[path];
+    test.skip(demoFile !== undefined && !demoPresent(demoFile), 'demo content removed by migration');
+
     // A 404/500 still renders a page axe can scan cleanly, so assert the
     // route actually exists before trusting a "no violations" result.
     const response = await page.goto(path);

@@ -8,6 +8,7 @@ import { describe, it, expect } from 'vitest';
 import { readFileSync, existsSync } from 'node:fs';
 import { join } from 'node:path';
 import { experimental_AstroContainer as AstroContainer } from 'astro/container';
+import { demoPresent } from './demo-content';
 
 const root = join(__dirname, '..');
 const manifest = JSON.parse(readFileSync(join(root, 'quant.studio.json'), 'utf8'));
@@ -71,7 +72,7 @@ describe('quant.studio.json palette defaults', () => {
     expect(empty).toEqual([]);
   });
 
-  it('points ManualList slugs at published entries of its collection', () => {
+  it.skipIf(!demoPresent())('points ManualList slugs at published entries of its collection', () => {
     const item = items.find((i) => nameOf(i) === 'ManualList')!;
     const { collection, slugs } = item.defaults as { collection: string; slugs: string[] };
     for (const slug of slugs) {

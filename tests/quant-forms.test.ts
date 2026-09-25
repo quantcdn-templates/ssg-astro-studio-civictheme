@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { readFileSync } from 'node:fs';
+import { readFileSync, existsSync } from 'node:fs';
 import { join } from 'node:path';
 import { parseHTML } from 'linkedom';
 import { focusFormResult } from '../src/lib/quant-form-result';
@@ -10,11 +10,20 @@ import { focusFormResult } from '../src/lib/quant-form-result';
  * (`FormSyncService`); the CDN then accepts a POST to `route`, rejects it
  * when a `mandatory_fields` value is empty or a `honeypot_fields` value is
  * filled, and writes the matching message into `#quant-form-result`.
+ *
+ * `forms/forms.json` itself survives a Studio migration, but the demo pages
+ * it points at (`contact-us.mdx`, `subscribe.mdx`) are demo content that
+ * migration deletes. `pageSource` is read at `describe`-body time (module
+ * load), so it must not throw when the page is gone — it returns `null`,
+ * and every test that reads the page source skips accordingly.
  */
 const root = join(__dirname, '..');
 type Entry = { route: string; enabled: boolean; config: Record<string, unknown> };
 const manifest = JSON.parse(readFileSync(join(root, 'forms/forms.json'), 'utf8')) as Entry[];
-const pageSource = (route: string) => readFileSync(join(root, `src/content/pages${route}.mdx`), 'utf8');
+const pageSource = (route: string): string | null => {
+  const path = join(root, `src/content/pages${route}.mdx`);
+  return existsSync(path) ? readFileSync(path, 'utf8') : null;
+};
 
 /** The CDN's own rewrite (quant `docker/fastly/src/filters.js`, `formSubmissionFilter`). */
 const cdnInject = (html: string, message: string) =>
@@ -33,13 +42,13 @@ describe('forms/forms.json', () => {
       const source = pageSource(entry.route);
       const config = entry.config;
 
-      it('matches a form that POSTs to its own page', () => {
+      it.skipIf(source === null)('matches a form that POSTs to its own page', () => {
         expect(entry.enabled).toBe(true);
         expect(config.target_url).toBe(entry.route);
         expect(source).toContain(`<form action="${entry.route}" method="post"`);
       });
 
-      it('names only fields the form has, and the honeypot field exists', () => {
+      it.skipIf(source === null)('names only fields the form has, and the honeypot field exists', () => {
         const fields = [...(config.mandatory_fields as string[]), ...(config.honeypot_fields as string[])];
         for (const field of fields) expect(source).toContain(`name="${field}"`);
         expect(config.honeypot_fields).toEqual(['website']);
@@ -57,9 +66,10 @@ describe('forms/forms.json', () => {
         expect(config).not.toHaveProperty('notifications');
       });
 
-      it('ends the result container with its id, so the CDN rewrite matches', () => {
+      it.skipIf(source === null)('ends the result container with its id, so the CDN rewrite matches', () => {
         expect(source).toMatch(/<div[^>]*\sid="quant-form-result"><\/div>/);
-        expect(cdnInject(source, 'Sent')).toContain(
+        // Guarded by skipIf above: this test only runs when `source` is non-null.
+        expect(cdnInject(source as string, 'Sent')).toContain(
           `id="quant-form-result"><div class='quant-form-success'>Sent</div></div>`
         );
       });

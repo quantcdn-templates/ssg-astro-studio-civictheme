@@ -2,6 +2,7 @@ import { readFileSync } from 'node:fs';
 import { test, expect } from '@playwright/test';
 import AxeBuilder from '@axe-core/playwright';
 import { EXCLUDE_ALWAYS } from './axe-excludes';
+import { demoPresent } from '../demo-content';
 
 /**
  * The demo forms against a stand-in for the Quant CDN.
@@ -18,6 +19,7 @@ const manifest = JSON.parse(readFileSync('forms/forms.json', 'utf8')) as Entry[]
 
 for (const entry of manifest) {
   test(`${entry.route}: posts to its own page and focuses the Quant Forms message`, async ({ page }) => {
+    test.skip(!demoPresent(`src/content/pages${entry.route}.mdx`), 'demo page removed by migration');
     const posted: string[] = [];
     await page.route(`**${entry.route}`, async (route) => {
       if (route.request().method() !== 'POST') return route.fallback();

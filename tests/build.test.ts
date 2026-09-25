@@ -2,6 +2,7 @@ import { describe, it, expect, beforeAll } from 'vitest';
 import { execSync } from 'node:child_process';
 import { readdirSync, readFileSync, existsSync } from 'node:fs';
 import { join } from 'node:path';
+import { demoPresent, demoHomePresent } from './demo-content';
 
 const root = join(__dirname, '..');
 function builtCss(): string {
@@ -61,7 +62,7 @@ describe('astro build', () => {
   it('emits the home page OG image', () => {
     expect(existsSync(join(root, 'dist/og/home.png'))).toBe(true);
   });
-  it('emits detail pages for the card collections', () => {
+  it.skipIf(!demoPresent())('emits detail pages for the card collections', () => {
     expect(existsSync(pageFile('events/open-day'))).toBe(true);
     expect(existsSync(pageFile('news/new-library-hours'))).toBe(true);
     expect(existsSync(pageFile('publications/annual-report-2025'))).toBe(true);
@@ -119,12 +120,12 @@ describe('astro build', () => {
     expect(css).toContain('.ct-page.ct-theme-light{background-color:var(--ct-page-light-background-color)}');
     expect(css).toContain('.ct-page.ct-theme-dark{background-color:var(--ct-page-dark-background-color)}');
   });
-  it('excludes draft news articles from the news listing', () => {
+  it.skipIf(!demoPresent())('excludes draft news articles from the news listing', () => {
     const news = readFileSync(pageFile('news'), 'utf8');
     expect(news).not.toContain('Draft Heritage Strategy Under Internal Review');
     expect(news).toContain('Annual Budget for 2026 Adopted');
   });
-  it('emits the ten CivicTheme demo pages', () => {
+  it.skipIf(!demoPresent())('emits the ten CivicTheme demo pages', () => {
     const pages = [
       join(root, 'dist/index.html'),
       pageFile('about-us'),
@@ -141,16 +142,16 @@ describe('astro build', () => {
       expect(existsSync(page)).toBe(true);
     }
   });
-  it('renders the subject card and callout components on the home demo page', () => {
+  it.skipIf(!demoHomePresent())('renders the subject card and callout components on the home demo page', () => {
     const index = readFileSync(join(root, 'dist/index.html'), 'utf8');
     expect(index).toContain('ct-subject-card');
     expect(index).toContain('ct-callout');
   });
-  it('renders the promo card component on the individuals demo page', () => {
+  it.skipIf(!demoPresent())('renders the promo card component on the individuals demo page', () => {
     const individuals = readFileSync(pageFile('individuals'), 'utf8');
     expect(individuals).toContain('ct-promo-card');
   });
-  it('renders the navigation card component on the CivicTheme in 60 seconds demo page', () => {
+  it.skipIf(!demoPresent())('renders the navigation card component on the CivicTheme in 60 seconds demo page', () => {
     const series = readFileSync(pageFile('civictheme-60-second-series'), 'utf8');
     expect(series).toContain('ct-navigation-card');
   });

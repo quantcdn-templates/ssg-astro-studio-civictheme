@@ -1,4 +1,8 @@
 import { test, expect } from '@playwright/test';
+import { demoPresent } from '../demo-content';
+
+/** Site alerts render from `src/content/alerts/*.json`, demo content Studio migration deletes. */
+const alertsDemoPresent = () => demoPresent('src/content/alerts/site-alert.json');
 
 /**
  * CivicTheme behaviour smoke tests, against `src/pages/components/behaviours.astro`
@@ -44,6 +48,7 @@ test.describe('CivicTheme site alerts', () => {
   // shim in `src/civictheme/js/civictheme.js` attaches the dismiss listener
   // that `alert.js` itself only attaches to fetched alerts (alert.js:212).
   test('site alert dismisses on click', async ({ page }) => {
+    test.skip(!alertsDemoPresent(), 'demo alert content removed by migration');
     await page.goto('/');
     const alert = page.locator('[data-component-name="ct-alerts"] [data-component-name="ct-alert"]').first();
     await expect(alert).toBeVisible();
@@ -55,6 +60,10 @@ test.describe('CivicTheme site alerts', () => {
   // alerts before paint. With the module script blocked, only that inline
   // script can be hiding the alert.
   test('a dismissed alert stays hidden on the next page without the module script', async ({ page }) => {
+    test.skip(
+      !alertsDemoPresent() || !demoPresent('src/content/pages/about-us.mdx'),
+      'demo alert or demo page removed by migration'
+    );
     await page.goto('/');
     const alert = page.locator('[data-component-name="ct-alerts"] [data-component-name="ct-alert"]').first();
     await alert.locator('[data-alert-dismiss-trigger]').click();
@@ -67,6 +76,10 @@ test.describe('CivicTheme site alerts', () => {
   });
 
   test('an alert whose content changed since its dismissal shows again', async ({ page, context }) => {
+    test.skip(
+      !alertsDemoPresent() || !demoPresent('src/content/pages/about-us.mdx'),
+      'demo alert or demo page removed by migration'
+    );
     await page.goto('/');
     const alert = page.locator('[data-component-name="ct-alerts"] [data-component-name="ct-alert"]').first();
     const id = await alert.getAttribute('data-alert-id');

@@ -1,4 +1,5 @@
 import { test, expect } from '@playwright/test';
+import { demoPresent, demoHomePresent } from '../demo-content';
 
 /**
  * Card images inside MDX pages.
@@ -12,6 +13,7 @@ import { test, expect } from '@playwright/test';
  * bare Markdown images keep the margin.
  */
 test('NavigationCard images sit at the top of their wrapper and clear the title', async ({ page }) => {
+  test.skip(!demoPresent('src/content/pages/civictheme-60-second-series.mdx'), 'demo page removed by migration');
   await page.goto('/civictheme-60-second-series');
   const cards = await page.locator('.page-content .ct-navigation-card--with-image').evaluateAll((nodes) =>
     nodes.map((card) => {
@@ -34,6 +36,7 @@ test('NavigationCard images sit at the top of their wrapper and clear the title'
 });
 
 test('PromoCard images inside basic content have no vertical margin', async ({ page }) => {
+  test.skip(!demoHomePresent(), 'demo home page replaced by migration');
   await page.goto('/');
   const image = page.locator('.page-content .ct-promo-card__image img.ct-image').first();
   await expect(image).toBeVisible();

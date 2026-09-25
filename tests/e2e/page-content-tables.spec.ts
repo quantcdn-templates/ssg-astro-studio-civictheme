@@ -1,4 +1,5 @@
 import { test, expect } from '@playwright/test';
+import { demoPresent } from '../demo-content';
 
 /**
  * Mobile cell labels for Markdown tables in the page body.
@@ -25,6 +26,7 @@ const MARKDOWN_TABLE = [
 ].join('');
 
 test('a Markdown table in the page body gets mobile cell labels', async ({ page }) => {
+  test.skip(!demoPresent('src/content/pages/about-us.mdx'), 'demo page removed by migration');
   await page.setViewportSize({ width: 375, height: 800 });
   await page.route('**/about-us', async (route) => {
     const response = await route.fetch();
