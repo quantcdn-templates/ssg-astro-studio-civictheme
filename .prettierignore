@@ -16,3 +16,8 @@ quant.studio.json
 # Quant Studio's Forms screen rewrites the Quant Forms manifest the same way
 # (PHP pretty-print, 4-space indent).
 forms/forms.json
+
+# Content entries and data files are written by Quant Studio's editor and by
+# Studio migrations, not by hand, so a formatting difference must not fail a
+# site's build. The template's own demo content is kept formatted by review.
+src/content
