@@ -29,7 +29,11 @@ describe('astro build', () => {
   it('emits the CivicTheme stylesheet', () => {
     const css = builtCss();
     expect(css).toContain('.ct-button');
-    expect(css).toMatch(/--ct-color-light-brand1:\s*#00698f/);
+    // The light brand1 this site's own theme entry point declares (a migrated
+    // or re-themed site changes it), not the template's stock value.
+    const theme = readFileSync(join(root, 'src/civictheme/scss/variables.base.scss'), 'utf8');
+    const brand1 = /'light':\s*\(\s*'brand1':\s*(#[0-9a-fA-F]{6})/.exec(theme)?.[1] ?? '#00698f';
+    expect(css).toMatch(new RegExp(`--ct-color-light-brand1:\\s*${brand1}`, 'i'));
   });
   it('emits index.html', () => {
     expect(existsSync(join(root, 'dist/index.html'))).toBe(true);
