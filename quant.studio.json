@@ -490,7 +490,10 @@
     },
     "theme": {
       "file": "src/civictheme/scss/variables.base.scss",
-      "writer": "ct-brand-map"
+      "writer": "ct-brand-map",
+      "darkSurfaces": [
+        "#12172b"
+      ]
     },
     "demoContent": [
       "src/data/demo-content.txt",
