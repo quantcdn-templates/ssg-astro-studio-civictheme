@@ -79,6 +79,9 @@ const DEMO_HOME_TITLE_MARKER = /^title:\s*Your organisation's tagline\s*$/m;
 
 /** Is `src/content/pages/index.mdx` still CivicTheme's own demo home page? */
 export function demoHomePresent(): boolean {
+  // Between a migration's commits the demo home can outlive the rest of the
+  // demo content (its images, for one), so the marker must be present too.
+  if (!existsSync(join(root, DEMO_MARKER))) return false;
   const path = join(root, 'src/content/pages/index.mdx');
   if (!existsSync(path)) return false;
   return DEMO_HOME_TITLE_MARKER.test(readFileSync(path, 'utf8'));
