@@ -365,7 +365,10 @@ export function normaliseHtml(html: string): string {
     }
     if (node.nodeType !== 1) return '';
     const attrs = [...node.attributes]
-      .filter((a: any) => !a.name.startsWith('data-astro-cid-'))
+      // Astro's scoping ids, and (since Astro 7.3.5) the dev-mode source
+      // annotations it adds when rendering in a test: neither is markup the
+      // component authored, and upstream never has them.
+      .filter((a: any) => !a.name.startsWith('data-astro-cid-') && !a.name.startsWith('data-astro-source-'))
       .map(
         (a: any) =>
           [
