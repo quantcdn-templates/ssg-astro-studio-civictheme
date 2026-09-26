@@ -1,0 +1,5 @@
+This file marks the CivicTheme demo content as present.
+A Studio migration deletes it (it is listed in quant.studio.json _migration.demoContent),
+so tests that assert demo pages, news or forms skip on a migrated site.
+A migration can write real pages at the same paths as the demo pages
+(for example src/content/pages/contact-us.mdx), so a demo page path alone does not prove the demo is present.

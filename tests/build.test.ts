@@ -82,8 +82,13 @@ describe('astro build', () => {
   it('links the favicon from the site settings on every page', () => {
     const index = readFileSync(join(root, 'dist/index.html'), 'utf8');
     const events = readFileSync(pageFile('events'), 'utf8');
-    expect(index).toContain('<link rel="icon" href="/favicon.svg" type="image/svg+xml">');
-    expect(events).toContain('<link rel="icon" href="/favicon.svg" type="image/svg+xml">');
+    // A migration replaces the favicon with the source site's own, so read it from the settings.
+    const { favicon = '/favicon.svg' } = JSON.parse(readFileSync(join(root, 'src/content/settings/site.json'), 'utf8'));
+    const expected = favicon.endsWith('.svg')
+      ? `<link rel="icon" href="${favicon}" type="image/svg+xml">`
+      : `<link rel="icon" href="${favicon}">`;
+    expect(index).toContain(expected);
+    expect(events).toContain(expected);
   });
   it('excludes the behaviours smoke page from the sitemap', () => {
     const sitemap = readFileSync(join(root, 'dist/sitemap-0.xml'), 'utf8');

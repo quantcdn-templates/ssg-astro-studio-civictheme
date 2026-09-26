@@ -493,6 +493,7 @@
       "writer": "ct-brand-map"
     },
     "demoContent": [
+      "src/data/demo-content.txt",
       "src/content/pages/about-us.mdx",
       "src/content/pages/accessibility.mdx",
       "src/content/pages/businesses.mdx",

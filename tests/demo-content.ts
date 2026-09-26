@@ -46,14 +46,26 @@ function expand(pattern: string): string[] {
 const demoPaths = patterns.flatMap(expand);
 
 /**
+ * The marker file (`src/data/demo-content.txt`, listed in
+ * `_migration.demoContent`). A migration deletes it with the rest of the demo
+ * content and never writes it again. A demo page PATH alone proves nothing: a
+ * migration writes the source site's own pages at the same paths when the
+ * slugs match (`contact-us.mdx`, `privacy.mdx`), so a path check ran demo
+ * assertions against real migrated pages.
+ */
+const DEMO_MARKER = 'src/data/demo-content.txt';
+
+/**
  * Is a given demo file present? `path` is repo-relative, e.g.
  * `'src/content/pages/contact-us.mdx'`. With no `path`, answers whether ANY
  * demo file (per `_migration.demoContent`) is still present, so a whole
- * demo-content-dependent suite can guard itself with one call.
+ * demo-content-dependent suite can guard itself with one call. Both forms
+ * answer false once the demo marker is gone.
  */
 export function demoPresent(path?: string): boolean {
+  if (!existsSync(join(root, DEMO_MARKER))) return false;
   if (path !== undefined) return existsSync(join(root, path));
-  return demoPaths.some((demoPath) => existsSync(join(root, demoPath)));
+  return demoPaths.some((demoPath) => demoPath !== DEMO_MARKER && existsSync(join(root, demoPath)));
 }
 
 /**
