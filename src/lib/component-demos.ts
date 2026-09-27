@@ -19,7 +19,7 @@
  * upstream stories fails CI instead of silently serving stale demo data.
  *
  * The snake_case→camelCase prop mapping (shared-reference R2) is copied
- * from `tests/story-parity/args-to-props.ts` rather than imported from it,
+ * from `src/lib/story-parity/args-to-props.ts` rather than imported from it,
  * for the same reason as the fixtures themselves: this file must not
  * depend on anything under `tests/`. Keep the two copies in sync by hand if
  * shared-reference R2's mapping rules change.

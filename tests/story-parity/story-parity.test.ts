@@ -19,7 +19,7 @@ import { describe, it, expect } from 'vitest';
 import { readFileSync, readdirSync, existsSync } from 'node:fs';
 import { join, relative } from 'node:path';
 import { normaliseHtml, renderComponent } from '../parity/harness';
-import { argsToProps } from './args-to-props';
+import { argsToProps } from '../../src/lib/story-parity/args-to-props';
 import accepted from './accepted-differences.json';
 
 const FIXTURES = join(process.cwd(), 'tests/story-parity/fixtures');
