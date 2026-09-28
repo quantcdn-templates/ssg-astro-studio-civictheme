@@ -33,6 +33,12 @@
     flex-direction: row-reverse;
   }
 
+  // Header.astro's logo/navigation row uses this. Without a rule, the row
+  // wrapped and squeezed the header's last link until it broke mid-word.
+  &#{$root}--no-wrap {
+    flex-wrap: nowrap;
+  }
+
   &#{$root}--no-grow {
     > .col,
     > [class*='col-'] {

@@ -12,6 +12,8 @@ import Callout from '@civictheme/molecules/Callout.astro';
 import NextStep from '@civictheme/molecules/NextStep.astro';
 import Accordion from '@civictheme/molecules/Accordion.astro';
 import Tabs from '@civictheme/molecules/Tabs.astro';
+import TagList from '@civictheme/molecules/TagList.astro';
+import Tag from '@civictheme/atoms/Tag.astro';
 import BasicContent from '@civictheme/molecules/BasicContent.astro';
 import Attachment from '@civictheme/molecules/Attachment.astro';
 import Figure from '@civictheme/molecules/Figure.astro';
@@ -37,6 +39,8 @@ export const components = {
   NextStep,
   Accordion,
   Tabs,
+  TagList,
+  Tag,
   Campaign,
   Slider,
   Slide,
