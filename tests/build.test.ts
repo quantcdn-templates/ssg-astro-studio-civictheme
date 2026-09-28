@@ -33,7 +33,11 @@ describe('astro build', () => {
     // or re-themed site changes it), not the template's stock value.
     const theme = readFileSync(join(root, 'src/civictheme/scss/variables.base.scss'), 'utf8');
     const brand1 = /'light':\s*\(\s*'brand1':\s*(#[0-9a-fA-F]{6})/.exec(theme)?.[1] ?? '#00698f';
-    expect(css).toMatch(new RegExp(`--ct-color-light-brand1:\\s*${brand1}`, 'i'));
+    // The minifier writes a colour whose digit pairs repeat in short form
+    // (#0066cc becomes #06c), so accept either spelling.
+    const short = /^#(.)\1(.)\2(.)\3$/i.exec(brand1);
+    const spellings = short ? [brand1, `#${short[1]}${short[2]}${short[3]}`] : [brand1];
+    expect(css).toMatch(new RegExp(`--ct-color-light-brand1:\\s*(${spellings.join('|')})\\b`, 'i'));
   });
   it('emits index.html', () => {
     expect(existsSync(join(root, 'dist/index.html'))).toBe(true);
