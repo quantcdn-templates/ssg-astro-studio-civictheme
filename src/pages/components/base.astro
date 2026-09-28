@@ -16,6 +16,7 @@ import ComponentDemoBlock from '@/components/ComponentDemoBlock.astro';
 import Heading from '@civictheme/atoms/Heading.astro';
 import Icon from '@civictheme/base/Icon.astro';
 import Grid from '@civictheme/base/Grid.astro';
+import FlexCenter from '@civictheme/base/FlexCenter.astro';
 import Layout from '@civictheme/base/Layout.astro';
 import Menu from '@civictheme/base/Menu.astro';
 import ItemList from '@civictheme/base/ItemList.astro';
@@ -60,6 +61,10 @@ const videoPlayerStories = storiesFor('02-molecules/video-player');
 const gridProps = {
   items: ['<div>Column 1</div>', '<div>Column 2</div>', '<div>Column 3</div>'],
   templateColumnCount: 3,
+};
+
+const flexCenterProps = {
+  content: "<a class='ct-button ct-button--primary' href='/'>Read more</a>",
 };
 ---
 
@@ -107,6 +112,11 @@ const gridProps = {
   <h2 class="ct-basic-content">Grid</h2>
   <ComponentDemoBlock heading="Grid (3 columns)" tag="Grid" props={gridProps} theme="light">
     <Grid items={gridProps.items} templateColumnCount={gridProps.templateColumnCount} />
+  </ComponentDemoBlock>
+
+  <h2 class="ct-basic-content">FlexCenter</h2>
+  <ComponentDemoBlock heading="FlexCenter" tag="FlexCenter" props={flexCenterProps} theme="light">
+    <FlexCenter content={flexCenterProps.content} />
   </ComponentDemoBlock>
 
   <h2 class="ct-basic-content">Layout</h2>

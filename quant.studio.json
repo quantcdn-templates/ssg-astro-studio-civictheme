@@ -486,6 +486,15 @@
             ]
           }
         }
+      },
+      {
+        "path": "src/civictheme/components/00-base/FlexCenter.astro",
+        "tag": "FlexCenter",
+        "group": "layout",
+        "description": "Centres its content using CivicTheme's flex utility class; put a single component inside.",
+        "defaults": {
+          "content": "<a class='ct-button ct-theme-light ct-button--primary ct-button--link ct-button--regular' href='/'>Read more</a>"
+        }
       }
     ]
   },

@@ -28,6 +28,7 @@ import Button from '@civictheme/atoms/Button.astro';
 import Link from '@civictheme/atoms/Link.astro';
 import Grid from '@civictheme/base/Grid.astro';
 import Section from '@civictheme/base/Section.astro';
+import FlexCenter from '@civictheme/base/FlexCenter.astro';
 import PromoCard from '@civictheme/molecules/PromoCard.astro';
 import NavigationCard from '@civictheme/molecules/NavigationCard.astro';
 import SubjectCard from '@civictheme/molecules/SubjectCard.astro';
@@ -58,6 +59,7 @@ export const components = {
   Webform,
   Grid,
   Section,
+  FlexCenter,
   PromoCard,
   NavigationCard,
   SubjectCard,

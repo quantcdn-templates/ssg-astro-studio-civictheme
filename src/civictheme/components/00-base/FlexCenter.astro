@@ -1,0 +1,35 @@
+---
+/**
+ * FlexCenter component.
+ *
+ * A minimal, writer-rendered wrapper that centres its content using
+ * CivicTheme's own `.ct-flex-justify-content-center` flex utility class
+ * (`scss/00-base/flex/_index.scss`) -- the source pattern of a section's
+ * "Read more"/"View more" button sitting centred under its card grid.
+ * Not a CivicTheme design-system component and not restyling anything --
+ * just a structural wrapper the migration writer emits, alongside
+ * `Grid.astro`/`Section.astro`, the other plain layout primitives in
+ * `00-base`.
+ *
+ * Props:
+ * - content: Fallback content (raw HTML), rendered only when the default
+ *   slot is empty -- same slot-vs-string-prop precedence as `Section`: a
+ *   real slotted child always wins.
+ * - class: Additional CSS classes.
+ * - ...rest: Additional HTML attributes, spread onto the root element.
+ */
+interface Props {
+  content?: string;
+  class?: string;
+  [key: string]: unknown;
+}
+
+const { content, class: className = '', ...rest } = Astro.props;
+
+const classes = ['ct-flex-justify-content-center', className].filter(Boolean).join(' ');
+const hasSlot = Astro.slots.has('default');
+---
+
+<div class={classes} {...rest}>
+  {hasSlot ? <slot /> : content && <Fragment set:html={content} />}
+</div>
