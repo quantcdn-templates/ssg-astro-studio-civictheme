@@ -27,6 +27,7 @@ import Paragraph from '@civictheme/atoms/Paragraph.astro';
 import Button from '@civictheme/atoms/Button.astro';
 import Link from '@civictheme/atoms/Link.astro';
 import Grid from '@civictheme/base/Grid.astro';
+import Section from '@civictheme/base/Section.astro';
 import PromoCard from '@civictheme/molecules/PromoCard.astro';
 import NavigationCard from '@civictheme/molecules/NavigationCard.astro';
 import SubjectCard from '@civictheme/molecules/SubjectCard.astro';
@@ -56,6 +57,7 @@ export const components = {
   VideoPlayer,
   Webform,
   Grid,
+  Section,
   PromoCard,
   NavigationCard,
   SubjectCard,

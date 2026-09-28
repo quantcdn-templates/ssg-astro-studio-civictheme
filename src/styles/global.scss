@@ -97,3 +97,15 @@ body {
   margin-top: 0;
   margin-bottom: 0;
 }
+
+// Section component (src/civictheme/components/00-base/Section.astro): a
+// full-width band, tinted or plain. Not part of upstream CivicTheme's own
+// vendored component set (see civictheme/scss/index.scss's own "do not
+// edit" generated header), so its styles live here instead, alongside the
+// other site overrides.
+.ct-section {
+  &--light {
+    background-color: ct-color-light('background-light');
+    padding: ct-spacing(5) 0;
+  }
+}

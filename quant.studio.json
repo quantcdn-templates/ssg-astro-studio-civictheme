@@ -467,6 +467,25 @@
             "label": "Icon position"
           }
         }
+      },
+      {
+        "path": "src/civictheme/components/00-base/Section.astro",
+        "tag": "Section",
+        "group": "layout",
+        "description": "Full-width band, tinted or plain; put other components inside.",
+        "defaults": {
+          "background": "light",
+          "content": "<p class='ct-paragraph ct-theme-light ct-paragraph--regular'>Section content.</p>"
+        },
+        "props": {
+          "background": {
+            "label": "Background",
+            "options": [
+              "default",
+              "light"
+            ]
+          }
+        }
       }
     ]
   },

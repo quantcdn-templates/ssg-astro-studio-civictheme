@@ -23,9 +23,16 @@
 import Banner from '@civictheme/organisms/Banner.astro';
 import Paragraph from '@civictheme/atoms/Paragraph.astro';
 import TagList from '@civictheme/molecules/TagList.astro';
+import Grid from '@civictheme/base/Grid.astro';
+import NavigationCard from '@civictheme/molecules/NavigationCard.astro';
 
 export interface BreadcrumbLink {
   text: string;
+  url: string;
+}
+
+export interface BannerCard {
+  title: string;
   url: string;
 }
 
@@ -43,6 +50,8 @@ interface Props {
   theme?: 'light' | 'dark';
   bannerType?: 'default' | 'large';
   isDecorative?: boolean;
+  /** A small task/link-card group shown overlapping the banner's lower edge, via CivicTheme's "content below" area. */
+  cards?: BannerCard[];
 }
 
 const {
@@ -57,6 +66,7 @@ const {
   theme = 'dark',
   bannerType = 'default',
   isDecorative = true,
+  cards = [],
 } = Astro.props;
 
 const breadcrumb =
@@ -70,6 +80,7 @@ const isSafeCssUrl = (value: string) => !/['")\s]/.test(value);
 const background = backgroundImage && isSafeCssUrl(backgroundImage) ? { url: backgroundImage, alt: '' } : undefined;
 const tagItems = metaTags.filter(Boolean).map((tag) => ({ content: tag }));
 const hasContent = Boolean(summary) || tagItems.length > 0;
+const hasCards = cards.length > 0;
 
 const bannerProps = {
   theme,
@@ -85,11 +96,39 @@ const bannerProps = {
 ---
 
 {
-  hasContent ? (
+  hasContent && hasCards ? (
     <Banner {...bannerProps}>
       <Fragment slot="content">
         {tagItems.length > 0 && <TagList theme={theme} tags={tagItems} verticalSpacing="bottom" />}
         {summary && <Paragraph theme={theme} content={summary} />}
+      </Fragment>
+      <Fragment slot="contentBelow">
+        <Grid templateColumnCount={3}>
+          {cards.map((card) => (
+            <div class="col-xxs-12 col-m-4">
+              <NavigationCard theme={theme} title={card.title} link={{ url: card.url }} />
+            </div>
+          ))}
+        </Grid>
+      </Fragment>
+    </Banner>
+  ) : hasContent ? (
+    <Banner {...bannerProps}>
+      <Fragment slot="content">
+        {tagItems.length > 0 && <TagList theme={theme} tags={tagItems} verticalSpacing="bottom" />}
+        {summary && <Paragraph theme={theme} content={summary} />}
+      </Fragment>
+    </Banner>
+  ) : hasCards ? (
+    <Banner {...bannerProps}>
+      <Fragment slot="contentBelow">
+        <Grid templateColumnCount={3}>
+          {cards.map((card) => (
+            <div class="col-xxs-12 col-m-4">
+              <NavigationCard theme={theme} title={card.title} link={{ url: card.url }} />
+            </div>
+          ))}
+        </Grid>
       </Fragment>
     </Banner>
   ) : (

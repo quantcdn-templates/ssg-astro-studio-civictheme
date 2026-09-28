@@ -1,0 +1,38 @@
+---
+/**
+ * Section component.
+ *
+ * A full-width band, tinted or plain, wrapping its content in a
+ * `.container` -- the smallest template building block for the source's
+ * own "light grey band behind this bit of the page" pattern (e.g. a
+ * migrated site's "Latest news" section sitting on a tinted band). Not part
+ * of upstream CivicTheme's own component set; kept in `00-base` alongside
+ * `Grid.astro`, the other plain layout primitive.
+ *
+ * Props:
+ * - background: 'default' (no tint, the page's own background) or 'light'
+ *   (a light grey band, CivicTheme's own `background-light` colour token).
+ * - content: Fallback content (raw HTML), rendered only when the default
+ *   slot is empty -- same slot-vs-string-prop precedence as `Banner`/
+ *   `Footer`: a real slotted child always wins.
+ * - class: Additional CSS classes.
+ * - ...rest: Additional HTML attributes, spread onto the root element.
+ */
+interface Props {
+  background?: 'default' | 'light';
+  content?: string;
+  class?: string;
+  [key: string]: unknown;
+}
+
+const { background = 'default', content, class: className = '', ...rest } = Astro.props;
+
+const classes = ['ct-section', `ct-section--${background}`, className].filter(Boolean).join(' ');
+const hasSlot = Astro.slots.has('default');
+---
+
+<div class={classes} {...rest}>
+  <div class="container">
+    {hasSlot ? <slot /> : content && <Fragment set:html={content} />}
+  </div>
+</div>

@@ -84,6 +84,7 @@ describe('quant.studio.json component-editor hints', () => {
       'NavigationCard.astro',
       'Grid.astro',
       'Button.astro',
+      'Section.astro',
     ]);
     for (const item of items) {
       const props = propsInterface(item.path);

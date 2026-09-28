@@ -5,8 +5,9 @@
  * Live components inside the `Footer` organism's named slots (Task 15, see
  * PORTING.md). Slot allocation follows upstream `footer.stories.data.js`:
  * `Logo` in `contentTop1`, `SocialLinks` in `contentTop2`, the footer menu in
- * `contentMiddle1`, the acknowledgement in `contentBottom1` and the copyright
- * in `contentBottom2`.
+ * `contentMiddle1`, the site's own contact details (when the source had a
+ * "Contact us" block) in `contentMiddle2`, the acknowledgement in
+ * `contentBottom1` and the copyright in `contentBottom2`.
  */
 import Footer from '@civictheme/organisms/Footer.astro';
 import Logo from '@civictheme/molecules/Logo.astro';
@@ -37,6 +38,10 @@ const socialItems = site.social.map((link) => ({
 }));
 
 const year = new Date().getFullYear();
+
+/** A line that is (almost) entirely digits/spaces/punctuation reads as a phone number -- linked as `tel:`, digits only, so a "1300 363 992"-style source number still dials correctly. */
+const isPhoneLine = (line: string) => /^[+()0-9][0-9 ()-]{5,}$/.test(line.trim());
+const telHref = (line: string) => `tel:${line.replace(/[^0-9+]/g, '')}`;
 ---
 
 <Footer theme={theme}>
@@ -49,6 +54,20 @@ const year = new Date().getFullYear();
   <Fragment slot="contentMiddle1">
     <Navigation theme={theme} items={footerMenu} name="footer" type="none" title={site.name} />
   </Fragment>
+  {
+    site.footerContact && (
+      <Fragment slot="contentMiddle2">
+        <div class="ct-footer__contact">
+          <div class="ct-footer__contact-heading ct-text-bold">{site.footerContact.heading}</div>
+          <ul class="ct-footer__contact-lines">
+            {site.footerContact.lines.map((line) => (
+              <li>{isPhoneLine(line) ? <a href={telHref(line)}>{line}</a> : line}</li>
+            ))}
+          </ul>
+        </div>
+      </Fragment>
+    )
+  }
   <Fragment slot="contentBottom1">
     {site.acknowledgement && <div class="ct-footer__acknowledgement ct-text-regular">{site.acknowledgement}</div>}
   </Fragment>
