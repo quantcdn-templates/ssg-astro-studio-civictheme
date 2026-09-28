@@ -117,6 +117,8 @@ const settings = defineCollection({
      * migrated site whose source header is dark (a white logo) sets `dark`.
      */
     headerTheme: z.enum(['light', 'dark']).optional(),
+    /** A short contact block for the footer, e.g. a phone number and opening hours. */
+    footerContact: z.object({ heading: z.string(), lines: z.array(z.string()) }).optional(),
     /** The native `/search` page (see `src/pages/search.astro`). */
     search: z
       .object({

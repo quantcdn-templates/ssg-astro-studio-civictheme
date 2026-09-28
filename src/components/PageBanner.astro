@@ -23,8 +23,7 @@
 import Banner from '@civictheme/organisms/Banner.astro';
 import Paragraph from '@civictheme/atoms/Paragraph.astro';
 import TagList from '@civictheme/molecules/TagList.astro';
-import Grid from '@civictheme/base/Grid.astro';
-import NavigationCard from '@civictheme/molecules/NavigationCard.astro';
+import BannerCards from './BannerCards.astro';
 
 export interface BreadcrumbLink {
   text: string;
@@ -103,13 +102,7 @@ const bannerProps = {
         {summary && <Paragraph theme={theme} content={summary} />}
       </Fragment>
       <Fragment slot="contentBelow">
-        <Grid templateColumnCount={3}>
-          {cards.map((card) => (
-            <div class="col-xxs-12 col-m-4">
-              <NavigationCard theme={theme} title={card.title} link={{ url: card.url }} />
-            </div>
-          ))}
-        </Grid>
+        <BannerCards cards={cards} />
       </Fragment>
     </Banner>
   ) : hasContent ? (
@@ -122,13 +115,7 @@ const bannerProps = {
   ) : hasCards ? (
     <Banner {...bannerProps}>
       <Fragment slot="contentBelow">
-        <Grid templateColumnCount={3}>
-          {cards.map((card) => (
-            <div class="col-xxs-12 col-m-4">
-              <NavigationCard theme={theme} title={card.title} link={{ url: card.url }} />
-            </div>
-          ))}
-        </Grid>
+        <BannerCards cards={cards} />
       </Fragment>
     </Banner>
   ) : (

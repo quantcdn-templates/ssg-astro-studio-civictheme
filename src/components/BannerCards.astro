@@ -1,0 +1,26 @@
+---
+/**
+ * The task/link cards a page banner shows overlapping its lower edge (the
+ * banner's "content below" area). Light cards, so they stand out on a dark
+ * banner the way the source sites that use this pattern show them.
+ */
+import Grid from '@civictheme/base/Grid.astro';
+import NavigationCard from '@civictheme/molecules/NavigationCard.astro';
+import type { BannerCard } from './PageBanner.astro';
+
+interface Props {
+  cards: BannerCard[];
+}
+
+const { cards } = Astro.props;
+---
+
+<Grid templateColumnCount={3}>
+  {
+    cards.map((card) => (
+      <div class="col-xxs-12 col-m-4">
+        <NavigationCard theme="light" title={card.title} link={{ url: card.url }} />
+      </div>
+    ))
+  }
+</Grid>
