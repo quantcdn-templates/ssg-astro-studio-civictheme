@@ -13,6 +13,8 @@ import Footer from '@civictheme/organisms/Footer.astro';
 import Logo from '@civictheme/molecules/Logo.astro';
 import Navigation from '@civictheme/organisms/Navigation.astro';
 import SocialLinks from '@civictheme/molecules/SocialLinks.astro';
+import Heading from '@civictheme/atoms/Heading.astro';
+import Link from '@civictheme/atoms/Link.astro';
 import { siteSettings, menu, humanise } from '@/lib/content';
 
 interface Props {
@@ -57,13 +59,17 @@ const telHref = (line: string) => `tel:${line.replace(/[^0-9+]/g, '')}`;
   {
     site.footerContact && (
       <Fragment slot="contentMiddle2">
-        <div class="ct-footer__contact">
-          <div class="ct-footer__contact-heading ct-text-bold">{site.footerContact.heading}</div>
-          <ul class="ct-footer__contact-lines">
-            {site.footerContact.lines.map((line) => (
-              <li>{isPhoneLine(line) ? <a href={telHref(line)}>{line}</a> : line}</li>
-            ))}
-          </ul>
+        <div class={`ct-footer__contact ct-theme-${theme}`}>
+          <Heading theme={theme} level="3" content={site.footerContact.heading} class="ct-heading--no-margin" />
+          {
+            // CivicTheme paragraph classes with escaped text: these lines are
+            // plain settings text, and Paragraph renders `content` as HTML.
+            site.footerContact.lines.map((line) => (
+              <div class={`ct-paragraph ct-theme-${theme} ct-paragraph--regular ct-paragraph--no-margin`}>
+                {isPhoneLine(line) ? <Link theme={theme} text={line} url={telHref(line)} /> : line}
+              </div>
+            ))
+          }
         </div>
       </Fragment>
     )
