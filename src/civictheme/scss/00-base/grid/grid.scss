@@ -33,10 +33,13 @@
     flex-direction: row-reverse;
   }
 
-  // Header.astro's logo/navigation row uses this. Without a rule, the row
-  // wrapped and squeezed the header's last link until it broke mid-word.
+  // Header.astro's logo/navigation row uses this. From the desktop-menu
+  // breakpoint up, the row stays on one line; below it the row must still
+  // wrap, or it pushes a phone-width page wider than the viewport.
   &#{$root}--no-wrap {
-    flex-wrap: nowrap;
+    @include ct-breakpoint($ct-header-desktop-menu-breakpoint) {
+      flex-wrap: nowrap;
+    }
   }
 
   &#{$root}--no-grow {
