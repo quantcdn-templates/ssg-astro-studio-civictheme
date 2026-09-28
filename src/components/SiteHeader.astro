@@ -22,8 +22,10 @@ interface Props {
   theme?: 'light' | 'dark';
 }
 
-const { theme = 'light' } = Astro.props;
+const { theme: pageTheme = 'light' } = Astro.props;
 const site = await siteSettings();
+// A site-wide header theme wins over the page theme when the site sets one.
+const theme = site.headerTheme ?? pageTheme;
 const pathname = Astro.url.pathname;
 const primary = withActiveTrail(await menu('primary'), pathname);
 const secondary = withActiveTrail(await menu('secondary'), pathname);

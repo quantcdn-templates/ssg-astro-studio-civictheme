@@ -107,6 +107,11 @@ const settings = defineCollection({
     acknowledgement: z.string().default(''),
     social: z.array(z.object({ platform: z.string(), url: z.string() })).default([]),
     theme,
+    /**
+     * The header's own theme. Unset, the header follows the page theme. A
+     * migrated site whose source header is dark (a white logo) sets `dark`.
+     */
+    headerTheme: z.enum(['light', 'dark']).optional(),
     /** The native `/search` page (see `src/pages/search.astro`). */
     search: z
       .object({
