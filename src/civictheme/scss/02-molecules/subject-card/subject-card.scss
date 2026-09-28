@@ -26,6 +26,24 @@
     }
   }
 
+  // Not part of upstream CivicTheme: the migration writer's own smallest-
+  // scoped class for a card asked to fill its column's full height (e.g.
+  // inside a `row--equal-heights-content` grid row) -- `#{$root}` itself
+  // already receives `height: 100%` from that row modifier's own `> *`
+  // selector, but its `__content` child only has a `min-height` of its
+  // own, so the card's real height still only reached the image's own
+  // aspect ratio, not the full stretched column. This makes `__content`
+  // fill `#{$root}`'s own (now stretched) height too, so the full-bleed
+  // background image behind it actually reaches the bottom of the
+  // column, matching a source's own full-height featured image card.
+  &--fill {
+    height: 100%;
+
+    #{$root}__content {
+      height: 100%;
+    }
+  }
+
   #{$root}__content {
     @include ct-image-fit();
 
