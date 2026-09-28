@@ -26,6 +26,8 @@
       padding-top: var(--ct-navigation-drawer-top-offset);
       padding-bottom: var(--ct-navigation-drawer-top-offset);
       text-align: center;
+      // One word next to a long primary menu: never break it mid-word.
+      white-space: nowrap;
     }
 
     &:focus-visible {
