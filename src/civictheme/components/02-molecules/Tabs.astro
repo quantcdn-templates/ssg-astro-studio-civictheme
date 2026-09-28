@@ -5,7 +5,9 @@
  * Props:
  * - theme: Theme variation (light or dark).
  * - verticalSpacing: Vertical spacing for the tabs (none, top, bottom, both).
- * - panels: Tab panels: Array<{ title, content, id, isSelected }>.
+ * - panels: Tab panels: Array<{ title, content, id, isSelected }>. A panel
+ *   whose `id` names a slot renders that slot (real components, for example
+ *   a Grid of cards from migrated MDX) instead of its `content` string.
  * - links: Optional links (if not provided, generated from panels):
  *   Array<{ text, url, class, isNewWindow, isExternal, ...rest }>.
  * - class: Additional CSS classes.
@@ -115,7 +117,7 @@ const hasContent = panels.length > 0 || links.length > 0;
           <div class="ct-tabs__panels">
             {panels.map(
               (panel, k) =>
-                panel.content && (
+                (panel.content || (panel.id && Astro.slots.has(panel.id))) && (
                   <Fragment>
                     {k > 0 && ' '}
                     <div
@@ -124,8 +126,13 @@ const hasContent = panels.length > 0 || links.length > 0;
                       id={panel.id}
                       role="tabpanel"
                       aria-labelledby={links[k]?.linkId}
-                      set:html={panel.content}
-                    />
+                    >
+                      {panel.id && Astro.slots.has(panel.id) ? (
+                        <slot name={panel.id} />
+                      ) : (
+                        <Fragment set:html={panel.content} />
+                      )}
+                    </div>
                   </Fragment>
                 )
             )}
