@@ -13,10 +13,11 @@ import type { CollectionEntry } from 'astro:content';
 import BaseLayout from '@/layouts/BaseLayout.astro';
 import PageBanner from '@/components/PageBanner.astro';
 import ListingAuto from '@/components/ListingAuto.astro';
-import { listPublished } from '@/lib/content';
+import { listPublished, pageOverridesListing, siteSettings } from '@/lib/content';
 import { listingPaths } from '@/lib/pagination';
 
 export const getStaticPaths = (async ({ paginate }) => {
+  if (await pageOverridesListing('news')) return [];
   const entries = await listPublished('news');
   return listingPaths(paginate, entries);
 }) satisfies GetStaticPaths;
@@ -24,7 +25,8 @@ export const getStaticPaths = (async ({ paginate }) => {
 const { page } = Astro.props as { page: Page<CollectionEntry<'news'>> };
 
 const title = 'News';
-const summary = 'Browse all published news from Your organisation.';
+const site = await siteSettings();
+const summary = `Browse all published news from ${site.name}.`;
 ---
 
 <BaseLayout title={title} description={summary} image="/og/news.png">

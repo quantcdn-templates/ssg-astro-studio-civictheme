@@ -52,6 +52,21 @@ export async function listPublished(
   return typeof opts?.limit === 'number' ? sorted.slice(0, opts.limit) : sorted;
 }
 
+/**
+ * True when `collection` has no published entries and a published `pages`
+ * entry uses the collection's own slug (`news`, `events`, `publications`). A
+ * migrated site brings its own landing page for that path, and an empty
+ * listing must not hide it: the listing route then emits no path, and the
+ * pages route renders the page instead.
+ */
+export async function pageOverridesListing(collection: CardCollection): Promise<boolean> {
+  const [entries, pages] = await Promise.all([
+    getCollection(collection, ({ data }) => !data.draft),
+    getCollection('pages', ({ id, data }) => id === collection && !data.draft),
+  ]);
+  return entries.length === 0 && pages.length > 0;
+}
+
 /** Alerts that are active and within their optional start/end window at `now`. */
 export async function activeAlerts(now: Date = new Date()): Promise<CollectionEntry<'alerts'>[]> {
   const alerts = await getCollection('alerts');

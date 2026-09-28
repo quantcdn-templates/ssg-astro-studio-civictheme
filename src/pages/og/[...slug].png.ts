@@ -70,9 +70,10 @@ export const getStaticPaths: GetStaticPaths = async () => {
       params: { slug: ogSlug('publications', entry.id) },
       props: { title: entry.data.title },
     })),
-    { params: { slug: 'events' }, props: { title: 'Events' } },
-    { params: { slug: 'news' }, props: { title: 'News' } },
-    { params: { slug: 'publications' }, props: { title: 'Publications' } },
+    // A listing's own image, unless a pages entry at that slug already has one.
+    ...(['events', 'news', 'publications'] as const)
+      .filter((slug) => !pages.some((entry) => entry.id === slug))
+      .map((slug) => ({ params: { slug }, props: { title: slug.charAt(0).toUpperCase() + slug.slice(1) } })),
   ];
 };
 
