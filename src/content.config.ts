@@ -19,6 +19,9 @@ const pages = defineCollection({
     theme,
     bannerType: z.enum(['default', 'large']).default('default'),
     bannerImage: z.string().optional(),
+    /** An image shown beside the banner text (CivicTheme's featured image), not behind it. */
+    bannerFeaturedImage: z.string().optional(),
+    bannerFeaturedImageAlt: z.string().default(''),
     bannerTheme: z.enum(['light', 'dark']).default('dark'),
     showBreadcrumb: z.boolean().default(true),
     showLastUpdated: z.boolean().default(false),

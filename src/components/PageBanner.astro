@@ -37,6 +37,9 @@ interface Props {
   siteSection?: string;
   breadcrumbLinks?: BreadcrumbLink[];
   backgroundImage?: string;
+  /** Shown beside the banner text, as CivicTheme's featured image. */
+  featuredImage?: string;
+  featuredImageAlt?: string;
   theme?: 'light' | 'dark';
   bannerType?: 'default' | 'large';
   isDecorative?: boolean;
@@ -49,6 +52,8 @@ const {
   siteSection,
   breadcrumbLinks,
   backgroundImage,
+  featuredImage,
+  featuredImageAlt = '',
   theme = 'dark',
   bannerType = 'default',
   isDecorative = true,
@@ -72,6 +77,7 @@ const bannerProps = {
   siteSection,
   breadcrumb,
   backgroundImage: background,
+  featuredImage: featuredImage ? { url: featuredImage, alt: featuredImageAlt } : undefined,
   backgroundImageBlendMode: background ? 'multiply' : undefined,
   isDecorative,
   class: bannerType === 'large' ? 'ct-banner--large' : undefined,

@@ -29,6 +29,10 @@ const theme = site.headerTheme ?? pageTheme;
 const pathname = Astro.url.pathname;
 const primary = withActiveTrail(await menu('primary'), pathname);
 const secondary = withActiveTrail(await menu('secondary'), pathname);
+// More top-level items than fit beside the logo move to their own row below
+// it, the way larger government sites lay out their header.
+const PRIMARY_INLINE_MAX = 5;
+const primaryOnOwnRow = primary.length > PRIMARY_INLINE_MAX;
 
 // `settings/site.json` holds one logo path per theme (Studio-friendly flat
 // frontmatter), so both breakpoints of the primary logo use the same image.
@@ -59,16 +63,27 @@ const logos = {
     <Logo theme={theme} logos={logos} url="/" title={site.name} />
   </Fragment>
   <Fragment slot="contentMiddle3">
-    <Navigation
-      theme={theme}
-      items={primary}
-      name="primary"
-      type="drawer"
-      variant="primary"
-      class="ct-flex-justify-content-end"
-    />
+    {
+      !primaryOnOwnRow && (
+        <Navigation
+          theme={theme}
+          items={primary}
+          name="primary"
+          type="drawer"
+          variant="primary"
+          class="ct-flex-justify-content-end"
+        />
+      )
+    }
     <Search theme={theme} text="Search" url="/search" class="ct-flex-justify-content-end" />
     <MobileNavigationTrigger theme={theme} icon="bars" text="Menu" />
     <MobileNavigation theme={theme} topMenu={primary} bottomMenu={secondary} />
   </Fragment>
+  {
+    primaryOnOwnRow && (
+      <Fragment slot="contentBottom1">
+        <Navigation theme={theme} items={primary} name="primary" type="drawer" variant="primary" />
+      </Fragment>
+    )
+  }
 </Header>
