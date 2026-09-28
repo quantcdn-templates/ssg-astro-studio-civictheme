@@ -403,7 +403,8 @@
         "path": "src/civictheme/components/00-base/Grid.astro",
         "tag": "Grid",
         "roles": [
-          "card-grid"
+          "card-grid",
+          "layout"
         ],
         "group": "layout",
         "description": "Column grid; put cards inside.",
@@ -471,6 +472,9 @@
       {
         "path": "src/civictheme/components/00-base/Section.astro",
         "tag": "Section",
+        "roles": [
+          "layout"
+        ],
         "group": "layout",
         "description": "Full-width band, tinted or plain; put other components inside.",
         "defaults": {
@@ -490,6 +494,9 @@
       {
         "path": "src/civictheme/components/00-base/FlexCenter.astro",
         "tag": "FlexCenter",
+        "roles": [
+          "layout"
+        ],
         "group": "layout",
         "description": "Centres its content using CivicTheme's flex utility class; put a single component inside.",
         "defaults": {
