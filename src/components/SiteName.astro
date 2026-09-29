@@ -1,0 +1,16 @@
+---
+/**
+ * The site name as a text link to the home page — shown where the logo goes
+ * when `settings/site.json` has no logo. A migrated site whose source has no
+ * logo image (olsc.nsw.gov.au shows only its name) keeps its name visible,
+ * never the template's "Your organisation" placeholder.
+ */
+interface Props {
+  theme?: 'light' | 'dark';
+  name: string;
+}
+
+const { theme = 'light', name } = Astro.props;
+---
+
+<a class:list={['ct-site-name', `ct-theme-${theme}`]} href="/">{name}</a>

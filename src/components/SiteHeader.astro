@@ -11,6 +11,7 @@
  */
 import Header from '@civictheme/organisms/Header.astro';
 import Logo from '@civictheme/molecules/Logo.astro';
+import SiteName from './SiteName.astro';
 import Navigation from '@civictheme/organisms/Navigation.astro';
 import Search from '@civictheme/molecules/Search.astro';
 import Paragraph from '@civictheme/atoms/Paragraph.astro';
@@ -60,7 +61,13 @@ const logos = {
     />
   </Fragment>
   <Fragment slot="contentMiddle2">
-    <Logo theme={theme} logos={logos} url="/" title={site.name} />
+    {
+      logoUrl ? (
+        <Logo theme={theme} logos={logos} url="/" title={site.name} />
+      ) : (
+        <SiteName theme={theme} name={site.name} />
+      )
+    }
   </Fragment>
   <Fragment slot="contentMiddle3">
     {

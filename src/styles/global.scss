@@ -109,3 +109,27 @@ body {
     padding: ct-spacing(5) 0;
   }
 }
+
+// The site name in the logo's place, when the site has no logo image.
+.ct-site-name {
+  display: inline-block;
+  max-width: 22rem;
+  font-family: var(--ct-typography-heading-font-family, inherit);
+  font-size: 1.25rem;
+  font-weight: 700;
+  line-height: 1.25;
+  text-decoration: none;
+
+  &.ct-theme-light {
+    color: var(--ct-color-light-heading, #1c1c1c);
+  }
+
+  &.ct-theme-dark {
+    color: var(--ct-color-dark-heading, #ffffff);
+  }
+
+  &:hover,
+  &:focus-visible {
+    text-decoration: underline;
+  }
+}

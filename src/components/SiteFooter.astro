@@ -11,6 +11,7 @@
  */
 import Footer from '@civictheme/organisms/Footer.astro';
 import Logo from '@civictheme/molecules/Logo.astro';
+import SiteName from './SiteName.astro';
 import Navigation from '@civictheme/organisms/Navigation.astro';
 import SocialLinks from '@civictheme/molecules/SocialLinks.astro';
 import Heading from '@civictheme/atoms/Heading.astro';
@@ -48,7 +49,13 @@ const telHref = (line: string) => `tel:${line.replace(/[^0-9+]/g, '')}`;
 
 <Footer theme={theme}>
   <Fragment slot="contentTop1">
-    <Logo theme={theme} logos={logos} url="/" title={site.name} />
+    {
+      logoUrl ? (
+        <Logo theme={theme} logos={logos} url="/" title={site.name} />
+      ) : (
+        <SiteName theme={theme} name={site.name} />
+      )
+    }
   </Fragment>
   <Fragment slot="contentTop2">
     <SocialLinks theme={theme} withBorder items={socialItems} />
