@@ -133,3 +133,16 @@ body {
     text-decoration: underline;
   }
 }
+
+// An SVG logo with only a viewBox (no width/height) has no intrinsic width,
+// so the header's shrink-to-fit layout collapsed it to 0 x 0 (the migrated
+// www.acma.gov.au logo). Its own max height becomes its height, and the
+// width follows the viewBox ratio.
+.ct-logo__image[src$='.svg'] {
+  width: auto;
+  height: var(--ct-logo-image-height-max-mobile);
+
+  @include ct-breakpoint($ct-logo-breakpoint) {
+    height: var(--ct-logo-image-height-max-desktop);
+  }
+}
