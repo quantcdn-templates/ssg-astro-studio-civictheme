@@ -46,7 +46,10 @@ describe('footerColumns', () => {
   });
 
   it('packs groups into columns in source order, balanced by link count', () => {
-    const cols = footerColumns([group('a', 7), group('b', 5), group('c', 6), group('d', 6), group('e', 2), group('f', 3), group('g', 5)], 4);
+    const cols = footerColumns(
+      [group('a', 7), group('b', 5), group('c', 6), group('d', 6), group('e', 2), group('f', 3), group('g', 5)],
+      4
+    );
     expect(cols).toHaveLength(4);
     expect(cols.flat().map((g) => g.title)).toEqual(['a', 'b', 'c', 'd', 'e', 'f', 'g']);
     const sizes = cols.map((c) => c.reduce((n, g) => n + 1 + g.below.length, 0));

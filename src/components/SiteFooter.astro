@@ -81,15 +81,19 @@ const telHref = (line: string) => `tel:${line.replace(/[^0-9+]/g, '')}`;
     columns.length > 0 && (
       <Fragment slot="contentMiddle5">
         <div class="row site-footer__columns">
-          {
-            columns.map((column) => (
-              <div class="col-xxs-12 col-m-6 col-l-3">
-                {column.map((group) => (
-                  <Navigation theme={theme} items={group.below} name={`footer-${group.title}`} type="none" title={group.title} />
-                ))}
-              </div>
-            ))
-          }
+          {columns.map((column) => (
+            <div class="col-xxs-12 col-m-6 col-l-3">
+              {column.map((group) => (
+                <Navigation
+                  theme={theme}
+                  items={group.below}
+                  name={`footer-${group.title}`}
+                  type="none"
+                  title={group.title}
+                />
+              ))}
+            </div>
+          ))}
         </div>
       </Fragment>
     )

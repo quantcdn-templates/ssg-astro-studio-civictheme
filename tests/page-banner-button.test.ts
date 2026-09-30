@@ -16,7 +16,9 @@ describe('PageBanner button', () => {
     const html = await render({ summary: 'We handle complaints.', button: { text: 'Learn more', url: '/about-us' } });
     const content = html.slice(html.indexOf('ct-banner__content'));
     expect(content).toMatch(/We handle complaints\./);
-    expect(content).toMatch(/<a[^>]+class="ct-button[^"]*"[^>]*href="\/about-us"|<a[^>]+href="\/about-us"[^>]*class="ct-button/);
+    expect(content).toMatch(
+      /<a[^>]+class="ct-button[^"]*"[^>]*href="\/about-us"|<a[^>]+href="\/about-us"[^>]*class="ct-button/
+    );
     expect(content.indexOf('We handle complaints.')).toBeLessThan(content.indexOf('Learn more'));
   });
 
