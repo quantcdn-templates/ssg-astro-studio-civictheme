@@ -146,3 +146,13 @@ body {
     height: var(--ct-logo-image-height-max-desktop);
   }
 }
+
+// A single site logo shown on the dark footer: a white knockout of it.
+.site-footer__logo--knockout .ct-logo__image {
+  filter: brightness(0) invert(1);
+}
+
+// Footer group columns: space between the groups stacked in one column.
+.site-footer__columns .ct-navigation + .ct-navigation {
+  margin-top: 2rem;
+}

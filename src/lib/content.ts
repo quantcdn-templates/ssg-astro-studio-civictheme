@@ -123,6 +123,35 @@ export async function menu(name: string): Promise<MenuNode[]> {
   return entry ? menuTree(entry.data.items) : [];
 }
 
+/**
+ * The footer menu's link groups (top-level items with children), packed into
+ * at most `count` columns in source order and balanced by link count, the way
+ * a source footer stacks its groups (www.vic.gov.au: 12 groups in 4 columns).
+ * Top-level items with no children are not groups and are left out.
+ */
+export function footerColumns(items: MenuNode[], count = 4): MenuNode[][] {
+  const groups = items.filter((item) => item.below.length > 0);
+  if (groups.length <= count) return groups.map((group) => [group]);
+  const size = (group: MenuNode) => 1 + group.below.length;
+  const target = groups.reduce((n, group) => n + size(group), 0) / count;
+  const columns: MenuNode[][] = [[]];
+  let filled = 0;
+  groups.forEach((group, i) => {
+    const column = columns[columns.length - 1];
+    const groupsLeft = groups.length - i;
+    const columnsLeft = count - columns.length;
+    // Start the next column once this one is full, but never leave a column empty.
+    if (column.length > 0 && columnsLeft > 0 && (filled + size(group) / 2 > target || groupsLeft <= columnsLeft)) {
+      columns.push([group]);
+      filled = size(group);
+      return;
+    }
+    column.push(group);
+    filled += size(group);
+  });
+  return columns;
+}
+
 /** Marks the item (and its ancestors) whose `url` matches `pathname` as in the active trail. */
 export function withActiveTrail(items: MenuNode[], pathname: string): MenuNode[] {
   const normalise = (url: string) => (url.length > 1 ? url.replace(/\/$/, '') : url);
