@@ -25,6 +25,8 @@ const pages = defineCollection({
     bannerTheme: z.enum(['light', 'dark']).default('dark'),
     /** A small group of task/link cards shown overlapping the banner's lower edge (CivicTheme's "content below" area) -- e.g. a home hero's own call-to-action cards. */
     bannerCards: z.array(z.object({ title: z.string(), url: linkUrl })).default([]),
+    /** The source hero's own call-to-action, shown as a button in the banner. */
+    bannerButton: z.object({ text: z.string(), url: linkUrl }).optional(),
     showBreadcrumb: z.boolean().default(true),
     showLastUpdated: z.boolean().default(false),
     /**
