@@ -27,7 +27,7 @@ const pageSource = (route: string): string | null => {
   return demoPresent(relative) ? readFileSync(join(root, relative), 'utf8') : null;
 };
 
-/** The CDN's own rewrite (quant `docker/fastly/src/filters.js`, `formSubmissionFilter`). */
+/** The CDN's own rewrite (the CDN form submission filter). */
 const cdnInject = (html: string, message: string) =>
   html.replace(
     /id\s*=\s*(?:"quant-form-result"|'quant-form-result'|quant-form-result)\s*>/gi,
