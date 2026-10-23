@@ -9,7 +9,7 @@ import { demoPresent } from '../demo-content';
  *
  * On Quant, a POST to a page with Quant Forms enabled returns the same page
  * with the configured message written after `id="quant-form-result">`
- * (quant `docker/fastly/src/filters.js`, `formSubmissionFilter`). The route
+ * (the CDN form submission filter). The route
  * below does the same to the built page, with the message from
  * `forms/forms.json`, so these tests prove the built markup, the manifest
  * and the focus script fit that contract.
