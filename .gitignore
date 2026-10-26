@@ -8,3 +8,7 @@ playwright-report/
 .superpowers/
 dist-story-parity/
 .story-parity-results/
+
+# Local agent planning notes (never commit)
+docs/plans/
+docs/superpowers/
