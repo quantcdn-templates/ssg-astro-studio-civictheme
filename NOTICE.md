@@ -3,8 +3,8 @@
 This template is a derivative work of the CivicTheme UI Kit by Salsa Digital.
 
 - Upstream: https://github.com/civictheme/uikit (`packages/twig`)
-- Version: 1.13.0
-- Commit: fe4291907b1ea15cfc0ea5d9ca47d31964a5b91a
+- Version: 1.14.0
+- Commit: 8990d70a4d7f511d00733627efe11098e836ea7b
 - Licence: GPL-2.0-or-later (see LICENSE.txt)
 
 Everything under `src/civictheme/` is derived from the UI Kit: SCSS and JavaScript are

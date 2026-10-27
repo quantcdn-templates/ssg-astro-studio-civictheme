@@ -50,7 +50,8 @@ const hasCaption = Boolean(caption) || hasCaptionSlot;
         <Fragment>
           {' '}
           <figcaption class="ct-figure__caption">
-            <Icon symbol="image" /> {hasCaptionSlot ? <slot name="caption" /> : <Fragment set:html={caption} />}
+            <Icon symbol="image" size="regular" class="ct-figure__caption-icon" />{' '}
+            {hasCaptionSlot ? <slot name="caption" /> : <Fragment set:html={caption} />}
           </figcaption>
         </Fragment>
       )}

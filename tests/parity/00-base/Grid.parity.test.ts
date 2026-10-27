@@ -19,78 +19,78 @@ describe('Grid', () => {
     useContainer: true,
   });
 
-  grid(
-    `Grid renders correctly {\n  items: [Array],\n  use_container: false,\n  description: 'without container'\n} 1`,
-    { items: ['1'], useContainer: false }
-  );
+  grid(`Grid renders correctly { items: [Array], use_container: false, description: 'without container' } 1`, {
+    items: ['1'],
+    useContainer: false,
+  });
 
   grid(
-    `Grid renders correctly {\n  items: [Array],\n  use_container: true,\n  description: 'multiple items with container'\n} 1`,
+    `Grid renders correctly { items: [Array], use_container: true, description: 'multiple items with container' } 1`,
     { items: ['1', '2'], useContainer: true }
   );
 
   grid(
-    `Grid renders correctly {\n  items: [Array],\n  use_container: true,\n  is_fluid: true,\n  description: 'multiple items with fluid container'\n} 1`,
+    `Grid renders correctly { items: [Array], use_container: true, is_fluid: true, description: 'multiple items with fluid container' } 1`,
     { items: ['1', '2'], useContainer: true, isFluid: true }
   );
 
   grid(
-    `Grid renders correctly {\n  items: [Array],\n  use_container: false,\n  description: 'multiple items without container'\n} 1`,
+    `Grid renders correctly { items: [Array], use_container: false, description: 'multiple items without container' } 1`,
     { items: ['1', '2'], useContainer: false }
   );
 
   grid(
-    `Grid renders correctly {\n  items: [Array],\n  use_container: true,\n  template_column_count: 3,\n  description: 'column count with container'\n} 1`,
+    `Grid renders correctly { items: [Array], use_container: true, template_column_count: 3, description: 'column count with container' } 1`,
     { items: ['1', '2', '3'], useContainer: true, templateColumnCount: 3 }
   );
 
   grid(
-    `Grid renders correctly {\n  items: [Array],\n  use_container: true,\n  template_column_count: 3,\n  is_fluid: true,\n  description: 'column count with fluid container'\n} 1`,
+    `Grid renders correctly { items: [Array], use_container: true, template_column_count: 3, is_fluid: true, description: 'column count with fluid container' } 1`,
     { items: ['1', '2', '3'], useContainer: true, templateColumnCount: 3, isFluid: true }
   );
 
   grid(
-    `Grid renders correctly {\n  items: [Array],\n  use_container: false,\n  template_column_count: 3,\n  description: 'column count without container'\n} 1`,
+    `Grid renders correctly { items: [Array], use_container: false, template_column_count: 3, description: 'column count without container' } 1`,
     { items: ['1', '2', '3'], useContainer: false, templateColumnCount: 3 }
   );
 
   grid(
-    `Grid renders correctly {\n  items: [Array],\n  use_container: true,\n  row_element: 'section',\n  column_element: 'span',\n  description: 'custom elements with container'\n} 1`,
+    `Grid renders correctly { items: [Array], use_container: true, row_element: 'section', column_element: 'span', description: 'custom elements with container' } 1`,
     { items: ['1', '2'], useContainer: true, rowElement: 'section', columnElement: 'span' }
   );
 
   grid(
-    `Grid renders correctly {\n  items: [Array],\n  use_container: false,\n  row_element: 'section',\n  column_element: 'span',\n  description: 'custom elements without container'\n} 1`,
+    `Grid renders correctly { items: [Array], use_container: false, row_element: 'section', column_element: 'span', description: 'custom elements without container' } 1`,
     { items: ['1', '2'], useContainer: false, rowElement: 'section', columnElement: 'span' }
   );
 
   grid(
-    `Grid renders correctly {\n  items: [Array],\n  use_container: true,\n  row_class: 'custom-row',\n  column_class: 'custom-col',\n  description: 'custom classes with container'\n} 1`,
+    `Grid renders correctly { items: [Array], use_container: true, row_class: 'custom-row', column_class: 'custom-col', description: 'custom classes with container' } 1`,
     { items: ['1'], useContainer: true, rowClass: 'custom-row', columnClass: 'custom-col' }
   );
 
   grid(
-    `Grid renders correctly {\n  items: [Array],\n  use_container: false,\n  row_class: 'custom-row',\n  column_class: 'custom-col',\n  description: 'custom classes without container'\n} 1`,
+    `Grid renders correctly { items: [Array], use_container: false, row_class: 'custom-row', column_class: 'custom-col', description: 'custom classes without container' } 1`,
     { items: ['1'], useContainer: false, rowClass: 'custom-row', columnClass: 'custom-col' }
   );
 
   grid(
-    `Grid renders correctly {\n  items: [Array],\n  use_container: true,\n  fill_width: true,\n  description: 'fill width with container'\n} 1`,
+    `Grid renders correctly { items: [Array], use_container: true, fill_width: true, description: 'fill width with container' } 1`,
     { items: ['1', '2'], useContainer: true, fillWidth: true }
   );
 
   grid(
-    `Grid renders correctly {\n  items: [Array],\n  use_container: false,\n  fill_width: true,\n  description: 'fill width without container'\n} 1`,
+    `Grid renders correctly { items: [Array], use_container: false, fill_width: true, description: 'fill width without container' } 1`,
     { items: ['1', '2'], useContainer: false, fillWidth: true }
   );
 
   grid(
-    `Grid renders correctly {\n  items: [Array],\n  use_container: true,\n  attributes: [DrupalAttribute [Map]],\n  modifier_class: 'custom-modifier',\n  description: 'attributes and modifier class with container'\n} 1`,
+    `Grid renders correctly { items: [Array], use_container: true, attributes: [DrupalAttribute [Map]], modifier_class: 'custom-modifier', description: 'attributes and modifier class with container' } 1`,
     { items: ['1'], useContainer: true, 'data-test': 'true', class: 'custom-modifier' }
   );
 
   grid(
-    `Grid renders correctly {\n  items: [Array],\n  use_container: false,\n  attributes: [DrupalAttribute [Map]],\n  modifier_class: 'custom-modifier',\n  description: 'attributes and modifier class without container'\n} 1`,
+    `Grid renders correctly { items: [Array], use_container: false, attributes: [DrupalAttribute [Map]], modifier_class: 'custom-modifier', description: 'attributes and modifier class without container' } 1`,
     { items: ['1'], useContainer: false, 'data-test': 'true', class: 'custom-modifier' }
   );
 
@@ -130,11 +130,11 @@ describe('Grid', () => {
 
   // "Grid Attributes and Modifier Class renders %s"
   grid(
-    `Grid Attributes and Modifier Class renders {\n  attributes: [DrupalAttribute [Map]],\n  modifier_class: 'custom-modifier',\n  use_container: true\n} 1`,
+    `Grid Attributes and Modifier Class renders { attributes: [DrupalAttribute [Map]], modifier_class: 'custom-modifier', use_container: true } 1`,
     { items: ['1'], useContainer: true, ...attrsModifier }
   );
   grid(
-    `Grid Attributes and Modifier Class renders {\n  attributes: [DrupalAttribute [Map]],\n  modifier_class: 'custom-modifier',\n  use_container: false\n} 1`,
+    `Grid Attributes and Modifier Class renders { attributes: [DrupalAttribute [Map]], modifier_class: 'custom-modifier', use_container: false } 1`,
     { items: ['1'], useContainer: false, ...attrsModifier }
   );
 
@@ -154,23 +154,23 @@ describe('Grid', () => {
 
   // "Grid Custom Classes renders %s"
   grid(
-    `Grid Custom Classes renders {\n  template_column_count: null,\n  row_class: null,\n  column_class: null,\n  fill_width: false,\n  expectedRowClass: 'row',\n  expectedColumnClass: 'col'\n} 1`,
+    `Grid Custom Classes renders { template_column_count: null, row_class: null, column_class: null, fill_width: false, expectedRowClass: 'row', expectedColumnClass: 'col' } 1`,
     { items: ['1'], useContainer: true, templateColumnCount: null, rowClass: null, columnClass: null, fillWidth: false }
   );
   grid(
-    `Grid Custom Classes renders {\n  template_column_count: null,\n  row_class: null,\n  column_class: null,\n  fill_width: true,\n  expectedRowClass: 'row row--fill-width',\n  expectedColumnClass: 'col'\n} 1`,
+    `Grid Custom Classes renders { template_column_count: null, row_class: null, column_class: null, fill_width: true, expectedRowClass: 'row row--fill-width', expectedColumnClass: 'col' } 1`,
     { items: ['1'], useContainer: true, templateColumnCount: null, rowClass: null, columnClass: null, fillWidth: true }
   );
   grid(
-    `Grid Custom Classes renders {\n  template_column_count: 0,\n  row_class: null,\n  column_class: null,\n  fill_width: false,\n  expectedRowClass: 'row',\n  expectedColumnClass: 'col'\n} 1`,
+    `Grid Custom Classes renders { template_column_count: 0, row_class: null, column_class: null, fill_width: false, expectedRowClass: 'row', expectedColumnClass: 'col' } 1`,
     { items: ['1'], useContainer: true, templateColumnCount: 0, rowClass: null, columnClass: null, fillWidth: false }
   );
   grid(
-    `Grid Custom Classes renders {\n  template_column_count: 0,\n  row_class: null,\n  column_class: null,\n  fill_width: true,\n  expectedRowClass: 'row row--fill-width',\n  expectedColumnClass: 'col'\n} 1`,
+    `Grid Custom Classes renders { template_column_count: 0, row_class: null, column_class: null, fill_width: true, expectedRowClass: 'row row--fill-width', expectedColumnClass: 'col' } 1`,
     { items: ['1'], useContainer: true, templateColumnCount: 0, rowClass: null, columnClass: null, fillWidth: true }
   );
   grid(
-    `Grid Custom Classes renders {\n  template_column_count: 0,\n  row_class: 'custom-row',\n  column_class: 'custom-col',\n  fill_width: false,\n  expectedRowClass: 'row custom-row',\n  expectedColumnClass: 'col custom-col'\n} 1`,
+    `Grid Custom Classes renders { template_column_count: 0, row_class: 'custom-row', column_class: 'custom-col', fill_width: false, expectedRowClass: 'row custom-row', expectedColumnClass: 'col custom-col' } 1`,
     {
       items: ['1'],
       useContainer: true,
@@ -181,7 +181,7 @@ describe('Grid', () => {
     }
   );
   grid(
-    `Grid Custom Classes renders {\n  template_column_count: 0,\n  row_class: 'custom-row',\n  column_class: 'custom-col',\n  fill_width: true,\n  expectedRowClass: 'row row--fill-width custom-row',\n  expectedColumnClass: 'col custom-col'\n} 1`,
+    `Grid Custom Classes renders { template_column_count: 0, row_class: 'custom-row', column_class: 'custom-col', fill_width: true, expectedRowClass: 'row row--fill-width custom-row', expectedColumnClass: 'col custom-col' } 1`,
     {
       items: ['1'],
       useContainer: true,
@@ -192,15 +192,15 @@ describe('Grid', () => {
     }
   );
   grid(
-    `Grid Custom Classes renders {\n  template_column_count: 12,\n  row_class: null,\n  column_class: null,\n  fill_width: false,\n  expectedRowClass: 'row',\n  expectedColumnClass: 'col-xxs-12 col-m-1'\n} 1`,
+    `Grid Custom Classes renders { template_column_count: 12, row_class: null, column_class: null, fill_width: false, expectedRowClass: 'row', expectedColumnClass: 'col-xxs-12 col-m-1' } 1`,
     { items: ['1'], useContainer: true, templateColumnCount: 12, rowClass: null, columnClass: null, fillWidth: false }
   );
   grid(
-    `Grid Custom Classes renders {\n  template_column_count: 12,\n  row_class: null,\n  column_class: null,\n  fill_width: true,\n  expectedRowClass: 'row row--fill-width',\n  expectedColumnClass: 'col-xxs-12 col-m-1'\n} 1`,
+    `Grid Custom Classes renders { template_column_count: 12, row_class: null, column_class: null, fill_width: true, expectedRowClass: 'row row--fill-width', expectedColumnClass: 'col-xxs-12 col-m-1' } 1`,
     { items: ['1'], useContainer: true, templateColumnCount: 12, rowClass: null, columnClass: null, fillWidth: true }
   );
   grid(
-    `Grid Custom Classes renders {\n  template_column_count: 12,\n  row_class: 'custom-row',\n  column_class: null,\n  fill_width: false,\n  expectedRowClass: 'row custom-row',\n  expectedColumnClass: 'col-xxs-12 col-m-1'\n} 1`,
+    `Grid Custom Classes renders { template_column_count: 12, row_class: 'custom-row', column_class: null, fill_width: false, expectedRowClass: 'row custom-row', expectedColumnClass: 'col-xxs-12 col-m-1' } 1`,
     {
       items: ['1'],
       useContainer: true,
@@ -211,7 +211,7 @@ describe('Grid', () => {
     }
   );
   grid(
-    `Grid Custom Classes renders {\n  template_column_count: 12,\n  row_class: 'custom-row',\n  column_class: null,\n  fill_width: true,\n  expectedRowClass: 'row row--fill-width custom-row',\n  expectedColumnClass: 'col-xxs-12 col-m-1'\n} 1`,
+    `Grid Custom Classes renders { template_column_count: 12, row_class: 'custom-row', column_class: null, fill_width: true, expectedRowClass: 'row row--fill-width custom-row', expectedColumnClass: 'col-xxs-12 col-m-1' } 1`,
     {
       items: ['1'],
       useContainer: true,
@@ -222,7 +222,7 @@ describe('Grid', () => {
     }
   );
   grid(
-    `Grid Custom Classes renders {\n  template_column_count: 12,\n  row_class: 'custom-row',\n  column_class: 'custom-col',\n  fill_width: false,\n  expectedRowClass: 'row custom-row',\n  expectedColumnClass: 'col-xxs-12 col-m-1 custom-col'\n} 1`,
+    `Grid Custom Classes renders { template_column_count: 12, row_class: 'custom-row', column_class: 'custom-col', fill_width: false, expectedRowClass: 'row custom-row', expectedColumnClass: 'col-xxs-12 col-m-1 custom-col' } 1`,
     {
       items: ['1'],
       useContainer: true,
@@ -233,7 +233,7 @@ describe('Grid', () => {
     }
   );
   grid(
-    `Grid Custom Classes renders {\n  template_column_count: 12,\n  row_class: 'custom-row',\n  column_class: 'custom-col',\n  fill_width: true,\n  expectedRowClass: 'row row--fill-width custom-row',\n  expectedColumnClass: 'col-xxs-12 col-m-1 custom-col'\n} 1`,
+    `Grid Custom Classes renders { template_column_count: 12, row_class: 'custom-row', column_class: 'custom-col', fill_width: true, expectedRowClass: 'row row--fill-width custom-row', expectedColumnClass: 'col-xxs-12 col-m-1 custom-col' } 1`,
     {
       items: ['1'],
       useContainer: true,

@@ -14,8 +14,8 @@ Open [http://localhost:4321](http://localhost:4321).
 
 ## What's inside
 
-- **77 components** ported from the CivicTheme UI Kit (`packages/twig`, v1.13.0, commit
-  `fe4291907b1ea15cfc0ea5d9ca47d31964a5b91a`): 7 base, 22 atoms, 30 molecules, 18 organisms —
+- **77 components** ported from the CivicTheme UI Kit (`packages/twig`, v1.14.0, commit
+  `8990d70a4d7f511d00733627efe11098e836ea7b`): 7 base, 22 atoms, 30 molecules, 18 organisms —
   every layer's Twig template, minus Storybook-only `*.stories.twig` files, which are not
   components. Each is a hand-ported `.astro` file under `src/civictheme/components/`.
 - **Seven content collections**: `pages` (MDX), `events`/`news`/`publications` (MDX, with
