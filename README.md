@@ -295,9 +295,11 @@ text `id="quant-form-result">`, so keep `id` as that element's last attribute. A
 (`src/lib/quant-form-result.ts`) moves focus to the message. Submissions are stored per
 environment on the CDN and are viewed in Studio's Forms screen.
 
-No notification targets are committed. To get an email or a Slack message for each
-submission, add them in Studio's Forms screen for each environment (they are stored in the
-manifest as `config.notifications.email.to` and `config.notifications.slack.webhook`).
+No notification targets are committed. Both forms start with an empty list of alert channels
+(`config.notifications.channels: []`), so no secret is kept in the manifest. To get an email
+or a Slack message for each submission, create an alert channel in the Quant dashboard
+(Organisation, Alert channels) and select it in Studio's Forms screen. The manifest then
+holds the channel ID only.
 
 ## Known limitations
 
