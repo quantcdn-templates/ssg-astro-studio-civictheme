@@ -64,8 +64,10 @@ describe('forms/forms.json', () => {
         }
       });
 
-      it('commits no notification targets', () => {
-        expect(config).not.toHaveProperty('notifications');
+      it('starts in channel mode and commits no notification targets', () => {
+        // An empty channel list: Studio's Forms screen shows the alert channel picker, and no
+        // webhook or recipient is kept in the manifest.
+        expect(config.notifications).toEqual({ channels: [] });
       });
 
       it.skipIf(source === null)('ends the result container with its id, so the CDN rewrite matches', () => {
